@@ -1,0 +1,30 @@
+<?php
+/**
+ * @file
+ * The main module file for the Islanora workflow rest interface.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function islandora_workflow_rest_menu() {
+  return array(
+    'islandora_workflow_rest/add_workflow' => array(
+      'title' => 'CWRC Workflow Tool',
+      'description' => 'CWRC Workflow Restfull API.',
+      'page callback' => 'islandora_workflow_rest_add_workflow',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
+      'file' => 'includes/callbacks.inc',
+      'type' => MENU_CALLBACK,
+    ),
+    'admin/islandora/islandora_workflow_rest' => array(
+      'title' => 'Workflow Rest',
+      'description' => 'Configure custom Workflow Stamps.',
+      'page callback' => 'drupal_get_form',
+      'access arguments' => array('administer site configuration'),
+      'page arguments' => array('islandora_workflow_rest_admin'),
+      'file' => 'includes/admin.form.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
+  );
+}

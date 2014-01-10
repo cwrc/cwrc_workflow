@@ -1,0 +1,6 @@
+name = "Islandora Workflow Rest"
+description = "A default Islandora module to handle workflow REST API interface interaction."
+dependencies[] = islandora
+package = Islandora
+version = 7.x-dev
+core = 7.x

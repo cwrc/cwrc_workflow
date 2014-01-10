@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cwrc>
+<workflow date="2013-06-23" workflowID="E=mc2" userID="MRB">
+  <activity category="created" status="c" stamp="cwrc:cre">
+    <note>Ann Lewis document created and given to tagger.</note>
+  </activity>
+  <assigned category="content_contribution">
+    <message>
+      <recipient userID="JCA"></recipient>
+      <subject>Ann Lewis document.t</subject>
+      <body>Formatting issue with the Ann Lewis document -- construct tag needs to be moved.</body>
+    </message>
+  </assigned>
+</workflow>
+<workflow date="2013-06-25" workflowID="=c/d" userID="MRB">
+  <activity category="published" status="c" stamp="cwrc:pub">
+    <note>Typographical errors fixed.</note>
+  </activity>
+</workflow>
+</cwrc>

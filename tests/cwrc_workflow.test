@@ -1,0 +1,64 @@
+<?php
+
+/**
+ * @file
+ * Unit test for the HOCR class.
+ */
+
+class HOCRUnitTestCase extends DrupalWebTestCase {
+
+  /**
+   * Our sample file (like a datastream).
+   * @var DOMDocument
+   */
+  protected $sampleDoc;
+
+  /**
+   * Gets info to display to describe this test.
+   *
+   * @see DrupalUnitTestCase::getInfo()
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'CWRC_WORKFLOW class Unit Tests',
+      'description' => 'Ensure that CWRC_WORKFLOW doc parsing is working.',
+      'group' => 'Islandora Workflow Rest',
+    );
+  }
+
+  /**
+   * Sets up the requirements for this test.
+   *
+   * @see DrupalUnitTestCase::setUp()
+   */
+  public function setUp() {
+    parent::setUp('islandora_workflow_rest');
+  }
+
+  /**
+   * Test cwrc workflow.
+   */
+  public function testCwrcWorkflow() {
+    // Test invalid arguments throw exceptions.
+    try {
+      $file = drupal_get_path('module', 'islandora_workflow_rest') . '/data/test.xml';
+      $cwrc_workflow = new CWRC_WORKFLOW($file);
+      $this->fail('InvalidArgumentException not thrown when invalid file parameter given.');
+    }
+    catch (InvalidArgumentException $e) {
+      $this->pass('InvalidArgumentException thrown when invalid file parameter given.');
+    }
+    // Test correct arguments do not throw exceptions.
+    try {
+      $file = drupal_get_path('module', 'islandora_workflow_rest') . '/data/sample_workflow_datastream_file.xml';
+      $file = drupal_realpath($file);
+      $cwrc_workflow = new CWRC_WORKFLOW($file);
+      $this->pass('No exception thrown when valid file parameter given.');
+    }
+    catch (Exception $e) {
+      $this->fail('Exception thrown when valid file parameter given. ' . $file);
+    }
+    $this->sampleDoc = new DOMDocument('1.0', 'UTF-8');
+    $this->sampleDoc->load(drupal_get_path("module", "islandora_workflow_rest") . "/data/sample_workflow_datastream_file.xml");
+  }
+}
