@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Unit test for the HOCR class.
+ * Unit test for the CWRCWorkflowAPI class.
  */
 
-class HOCRUnitTestCase extends DrupalWebTestCase {
+class CWRCWorkflowAPIUnitTestCase extends IslandoraWebTestCase {
 
   /**
    * Our sample file (like a datastream).
@@ -14,14 +14,26 @@ class HOCRUnitTestCase extends DrupalWebTestCase {
   protected $sampleDoc;
 
   /**
+   * Sample islandora object.
+   * @var AbstractObject
+   */
+  protected $sampleIslandoraObject;
+
+  /**
+   * Sample islandora collection PID.
+   * @var string
+   */
+  protected $sampleIslandoraCollectionPid;
+
+  /**
    * Gets info to display to describe this test.
    *
    * @see DrupalUnitTestCase::getInfo()
    */
   public static function getInfo() {
     return array(
-      'name' => 'CWRC_WORKFLOW class Unit Tests',
-      'description' => 'Ensure that CWRC_WORKFLOW doc parsing is working.',
+      'name' => 'CWRCWorkflowAPI class Unit Tests',
+      'description' => 'Ensure that CWRCWorkflowAPI doc parsing is working.',
       'group' => 'Islandora Workflow Rest',
     );
   }
@@ -32,33 +44,133 @@ class HOCRUnitTestCase extends DrupalWebTestCase {
    * @see DrupalUnitTestCase::setUp()
    */
   public function setUp() {
-    parent::setUp('islandora_workflow_rest');
+    parent::setUp(array(
+      'islandora',
+      'islandora_basic_image',
+      'islandora_basic_collection',
+      'islandora_workflow_rest')
+    );
   }
 
   /**
-   * Test cwrc workflow.
+   * Test cwrc workflow API.
    */
   public function testCwrcWorkflow() {
-    // Test invalid arguments throw exceptions.
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+
+    // Setup basic object and collection.
+    $this->createBasicImageTestObjectAndCollection();
+    // Test the datastream is created from template.
     try {
-      $file = drupal_get_path('module', 'islandora_workflow_rest') . '/data/test.xml';
-      $cwrc_workflow = new CWRC_WORKFLOW($file);
-      $this->fail('InvalidArgumentException not thrown when invalid file parameter given.');
+      $cwrc_workflow = CWRCWorkflowAPI::fromTemplate();
+      CWRCWorkflowAPI::updateDatastream($cwrc_workflow, $this->sampleIslandoraObject);
+      $content = $this->sampleIslandoraObject['WORKFLOW'];
+      $this->pass('WORKFLOW datastream Created from template correctly.');
     }
     catch (InvalidArgumentException $e) {
-      $this->pass('InvalidArgumentException thrown when invalid file parameter given.');
+      $this->fail('WORKFLOW datastream not created from template. Exception: ' . $e);
     }
-    // Test correct arguments do not throw exceptions.
+    $workflow = NULL;
+    // Test the workflow object is created from objects datastream.
     try {
-      $file = drupal_get_path('module', 'islandora_workflow_rest') . '/data/sample_workflow_datastream_file.xml';
-      $file = drupal_realpath($file);
-      $cwrc_workflow = new CWRC_WORKFLOW($file);
-      $this->pass('No exception thrown when valid file parameter given.');
+      $workflow = CWRCWorkflowAPI::fromDatastream($this->sampleIslandoraObject['WORKFLOW']);
+      $this->pass('CWRCWorkflowAPI Created from datastream correctly.');
+    }
+    catch (InvalidArgumentException $e) {
+      $this->fail('CWRCWorkflowAPI not created from datastream. Exception: ' . $e);
+    }
+
+    // Test the activity is not created with bad input data.
+    try {
+      // Construct the WorkflowItem element with
+      // an invalid node name (first param).
+      $activity = new WorkflowItem("Herb_a_derb",
+        array(
+          'category' => 'sample_category',
+          'stamp' => 'niso:AO',
+          'status' => 'sample_status',
+        ),
+        "This is the text body of the note element"
+      );
+      $this->fail('activity workflowItem created with bad data.');
+    }
+    catch (InvalidArgumentException $e) {
+      $this->pass('activity element not created with an invalid node name: ' . $e);
+    }
+
+    // Test the assigned element is not created with bad input data.
+    try {
+      // Construct the assigned WorkflowItem is not
+      // created with an invalid property name (sttatus).
+      $assigned = new WorkflowItem(WorkflowConst::ASSIGNED,
+        array(
+          'category' => 'sample_category',
+          'stamp' => 'niso:AO',
+          'sttatus' => 'sample_status',
+        ),
+        "This is the text body of the note element"
+      );
+      $this->fail('assigned workflowItem created with bad node name data.');
+    }
+    catch (InvalidArgumentException $e) {
+      $this->pass('activity element not created with an invalid node name: ' . $e);
+    }
+
+    try {
+      // Construct the entry WorkflowItem can be
+      // created without additional params.
+      $entry = new WorkflowItem(WorkflowConst::WORKFLOW,
+        array(),
+        "This is the text body of the note element"
+      );
+      $this->pass('entry workflowItem created without optional array params');
+    }
+    catch (InvalidArgumentException $e) {
+      $this->fail('entry workflow element not created without optional parameter array: ' . $e);
+    }
+
+    try {
+      $workflow->addWorkflowStep($this->sampleIslandoraObject->id,
+        new WorkflowItem(WorkflowConst::WORKFLOW,
+          array(),
+          "This is the text body of the note element"
+        ),
+        new WorkflowItem(WorkflowConst::ACTIVITY,
+          array(
+            'category' => 'sample_category',
+            'stamp' => 'niso:AO',
+            'status' => 'sample_status',
+          ),
+        "This is the text body of the note element"
+        ),
+        new WorkflowItem(WorkflowConst::ASSIGNED,
+          array(
+            "category" => "content_contribution",
+            "recipient" => "Me",
+            "subject" => "Test Subject",
+            "body" => "This is a test entry. Additonal text required.",
+          )
+        )
+      );
+      CWRCWorkflowAPI::updateDatastream($workflow, $this->sampleIslandoraObject);
+
+      $this->pass('workflow entry created');
     }
     catch (Exception $e) {
-      $this->fail('Exception thrown when valid file parameter given. ' . $file);
+      $this->fail('workflow item not created with correct data. Error: ' . $e);
     }
-    $this->sampleDoc = new DOMDocument('1.0', 'UTF-8');
-    $this->sampleDoc->load(drupal_get_path("module", "islandora_workflow_rest") . "/data/sample_workflow_datastream_file.xml");
+  }
+
+  /**
+   * Creates an administrative user and attempts to ingest a test image.
+   * 
+   * For the purposes of this test, the sample data code has been lifted 
+   * out of islandora_basic_image.
+   */
+  public function createBasicImageTestObjectAndCollection() {
+    $this->sampleIslandoraObject = $this->ingestConstructedObject();
   }
 }

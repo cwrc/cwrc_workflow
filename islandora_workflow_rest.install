@@ -4,3 +4,82 @@
  * @file
  * Hooks for installing/unintstalling this module.
  */
+
+/**
+ * Implements hook_schema().
+ */
+function islandora_workflow_rest_schema() {
+  $schema['islandora_workflow_rest_stamps'] = array(
+    'description' => 'Table that stores lists of custom workflow stamps.',
+    'fields' => array(
+      'lid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The UID for a custom stamp.',
+      ),
+      'stamp' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The human readable name of the stamp.',
+      ),
+      'descr' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The description of the current stamp.',
+      ),
+    ),
+    'primary key' => array('lid'),
+  );
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function islandora_workflow_rest_install() {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+  // Add default stamp records.
+  $stamps = array(
+    "niso:AO" => "Author's Original (AO)",
+    "niso:SMUR" => "Submitted Manuscript Under Review (SMUR)",
+    "niso:AM" => "Accepted Manuscript (AM)",
+    "niso:P" => "Proof (P)",
+    "niso:VoR" => "Version of Record (VoR)",
+    "niso:CVoR" => "Corrected Version of Record (CVoR)",
+    "niso:EVoR" => "Enhanced Version of Record (EVoR)",
+    "orl:SUB" => "Submitted (SUB)",
+    "orl:RWT" => "Researched / Written / Tagged (RWT)",
+    "orl:REV" => "Revised (REV)",
+    "orl:RBV" => "Reviewed by Volume Author (RVB)",
+    "orl:CAS" => "Checked Against Sources (CAS)",
+    "orl:CFT" => "Checked for Tagging (CFT)",
+    "orl:CFB" => "Checked for Bibliographic Practices (CFB)",
+    "orl:PUB" => "Published (PUB)",
+    "orl:ENH" => "Enhanced (ENH)",
+    "orl:TC" => "Tag Cleanup (TC)",
+    "orl:PUBR" => "Publication Readthrough (PUBR)",
+    "cwrc:cre" => "repository item created (original version of repository object) - equivalent to category created",
+    "cwrc:dep" => "repository item deposited (an existing file) - equivalent to category deposited",
+    "cwrc:cvr" => "object content edited - cvr (corrected version of record)",
+    "cwrc:evr" => "object content added evr (enhanced version of record)",
+    "cwrc:ckd" => "Checked/corrected - equivalent to category checked",
+    "cwrc:tag" => "tagged by member of general public (i.e. subject keywords/ folksonomic descriptors added) - equivalent to category tagged",
+    "cwrc:rights_asg" => "Copyright/license terms attached to object - equivalent to category rights_assigned",
+    "cwrc:pub" => "repository item under ongoing publishing procedures - equivalent to category published",
+    "cwrc:rev" => "peer-review as opposed to internal editing/revision - equivalent to category peer-reviewed/evaluated",
+    "cwrc:wdr" => "Removed from published state - equivalent to category withdrawn",
+    "cwrc:del" => "Deleted from the repository - equivalent to category deleted",
+  );
+
+  // This hook fires on enable, so check that these values
+  // are not already in the islandora_workflow_rest_stamp table.
+  foreach ($stamps as $key => $value) {
+    $stamp = islandora_workflow_rest_get_stamp($key);
+    if (!isset($stamp) || $stamp == "") {
+      islandora_workflow_rest_set_stamp($key, $value);
+    }
+  }
+}

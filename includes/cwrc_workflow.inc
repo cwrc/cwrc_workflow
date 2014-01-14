@@ -260,10 +260,27 @@ class CWRCWorkflowAPI {
    *   The last entry in the workflow.
    */
   public function getLastWorkflowStep() {
-    $elements = $this->dom->getElementsByTagName('workflow');
-    $workflow_count = $this->dom->getElementsByTagName('workflow')->length;
+    $elements = $this->doc->getElementsByTagName('workflow');
+    $workflow_count = $this->doc->getElementsByTagName('workflow')->length;
     // TODO: safer to use the latest timestap then last element.
-    return $elements[$workflow_count];
+    return $elements->item($workflow_count - 1);
+  }
+
+  /**
+   * Return a DOMNodeList as an array.
+   *
+   * @param DOMNodeList $domnodelist
+   *   The DOMNodeList to convert to an array().
+   *
+   * @return array
+   *   DOMNodeList converted to an array.
+   */
+  protected function dnl2array($domnodelist) {
+    $return = array();
+    for ($i = 0; $i < $domnodelist->length; ++$i) {
+      $return[] = $domnodelist->item($i);
+    }
+    return $return;
   }
 
   /**
@@ -273,7 +290,7 @@ class CWRCWorkflowAPI {
    *   The workflow id to locate.
    */
   public function getWorkflowStepByWorkflowId($workflow_id) {
-    return getWorkflowStepsByAttributeValue('workflowID', $workflow_id);
+    return $this->getWorkflowStepsByAttributeValue(WorkflowConst::WORKFLOWID, $workflow_id);
   }
 
   /**
@@ -290,7 +307,7 @@ class CWRCWorkflowAPI {
   public function getWorkflowStepsByAttributeValue($attribute, $value) {
     $query = "//*[@" . $attribute . "='" . $value . "']";
     $workflow_steps = $this->xpath->query("//*[@" . $attribute . "='" . $value . "']");
-    return $workflow_steps;
+    return $this->dnl2array($workflow_steps);
   }
 
   /**

@@ -12,6 +12,8 @@ function islandora_workflow_rest_add_workflow() {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+
   $module_path = drupal_get_path('module', 'islandora_workflow_rest');
 
   $islandora_object = islandora_object_load("islandora:9");
@@ -26,7 +28,7 @@ function islandora_workflow_rest_add_workflow() {
   $activity = new WorkflowItem(WorkflowConst::ACTIVITY,
     array(
       'category' => 'sample_category',
-      'stamp' => 'sample_stamp',
+      'stamp' => 'niso:AO',
       'status' => 'sample_status',
     ),
     "This is the body of the note element"
@@ -42,11 +44,11 @@ function islandora_workflow_rest_add_workflow() {
   $entry = new WorkflowItem(WorkflowConst::WORKFLOW,
     array(
       'toolID' => '',
-      'workflowID' => '',
     )
   );
   $workflow->addWorkflowStep($islandora_object->id, $entry, $activity, $assigned);
   CWRCWorkflowAPI::updateDatastream($workflow, $islandora_object);
-  dsm($islandora_object["WORKFLOW"]->content, "updated datastream");
+
+  dsm($workflow->getWorkflowStepByWorkflowId("islandora_9_wk_1"));
   return json_encode("Test");
 }
