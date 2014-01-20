@@ -24,7 +24,8 @@ function islandora_workflow_rest_menu() {
       'page callback' => 'islandora_workflow_rest_entry_form',
       'page arguments' => array(2),
       'type' => MENU_LOCAL_TASK,
-      'access callback' => FALSE,
+      'access arguments' => array(2),
+      'access callback' => TRUE,
     ),
     // Administer/add new workflow stamps.
     'admin/islandora/islandora_workflow_rest' => array(
@@ -71,20 +72,85 @@ function islandora_workflow_rest_menu() {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function islandora_workflow_rest_theme($existing, $type, $theme, $path) {
+  return array(
+    'islandora_workflow_rest_view_workflows' => array(
+      'template' => 'theme/islandora_workflow_rest_view_workflows',
+      'variables' => array(
+        'islandora_object' => NULL,
+        'workflow_table' => NULL,
+        'workflow_buttons' => NULL
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_preprocess().
+ */
+function islandora_workflow_rest_preprocess_islandora_workflow_rest_view_workflows(&$variables) {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
+
+  $form;
+  if (!$variables['islandora_object']['WORKFLOW']) {
+    return drupal_json_output("$object->id does not have any workflow entries.");
+  }
+
+  $workflow = CWRCWorkflowAPI::fromDatastream($variables['islandora_object']['WORKFLOW']);
+  $json = $workflow->workflowToJson();
+  $all_workflows = drupal_json_decode($json, TRUE);
+
+  $options = array();
+  foreach ($all_workflows['cwrc']['workflow'] as $key => $value) {
+    $options[$key] = array(
+      'workflowID' => $value['attributes']['workflowID'],
+      'userID' => $value['attributes']['userID'],
+    );
+  }
+  dsm($all_workflows['cwrc']['workflow']);
+  $header = array(
+    'workflowID' => t('Name'),
+    'userID' => t('Description'),
+  );
+  $form['table'] = array(
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#options' => $options,
+    '#attributes' => array(),
+    '#empty' => t("There are no workflows."),
+  );
+  dsm($form['table'], "table");
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add'),
+  );
+  $form['delete'] = array(
+    '#type' => 'submit',
+    '#value' => t('Delete'),
+  );
+
+  $variables['workflow_table'] = drupal_render($form);
+
+  dsm($variables, "vars");
+  return $variables;
+}
+
+// function islandora_workflow_rest_view_workflows_submit($form, &$form_state) {
+//   dsm(array(), "data");
+  
+// }
+/**
  * Workflow rest view work records table
  * @param AbstractObject $object
  * @return string
  */
 function islandora_workflow_rest_entry_form(AbstractObject $object) {
-  // TODO: in the next stage of workflow development, this seems
-  // like a logical place to add a table to view work records.
-  // Add a button to the workflow table here for edit/delete
-  // functionality.
-
-  // TODO: in the workflow admin page, add a table of content
-  // models to associate these workflow steps with. This callback's
-  // access callback with determine if this form can be shown.
-  return 'foo';
+  return theme('islandora_workflow_rest_view_workflows', array('islandora_object' => $object));
 }
 
 /**
@@ -245,7 +311,7 @@ function islandora_workflow_rest_find_workflows() {
     $required;
     (isset($params['collection_pid']) ? $collection_pid = $params['collection_pid'] : $collection_pid = NULL);
     (isset($params['required']) ? $required = json_decode($params['collection_pid'], TRUE) : $required = array());
-    $workflow_pids = CWRCWorkflowAPI::findWorkflowPids(NULL, $collection_pid, $required = array());
+    $workflow_pids = CWRCWorkflowAPI::findWorkflowPids(NULL, $collection_pid, $required);
     return drupal_json_encode($workflow_pids);
     exit();
   }

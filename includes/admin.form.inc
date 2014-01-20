@@ -56,6 +56,7 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#attributes' => array(),
     '#empty' => t("There are no stamps."),
   );
+  dsm($form['Stamps']);
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Add'),
