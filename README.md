@@ -93,7 +93,7 @@ typically an error returned by Fedora.
 ## Describe Existing Workflow Datastream
 
 #### URL syntax
-islandora_workflow_rest/v1/get_full_workflow/[params}
+islandora_workflow_rest/v1/get_full_workflow/{params}
 
 #### HTTP Method
 GET
@@ -169,9 +169,8 @@ Accept: application/json
 | ------------- | ------------------------------------------------------------ |
 | pid           | The fedora identifier to find the last workflow enry for.
 
-#### Response: 201 Created
+#### Response: 200 OK
 ##### Content-Type: application/json
-Returns the same response as a [GET Object](#response-200-ok) request.
 
 #### Example Response
 ```JSON
@@ -298,7 +297,7 @@ GET
 ##### Content-Type: application/json
 | Name          | Description                                                  |
 | ------------- | ------------------------------------------------------------ |
-| response      | Json workflow item.
+| response      | Json object array of workflow item(s).
 
 #### Example Response (simple:false)
 ```JSON
@@ -333,7 +332,7 @@ GET
                "body":"sample remote text for body"
             }
          }
-      }
+      },...
    }
 }
 ```
@@ -363,7 +362,6 @@ Accept: application/json
 #### Get Variables
 | Name          | Description                                                  |
 | ------------- | ------------------------------------------------------------ |
-| pid           | Persistent identifier of the object.
 | collection_id     | Limit workflow query to a collection. (optional)
 | required     | Limit workflow query, required attribute fields. (optional)
 
@@ -379,10 +377,9 @@ A JSON **array** with each field containing the following values.
 
 ```JSON
 [{
-  "pids": {
-    "0": "islandora:1",
-    "2": "islandora:2"
-  }
+  "islandora:1",
+  "islandora:2",
+  "islandora:3"...
 }]
 ```
 

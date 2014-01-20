@@ -88,11 +88,6 @@ function islandora_workflow_rest_entry_form(AbstractObject $object) {
 }
 
 /**
- * PID : required
- * stamp: optional
- * category: optional
- * status: optional
- * simple: true
  * 
  * @param string $pid
  */
@@ -135,12 +130,8 @@ function islandora_workflow_rest_test_workflow_step($pid = NULL) {
 
 /**
  * Return the last workflow step for an islandora object.
- *
- *PID : required
- * @param AbstractObject $object
- *   A fedora object instance.
  */
-function islandora_workflow_rest_get_last_workflow_step($pid = NULL) {
+function islandora_workflow_rest_get_last_workflow_step() {
   try {
     module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
@@ -168,12 +159,8 @@ function islandora_workflow_rest_get_last_workflow_step($pid = NULL) {
 
 /**
  * Return the full workflow datastream for an islandora object.
- *
- *PID : required
- * @param AbstractObject $object
- *   A fedora object instance.
  */
-function islandora_workflow_rest_get_full_workflow($pid = NULL) {
+function islandora_workflow_rest_get_full_workflow() {
   try {
     module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
@@ -197,10 +184,8 @@ function islandora_workflow_rest_get_full_workflow($pid = NULL) {
 
 /**
  * Rest end-point for workflow entries.
- *
- * @note This function exits.
  */
-function islandora_workflow_rest_add_workflow_step($pid = NULL) {
+function islandora_workflow_rest_add_workflow_step() {
   try {
     module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
@@ -253,12 +238,9 @@ function islandora_workflow_rest_find_workflows() {
     module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
-  
+
     $params = islandora_workflow_rest_get_request_parameters();
-    $object = islandora_object_load($params['PID']);
-    if (!$object['WORKFLOW']) {
-      return drupal_json_output("$object->id does not have a workflow datastream.");
-    }
+
     $collection_pid;
     $required;
     (isset($params['collection_pid']) ? $collection_pid = $params['collection_pid'] : $collection_pid = NULL);
