@@ -45,6 +45,11 @@ abstract class BasicEnum {
     $values = array_values(self::getConstants());
     return in_array($value, $values, $strict = TRUE);
   }
+  
+  public static function getConstantValue($value) {
+    $values = array_values(self::getConstants());
+    return $values[strtoupper($value)];
+  }
 }
 
 abstract class WorkflowConst extends BasicEnum {
@@ -61,6 +66,10 @@ abstract class WorkflowConst extends BasicEnum {
   const PEER_REVIEWED_EVALUATED = "peer-reviewed/evaluated";
   const WITHDRAWN = "withdrawn";
   const DELETED = "deleted";
+
+  // Define query constants.
+  const CHECK_STAMP = "workflow_assigned_stamp_mt";
+  const CHECK_CATEGORY = "workflow_activity_category_mt";
 
   // Workflow status.
   const C = "c";

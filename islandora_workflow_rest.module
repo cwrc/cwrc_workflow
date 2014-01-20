@@ -9,6 +9,7 @@
  */
 function islandora_workflow_rest_menu() {
   return array(
+    // Test Endpoint //
     'islandora_workflow_rest/add_workflow' => array(
       'title' => 'CWRC Workflow Tool',
       'description' => 'CWRC Workflow Restfull API.',
@@ -17,6 +18,15 @@ function islandora_workflow_rest_menu() {
       'file' => 'includes/callbacks.inc',
       'type' => MENU_CALLBACK,
     ),
+    // Workflow datastream form entry point tab.
+    'islandora/object/%islandora_object/workflow' => array(
+      'title' => 'Workflow',
+      'page callback' => 'islandora_workflow_rest_entry_form',
+      'page arguments' => array(2),
+      'type' => MENU_LOCAL_TASK,
+      'access callback' => FALSE,
+    ),
+    // Administer/add new workflow stamps.
     'admin/islandora/islandora_workflow_rest' => array(
       'title' => 'Workflow Rest',
       'description' => 'Configure custom Workflow Stamps.',
@@ -26,5 +36,240 @@ function islandora_workflow_rest_menu() {
       'file' => 'includes/admin.form.inc',
       'type' => MENU_NORMAL_ITEM,
     ),
+      // Add workflow Step.
+    'islandora_workflow_rest/v1/add_workflow' => array(
+      'page callback' => 'islandora_workflow_rest_add_workflow_step',
+      'page arguments' => array(3),
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+    ),
+      // Get last workflow item.
+    'islandora_workflow_rest/v1/get_last_workflow' => array(
+      'page callback' => 'islandora_workflow_rest_get_last_workflow_step',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+    ),
+     // Get full workflow datastream.
+    'islandora_workflow_rest/v1/get_full_workflow' => array(
+      'page callback' => 'islandora_workflow_rest_get_full_workflow',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+    ),
+     // Test for stamp/category on object WORKFLOW datastream.
+    'islandora_workflow_rest/v1/has_entry' => array(
+      'page callback' => 'islandora_workflow_rest_test_workflow_step',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+    ),
+      // Find all pids with given stamp/category, within an optional collection.
+    'islandora_workflow_rest/v1/workflow_query' => array(
+      'page callback' => 'islandora_workflow_rest_find_workflows',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+    ),
   );
 }
+
+/**
+ * Workflow rest view work records table
+ * @param AbstractObject $object
+ * @return string
+ */
+function islandora_workflow_rest_entry_form(AbstractObject $object) {
+  // TODO: in the next stage of workflow development, this seems
+  // like a logical place to add a table to view work records.
+  // Add a button to the workflow table here for edit/delete
+  // functionality.
+
+  // TODO: in the workflow admin page, add a table of content
+  // models to associate these workflow steps with. This callback's
+  // access callback with determine if this form can be shown.
+  return 'foo';
+}
+
+/**
+ * PID : required
+ * stamp: optional
+ * category: optional
+ * status: optional
+ * simple: true
+ * 
+ * @param string $pid
+ */
+function islandora_workflow_rest_test_workflow_step($pid = NULL) {
+  try {
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
+
+    $params = islandora_workflow_rest_get_request_parameters();
+    $object = islandora_object_load($params['PID']);
+    if (!$object['WORKFLOW']) {
+      return drupal_json_output("$object->id does not have a workflow datastream.");
+    }
+
+    $workflow = CWRCWorkflowAPI::fromDatastream($object['WORKFLOW']);
+    $response = array("response" => array());
+
+    // Test if the given object has the given stamp/category/status.
+    foreach ($params as $key => $value) {
+      if($key != "PID" && $key != "simple") {
+        $response["response"][$key] = $workflow->getWorkflowStepsByAttributeValue($key, $value);
+      }
+    }
+    // Just a simple true or false response.
+    if(isset($params['simple']) && strtoupper($params['simple']) == "TRUE") {
+      foreach ($response["response"] as $key => $value) {
+        $response["response"][$key] = "TRUE";
+      }
+    }
+    return drupal_json_encode($response);
+    exit();
+  }
+  catch (Exception $e) {
+    return drupal_json_encode($e);
+    exit();
+  }
+}
+
+/**
+ * Return the last workflow step for an islandora object.
+ *
+ *PID : required
+ * @param AbstractObject $object
+ *   A fedora object instance.
+ */
+function islandora_workflow_rest_get_last_workflow_step($pid = NULL) {
+  try {
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
+
+    $params = islandora_workflow_rest_get_request_parameters();
+    if(!isset($params['PID'])) {
+      return drupal_json_output(array("Error" => "PID was not supplied for this request.") );
+    }
+    $object = islandora_object_load($params['PID']);
+    if (!$object['WORKFLOW']) {
+      return drupal_json_output("$object->id does not have a workflow datastream.");
+    }
+    $workflow = CWRCWorkflowAPI::fromDatastream($object['WORKFLOW']);
+    return drupal_json_encode($workflow->entryToArray());
+    exit();
+  }
+  catch (Exception $e) {
+    return drupal_json_encode($e);
+    exit();
+  }
+
+}
+
+/**
+ * Return the full workflow datastream for an islandora object.
+ *
+ *PID : required
+ * @param AbstractObject $object
+ *   A fedora object instance.
+ */
+function islandora_workflow_rest_get_full_workflow($pid = NULL) {
+  try {
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
+
+    $params = islandora_workflow_rest_get_request_parameters();
+    $object = islandora_object_load($params['PID']);
+    if (!$object['WORKFLOW']) {
+      return drupal_json_output("$object->id does not have a workflow datastream.");
+    }
+    $workflow = CWRCWorkflowAPI::fromDatastream($object['WORKFLOW']);
+    return $workflow->workflowToJson();
+    exit();
+  }
+  catch (Exception $e) {
+    return drupal_json_encode($e);
+    exit();
+  }
+}
+
+/**
+ * Rest end-point for workflow entries.
+ *
+ * @note This function exits.
+ */
+function islandora_workflow_rest_add_workflow_step($pid = NULL) {
+  try {
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+
+    $module_path = drupal_get_path('module', 'islandora_workflow_rest');
+    $params = islandora_workflow_rest_get_request_parameters();
+
+    // Assign parameter values from GET request.
+    (isset($params['activity']) ? $activity_params = json_decode($params['activity'], TRUE) : $activity_params = array());
+    (isset($params['toolID']) ? $tool_id = array("toolID" => json_decode($params['toolID'])) : $tool_id = array());
+    (isset($params['assigned']) ? $assigned_params = json_decode($params['assigned'], TRUE) : $assigned_params = array());
+
+    $islandora_object = islandora_object_load($params['PID']);
+    if (!$islandora_object['WORKFLOW']) {
+      $workflow = CWRCWorkflowAPI::fromTemplate();
+      CWRCWorkflowAPI::updateDatastream($workflow, $islandora_object);
+    }
+    else {
+      $workflow = CWRCWorkflowAPI::fromDatastream($islandora_object['WORKFLOW']);
+    }
+
+    $activity = new WorkflowItem(WorkflowConst::ACTIVITY,
+      $activity_params
+    );
+    $assigned = new WorkflowItem(WorkflowConst::ASSIGNED,
+      $assigned_params
+    );
+    $entry = new WorkflowItem(WorkflowConst::WORKFLOW,
+      $tool_id
+    );
+    $workflow->addWorkflowStep($islandora_object->id, $entry, $activity, $assigned);
+    CWRCWorkflowAPI::updateDatastream($workflow, $islandora_object);
+    return drupal_json_encode($workflow->entryToArray());
+    exit();
+  }
+  catch (Exception $e) {
+    return drupal_json_encode($e);
+    exit();
+  }
+}
+
+/**
+ * Callback to retrieve workflow pids with given attributes.
+ */
+function islandora_workflow_rest_find_workflows() {
+  try {
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
+    module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
+  
+    $params = islandora_workflow_rest_get_request_parameters();
+    $object = islandora_object_load($params['PID']);
+    if (!$object['WORKFLOW']) {
+      return drupal_json_output("$object->id does not have a workflow datastream.");
+    }
+    $collection_pid;
+    $required;
+    (isset($params['collection_pid']) ? $collection_pid = $params['collection_pid'] : $collection_pid = NULL);
+    (isset($params['required']) ? $required = json_decode($params['collection_pid'], TRUE) : $required = array());
+    $workflow_pids = CWRCWorkflowAPI::findWorkflowPids(NULL, $collection_pid, $required = array());
+    return drupal_json_encode($workflow_pids);
+    exit();
+  }
+  catch (Exception $e) {
+    return drupal_json_encode($e);
+    exit();
+  }
+}
+

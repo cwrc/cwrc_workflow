@@ -58,6 +58,59 @@ class CWRCWorkflowAPI {
     return new CWRCWorkflowAPI($set_doc);
   }
 
+/**
+ * Solr query static function to find workflow pids, via query.
+ *
+ * @param string $custom_query
+ * @param string $collection_pid
+ * @param unknown $required
+ * @param number $offset
+ * @param number $limit
+ * @return unknown
+ */
+  public static function findWorkflowPids($custom_query = NULL, $collection_pid = NULL, $required = array(), $offset = 0, $limit = 1000000) {
+    // Find all objects with a workflow datastream/attributes in an optional collection.
+    $query = 'workflow_userID_ms:*';
+    $simple = TRUE;
+    if(isset($custom_query)) {
+      $query = $custom_query;
+      $simple = FALSE;
+    }
+    if(isset($collection_pid)) {
+      $query .= ' AND RELS_EXT_isMemberOfCollection_uri_mt:' . '"' . $collection_pid . '"';
+      $simple = FALSE;
+    }
+    if(isset($required)) {
+      foreach ($required as $key => $value) {
+        $concat = (isset($value) && WorkflowConst::isValidName($key) ? WorkflowConst::getConstantValue("CHECK_" . $key) . ":" . $value : "");
+        if($concat != "") {
+          $query .= ' AND ' . $concat;
+        }
+      }
+    }
+    $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
+    $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
+    $solr->setCreateDocuments(FALSE);
+    try {
+      $results = $solr->search($query, $offset, $limit);
+      $data = json_decode($results->getRawResponse(), TRUE);
+      if($simple == TRUE) {
+        // We only want the PID's for these objects
+        foreach ($data['response']['docs'] as $key => $value) {
+          $data[$key] = $data['response']['docs'][$key]['PID'];
+        }
+        unset($data['response']);
+        unset($data['responseHeader']);
+      }
+      $json = $data;
+    }
+    catch (Exception $e) {
+      watchdog_exception('Workflow item query: ', $e, 'Got an exception while searching for workflows.', array(), WATCHDOG_ERROR);
+    }
+    return $json;
+     
+  }
+
   /**
    * Updates an objects WORKFLOW datastream with the supplied CWRCWorkflowAPI.
    *
@@ -67,13 +120,19 @@ class CWRCWorkflowAPI {
    *   A fedora_object whos datastream 'WORKFLOW' should be updated.
    */
   public static function updateDatastream(CWRCWorkflowAPI $work, AbstractObject $object) {
-    if (!$object["WORKFLOW"]) {
-      $ds = $object->constructDatastream("WORKFLOW");
-      $ds->label = 'WORKFLOW DS';
-      $ds->mimetype = 'text/xml';
-      $object->ingestDatastream($ds);
+    try {
+      if (!$object["WORKFLOW"]) {
+        $ds = $object->constructDatastream("WORKFLOW");
+        $ds->label = 'WORKFLOW DS';
+        $ds->mimetype = 'text/xml';
+        $object->ingestDatastream($ds);
+      }
+      $object['WORKFLOW']->content = $work->toString();
     }
-    $object['WORKFLOW']->content = $work->toString();
+    catch (Exception $e) {
+      throw new InvalidArgumentException($e);
+    }
+    
   }
 
   /**
@@ -83,6 +142,86 @@ class CWRCWorkflowAPI {
     return $this->doc->saveXML();
   }
 
+  /**
+   * Retrieve a workflow step.
+   *
+   * Get a workflow step from this objects WORKFLOW
+   * datastream. Defaults to the last entry.
+   *
+   * @param string $workflowID
+   *   (Optional) Return a specific workflow entry.
+   */
+  public function entryToArray($workflowID = NULL) {
+    $node = NULL;
+    if($workflowID != NULL) {
+      $node = $this->xpath->query("//*[@workflowID='" . $workflowID . "']")->item(0);
+    } else {
+      $node = $this->getLastWorkflowStep();
+    }
+    // Create a new document
+    $newdoc = new DOMDocument;
+    $newdoc->formatOutput = true;
+    $newdoc->loadXML("<response></response>");
+    $node = $newdoc->importNode($node, true);
+    $newdoc->documentElement->appendChild($node);
+    $xmlArray = $this->xml_to_array($newdoc);
+    return $xmlArray;
+  }
+
+  /**
+   * Return this objects DOMDocument as json object.
+   *
+   * @return array
+   *   Current DOMDocument as json encoded array.
+   */
+  public function workflowToJson() {
+    $xmlArray = $this->xml_to_array($this->doc);
+    return drupal_json_encode($xmlArray);
+  }
+  /**
+   * Convert an DOMDocument to an array().
+   *
+   * @param DOMDocument $root
+   *   The DOMDocument to convert to formatted array.
+   *
+   * @return array
+   *   Formatted DOMDocument array.
+   */
+  private function xml_to_array($root) {
+    $result = array();
+    if ($root->hasAttributes()) {
+      $attrs = $root->attributes;
+      foreach ($attrs as $attr) {
+        $result['attributes'][$attr->name] = $attr->value;
+      }
+    }
+    if ($root->hasChildNodes()) {
+      $children = $root->childNodes;
+      if ($children->length == 1) {
+        $child = $children->item(0);
+        if ($child->nodeType == XML_TEXT_NODE) {
+          $result['_value'] = $child->nodeValue;
+          return count($result) == 1
+          ? $result['_value']
+          : $result;
+        }
+      }
+      $groups = array();
+      foreach ($children as $child) {
+        if (!isset($result[$child->nodeName])) {
+          $result[$child->nodeName] = $this->xml_to_array($child);
+        } else {
+          if (!isset($groups[$child->nodeName])) {
+            $result[$child->nodeName] = array($result[$child->nodeName]);
+            $groups[$child->nodeName] = 1;
+          }
+          $result[$child->nodeName][] = $this->xml_to_array($child);
+        }
+      }
+    }
+    return $result;
+  }
+  
   /**
    * Returns a clone of this objects DOMDocument.
    *
@@ -108,7 +247,7 @@ class CWRCWorkflowAPI {
     $this->doc = $dom_doc;
     $this->schema = "$module_path/data/workflow.rng";
     // TODO: the current scheam does not vaidate, get the latest.
-    // validateSchema();
+    // $this->validateSchema();
     // Setup xpath for querying on this object.
     $this->xpath = new DOMXPath($this->doc);
     $this->xpath->registerNamespace("php", "http://php.net/xpath");
@@ -204,14 +343,16 @@ class CWRCWorkflowAPI {
   protected function createActivity(DOMElement $parent, WorkflowItem $child) {
     $node = $this->doc->createElement($child->workName);
     foreach ($child->typeAttributes as $key => $value) {
-      $node->setAttribute($key, $value);
+      if($key != WorkflowConst::NOTE) {
+        $node->setAttribute($key, $value);
+      }
     }
     $parent->appendChild($node);
-    if (isset($child->text)) {
+    if (isset($child->typeAttributes['note'])) {
       // Add the note text if it is supplied.
       $note = $this->doc->createElement(WorkflowConst::NOTE);
-      $note_body = $this->doc->createTextNode($child->text);
-      $note->innerHTML = $child->text;
+      $note_body = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::NOTE]);
+      $note->innerHTML = $child->typeAttributes[WorkflowConst::NOTE];
       $note->appendChild($note_body);
       $node->appendChild($note);
     }
@@ -246,18 +387,19 @@ class CWRCWorkflowAPI {
     if ($child->typeAttributes[WorkflowConst::BODY]) {
       $body = $this->doc->createElement(WorkflowConst::BODY);
       $body_note = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::BODY]);
-      $body->innerHTML = $child->text;
+      $body->innerHTML = $child->typeAttributes[WorkflowConst::BODY];
       $body->appendChild($body_note);
       $message->appendChild($body);
     }
     $assigned->appendChild($message);
   }
 
+
   /**
    * Get the last workflow step add to the datastream.
    *
-   * @return DOMElement
-   *   The last entry in the workflow.
+   * @param string $workflowID
+   *   (Optional) Return a specific workflow entry by workflowID.
    */
   public function getLastWorkflowStep() {
     $elements = $this->doc->getElementsByTagName('workflow');
@@ -278,7 +420,8 @@ class CWRCWorkflowAPI {
   protected function dnl2array($domnodelist) {
     $return = array();
     for ($i = 0; $i < $domnodelist->length; ++$i) {
-      $return[] = $domnodelist->item($i);
+      $work_id = $domnodelist->item($i)->parentNode->getAttribute('workflowID');
+      $return[] = $this->entryToArray($work_id);
     }
     return $return;
   }
@@ -304,9 +447,10 @@ class CWRCWorkflowAPI {
    * @return DOMElement
    *   The workflow DOMElement.
    */
-  public function getWorkflowStepsByAttributeValue($attribute, $value) {
+  public function getWorkflowStepsByAttributeValue($attribute, $value = "") {
     $query = "//*[@" . $attribute . "='" . $value . "']";
-    $workflow_steps = $this->xpath->query("//*[@" . $attribute . "='" . $value . "']");
+    $tbody = $this->doc->getElementsByTagName('cwrc')->item(0);
+    $workflow_steps = $this->xpath->query($query, $tbody);
     return $this->dnl2array($workflow_steps);
   }
 

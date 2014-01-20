@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" xmlns="http://cwrc.ca/schema/workflow.rng" encoding="UTF-8"?>
 <cwrc>
 <workflow date="2013-06-23" workflowID="E=mc2" userID="MRB">
   <activity category="created" status="c" stamp="cwrc:cre">

@@ -82,7 +82,11 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
   switch ($form_state['triggering_element']['#value']) {
     case "Add":
       if ($form_state['input']['workflow_stamp_field'] != "") {
-        islandora_workflow_rest_set_stamp($form_state['input']['workflow_stamp_field'], $form_state['input']['workflow_stamp_desc']);
+        $stamp = islandora_workflow_rest_get_stamp($form_state['input']['workflow_stamp_field']);
+        if($stamp != "") {
+          islandora_workflow_rest_set_stamp($form_state['input']['workflow_stamp_field'], $form_state['input']['workflow_stamp_desc']);
+        }
+        
       }
       break;
 
