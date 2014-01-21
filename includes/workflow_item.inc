@@ -28,7 +28,7 @@ class WorkflowItem {
 
     // Validate attributes, and stamp values.
     foreach ($attributes as $key => $value) {
-      if($key != WorkflowConst::BODY) {
+      if ($key != WorkflowConst::BODY) {
         if ($key == WorkflowConst::STAMP) {
           // Validate the stamp value.
           $stamp = islandora_workflow_rest_get_stamp($value);
@@ -42,7 +42,6 @@ class WorkflowItem {
         }
       }
     }
-
     // Lets make sure this is a valid WorkflowItem.
     if (!WorkflowConst::isValidName($name)) {
       throw new InvalidArgumentException("$name is not a valid WorkflowNode");

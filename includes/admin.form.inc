@@ -56,7 +56,6 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#attributes' => array(),
     '#empty' => t("There are no stamps."),
   );
-  dsm($form['Stamps']);
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Add'),
@@ -84,10 +83,9 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
     case "Add":
       if ($form_state['input']['workflow_stamp_field'] != "") {
         $stamp = islandora_workflow_rest_get_stamp($form_state['input']['workflow_stamp_field']);
-        if($stamp != "") {
+        if ($stamp != "") {
           islandora_workflow_rest_set_stamp($form_state['input']['workflow_stamp_field'], $form_state['input']['workflow_stamp_desc']);
         }
-        
       }
       break;
 
