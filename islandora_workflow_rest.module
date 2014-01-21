@@ -80,11 +80,14 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
   module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
 
+  $workflow;
   if (!$object['WORKFLOW']) {
-    return drupal_json_output("$object->id does not have any workflow entries.");
+    $workflow = CWRCWorkflowAPI::fromTemplate($object['WORKFLOW']);
+    CWRCWorkflowAPI::updateDatastream($workflow,$object);
   }
-
-  $workflow = CWRCWorkflowAPI::fromDatastream($object['WORKFLOW']);
+  else {
+    $workflow = CWRCWorkflowAPI::fromDatastream($object['WORKFLOW']);
+  }
   $json = $workflow->workflowToJson();
   $all_workflows = drupal_json_decode($json, TRUE);
   $form['islandora_object'] = array('#type' => 'hidden', '#value' => $object->id);
@@ -102,13 +105,19 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
     '#collapsed' => TRUE,
   );
   $options = array();
-  foreach ($all_workflows['cwrc']['workflow'] as $key => $value) {
-    $options[$key] = array(
-      'workflowID' => $value['attributes']['workflowID'],
-      'userID' => $value['attributes']['userID'],
-      'category' => (isset($value['activity']['attributes']['category']) ? $value['activity']['attributes']['category'] : ""),
-    );
+  if(trim($all_workflows['cwrc']['workflow']) != "" && $all_workflows['cwrc']['workflow'] != "") {
+    foreach ($all_workflows['cwrc']['workflow'] as $key => $value) {
+      $options[$key] = array(
+        'workflowID' => $value['attributes']['workflowID'],
+        'userID' => $value['attributes']['userID'],
+        'category' => (isset($value['activity']['attributes']['category']) ? $value['activity']['attributes']['category'] : ""),
+      );
+    }
   }
+  else {
+  	
+  }
+  
   $header = array(
     'workflowID' => t('Workflow ID'),
     'userID' => t('User ID'),
