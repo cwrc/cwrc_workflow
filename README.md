@@ -2,7 +2,7 @@
 BUILD STATUS
 ------------
 Current build status:
-[![Build Status](https://travis-ci.org/Islandora/islandora_workflow_rest.png?branch=7.x)](https://travis-ci.org/Islandora/islandora_workflow_rest)
+[![Build Status](https://travis-ci.org/discoverygarden/cwrc_workflow.png?branch=7.x)](https://travis-ci.org/discoverygarden/cwrc_workflow)
 
 CI Server:
 http://jenkins.discoverygarden.ca
