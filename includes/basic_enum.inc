@@ -1,9 +1,14 @@
 <?php
 /**
  * @file
- * File contains as enums and constant validation.
+ * File contains enums and constant validation.
  */
 
+/**
+ * Basic Enumeration functionality for Workflow Constants.
+ * @author discoverygarden
+ *
+ */
 abstract class BasicEnum {
   protected static $constCache = NULL;
 
@@ -11,10 +16,10 @@ abstract class BasicEnum {
    * Return all constants via reflection.
    */
   protected static function getConstants() {
-    if (self::$constCache === NULL) {
+    //if (self::$constCache === NULL) {
       $reflect = new ReflectionClass(get_called_class());
       self::$constCache = $reflect->getConstants();
-    }
+    //}
     return self::$constCache;
   }
 

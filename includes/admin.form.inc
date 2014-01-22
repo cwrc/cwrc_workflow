@@ -7,9 +7,9 @@
 /**
  * Admin page for adding additional stamps.
  *
- * @param unknown $form
+ * @param array $form
  *   The current form.
- * @param unknown $form_state
+ * @param array $form_state
  *   The current form_state.
  *
  * @return array
@@ -39,7 +39,6 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#weight' => 4,
   );
   $options = array();
-  $rows = array();
   $results = islandora_workflow_rest_get_all_stamps();
   while ($data = $results->fetchObject()) {
     $options[$data->stamp]['stamp'] = $data->stamp;
@@ -71,14 +70,14 @@ function islandora_workflow_rest_admin($form, &$form_state) {
 /**
  * The islandora_workflow_rest_admin submit handler.
  *
- * @param unknown $form
+ * @param array $form
  *   The current form being submitted.
- * @param unknown $form_state
+ * @param array $form_state
  *   The current $form_state submission state.
  */
 function islandora_workflow_rest_admin_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
-  // Check the form triggering_element to preform the correct action.
+  // Check the form triggering_element to perform the correct action.
   switch ($form_state['triggering_element']['#value']) {
     case "Add":
       if ($form_state['input']['workflow_stamp_field'] != "") {

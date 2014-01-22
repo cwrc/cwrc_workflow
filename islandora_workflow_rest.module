@@ -71,7 +71,7 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
   module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
 
-  $workflow;
+  $workflow = NULL;
   if (!$object['WORKFLOW']) {
     $workflow = CWRCWorkflowAPI::fromTemplate($object['WORKFLOW']);
     CWRCWorkflowAPI::updateDatastream($workflow,$object);
@@ -95,8 +95,9 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
+  dsm($all_workflows, "all workflows");
   $options = array();
-  if(isset($all_workflows['cwrc']['workflow']) && trim($all_workflows['cwrc']['workflow']) != "" && $all_workflows['cwrc']['workflow'] != "") {
+  if(isset($all_workflows['cwrc']['workflow']) && $all_workflows['cwrc']['workflow'] != "") {
     foreach ($all_workflows['cwrc']['workflow'] as $key => $value) {
       $options[$key] = array(
         'workflowID' => $value['attributes']['workflowID'],
@@ -105,10 +106,7 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
       );
     }
   }
-  else {
-  	
-  }
-  
+
   $header = array(
     'workflowID' => t('Workflow ID'),
     'userID' => t('User ID'),
@@ -134,7 +132,7 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
  * @param array $form
  *   The drupal form array to append the form to.
  *
- * @return array()
+ * @return array
  *   The returned form.
  */
 function islandora_workflow_rest_build_add_workflow($form) {
@@ -173,7 +171,6 @@ function islandora_workflow_rest_build_add_workflow($form) {
   $form['workflow_wfs_add_fs']['wf_ass_note'] = array(
     '#title' => t('Note'),
     '#type' => 'textarea',
-    '#default_value' => (isset($context['keywords']) ? drupal_implode_tags($context['keywords']) : ''),
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity'] = array(
     '#type' => 'fieldset',
@@ -184,7 +181,6 @@ function islandora_workflow_rest_build_add_workflow($form) {
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_note'] = array(
     '#title' => t('Activity Note'),
     '#type' => 'textarea',
-    '#default_value' => (isset($context['keywords']) ? drupal_implode_tags($context['keywords']) : ''),
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_act_category'] = array(
     '#type' => 'select',
@@ -264,7 +260,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   CWRCWorkflowAPI::updateDatastream($workflow, $islandora_object);
 }
 /**
- * Test a workflow for paticular attributes.
+ * Test a workflow for particular attributes.
  */
 function islandora_workflow_rest_test_workflow_step() {
   try {
@@ -361,13 +357,12 @@ function islandora_workflow_rest_add_workflow_step() {
     module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
 
-    $module_path = drupal_get_path('module', 'islandora_workflow_rest');
     $params = islandora_workflow_rest_get_request_parameters();
 
     // Assign parameter values from GET request.
-    (isset($params['activity']) ? $activity_params = json_decode($params['activity'], TRUE) : $activity_params = array());
-    (isset($params['toolID']) ? $tool_id = array("toolID" => json_decode($params['toolID'])) : $tool_id = array());
-    (isset($params['assigned']) ? $assigned_params = json_decode($params['assigned'], TRUE) : $assigned_params = array());
+    $activity_params = (isset($params['activity']) ? json_decode($params['activity'], TRUE) : array());
+    $tool_id = (isset($params['toolID']) ? array("toolID" => json_decode($params['toolID'])) : array());
+    $assigned_params = (isset($params['assigned']) ? json_decode($params['assigned'], TRUE) : array());
 
     $islandora_object = islandora_object_load($params['PID']);
     if (!$islandora_object['WORKFLOW']) {

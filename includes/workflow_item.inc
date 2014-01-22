@@ -4,6 +4,12 @@
  * Defines the WorkflowItem class.
  */
 
+/**
+ * Generic Workflow item helper with basic validation.
+ *
+ * @author discoverygarden
+ *
+ */
 class WorkflowItem {
   public $workName;
   public $typeAttributes;

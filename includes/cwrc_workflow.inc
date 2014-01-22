@@ -74,7 +74,7 @@ class CWRCWorkflowAPI {
    * @return array
    *   An array of workflow items.
    */
-  public static function findWorkflowPids($custom_query = NULL, $collection_pid = NULL, $required = array(), $offset = 0, $limit = 1000000) {
+  public static function findWorkflowPids($custom_query = NULL, $collection_pid = NULL, $required = array(), $offset = 0, $limit = 5) {
     // Find all objects with a workflow datastream/attributes
     // in an optional collection.
     $query = 'workflow_userID_ms:*';

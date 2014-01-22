@@ -51,7 +51,7 @@ function islandora_workflow_rest_get_stamp($stamp) {
 }
 
 /**
- * Retrieve all stamp object.
+ * Retrieve all stamp objects.
  *
  * @param int $limit
  *   The limit to set on the query.
