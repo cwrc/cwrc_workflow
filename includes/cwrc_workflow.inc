@@ -37,9 +37,8 @@ class CWRCWorkflowAPI {
    *   Instance of CWRCWorkflowAPI from plain template.
    */
   public static function fromTemplate() {
-    $module_path = drupal_get_path('module', 'islandora_workflow_rest');
     $set_doc = new DOMDocument();
-    $set_doc->load("$module_path/data/workflow_ds_template.xml");
+    $set_doc->loadXML('<?xml version="1.0" encoding="UTF-8" ?><cwrc></cwrc>');
     return new CWRCWorkflowAPI($set_doc);
   }
 

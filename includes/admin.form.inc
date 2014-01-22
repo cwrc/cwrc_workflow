@@ -78,12 +78,13 @@ function islandora_workflow_rest_admin($form, &$form_state) {
  */
 function islandora_workflow_rest_admin_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+  dsm($form_state['input']['workflow_stamp_field'], "hit admin submit");
   // Check the form triggering_element to preform the correct action.
   switch ($form_state['triggering_element']['#value']) {
     case "Add":
       if ($form_state['input']['workflow_stamp_field'] != "") {
         $stamp = islandora_workflow_rest_get_stamp($form_state['input']['workflow_stamp_field']);
-        if ($stamp != "") {
+        if (!isset($stamp) || $stamp == "") {
           islandora_workflow_rest_set_stamp($form_state['input']['workflow_stamp_field'], $form_state['input']['workflow_stamp_desc']);
         }
       }

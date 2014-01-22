@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks for installing/unintstalling this module.
+ * Hooks for installing/uninstalling this module.
  */
 
 /**
@@ -74,8 +74,7 @@ function islandora_workflow_rest_install() {
     "cwrc:del" => "Deleted from the repository - equivalent to category deleted",
   );
 
-  // This hook fires on enable, so check that these values
-  // are not already in the islandora_workflow_rest_stamp table.
+  // This hook fires on install.
   foreach ($stamps as $key => $value) {
     $stamp = islandora_workflow_rest_get_stamp($key);
     if (!isset($stamp) || $stamp == "") {

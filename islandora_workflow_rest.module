@@ -9,15 +9,6 @@
  */
 function islandora_workflow_rest_menu() {
   return array(
-    // Test Endpoint //
-    'islandora_workflow_rest/add_workflow' => array(
-      'title' => 'CWRC Workflow Tool',
-      'description' => 'CWRC Workflow Restfull API.',
-      'page callback' => 'islandora_workflow_rest_add_workflow',
-      'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
-      'file' => 'includes/callbacks.inc',
-      'type' => MENU_CALLBACK,
-    ),
     // Workflow datastream form entry point tab.
     'islandora/object/%islandora_object/workflow' => array(
       'title' => 'Workflow',
@@ -105,7 +96,7 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
     '#collapsed' => TRUE,
   );
   $options = array();
-  if(trim($all_workflows['cwrc']['workflow']) != "" && $all_workflows['cwrc']['workflow'] != "") {
+  if(isset($all_workflows['cwrc']['workflow']) && trim($all_workflows['cwrc']['workflow']) != "" && $all_workflows['cwrc']['workflow'] != "") {
     foreach ($all_workflows['cwrc']['workflow'] as $key => $value) {
       $options[$key] = array(
         'workflowID' => $value['attributes']['workflowID'],
@@ -419,9 +410,12 @@ function islandora_workflow_rest_find_workflows() {
 
     $collection_pid;
     $required;
+    $custom_query;
     (isset($params['collection_pid']) ? $collection_pid = $params['collection_pid'] : $collection_pid = NULL);
     (isset($params['required']) ? $required = json_decode($params['collection_pid'], TRUE) : $required = array());
-    $workflow_pids = CWRCWorkflowAPI::findWorkflowPids(NULL, $collection_pid, $required);
+    (isset($params['query']) ? $custom_query = json_decode($params['query']) : $custom_query = NULL);
+    $workflow_pids = CWRCWorkflowAPI::findWorkflowPids($custom_query, $collection_pid, $required);
+    dsm($workflow_pids);
     return drupal_json_encode($workflow_pids);
   }
   catch (Exception $e) {
