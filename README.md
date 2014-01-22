@@ -2,7 +2,7 @@
 BUILD STATUS
 ------------
 Current build status:
-[![Build Status](https://travis-ci.org/Islandora/islandora_solution_pack_audio.png?branch=7.x)](https://travis-ci.org/Islandora/islandora_solution_pack_audio)
+[![Build Status](https://travis-ci.org/discoverygarden/islandora_workflow_rest.png?branch=7.x)](https://travis-ci.org/discoverygarden/islandora_workflow_rest)
 
 CI Server:
 http://jenkins.discoverygarden.ca
