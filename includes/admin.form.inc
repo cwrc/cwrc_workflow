@@ -78,7 +78,6 @@ function islandora_workflow_rest_admin($form, &$form_state) {
  */
 function islandora_workflow_rest_admin_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
-  dsm($form_state['input']['workflow_stamp_field'], "hit admin submit");
   // Check the form triggering_element to preform the correct action.
   switch ($form_state['triggering_element']['#value']) {
     case "Add":
