@@ -95,7 +95,6 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  dsm($all_workflows, "all workflows");
   $options = array();
   if(isset($all_workflows['cwrc']['workflow']) && $all_workflows['cwrc']['workflow'] != "") {
     foreach ($all_workflows['cwrc']['workflow'] as $key => $value) {
@@ -410,7 +409,6 @@ function islandora_workflow_rest_find_workflows() {
     (isset($params['required']) ? $required = json_decode($params['collection_pid'], TRUE) : $required = array());
     (isset($params['query']) ? $custom_query = json_decode($params['query']) : $custom_query = NULL);
     $workflow_pids = CWRCWorkflowAPI::findWorkflowPids($custom_query, $collection_pid, $required);
-    dsm($workflow_pids);
     return drupal_json_encode($workflow_pids);
   }
   catch (Exception $e) {
