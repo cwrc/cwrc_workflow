@@ -75,6 +75,11 @@ abstract class BasicEnum {
   }
 }
 
+/**
+ * Most common WorkflowItem related constants.
+ * @author discoverygarden
+ *
+ */
 abstract class WorkflowConst extends BasicEnum {
   // Workflow category.
   const CREATED = "created";
@@ -121,6 +126,11 @@ abstract class WorkflowConst extends BasicEnum {
   const MESSAGE = "message";
 }
 
+/**
+ * Assigned Category WorkflowItem constants.
+ * @author discoverygarden
+ *
+ */
 abstract class AssignedCategory extends BasicEnum {
   const CREATED = "created";
   const DEPOSITED = "deposited";
