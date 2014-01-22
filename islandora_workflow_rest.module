@@ -404,7 +404,7 @@ function islandora_workflow_rest_find_workflows() {
 
     $collection_pid = (isset($params['collection_pid']) ? $params['collection_pid'] : NULL);
     $required = (isset($params['required']) ? json_decode($params['collection_pid'], TRUE) : array());
-    $custom_query = (isset($params['query']) ? json_decode($params['query']) : $NULL);
+    $custom_query = (isset($params['query']) ? json_decode($params['query']) : NULL);
 
     $workflow_pids = CWRCWorkflowAPI::findWorkflowPids($custom_query, $collection_pid, $required);
     return drupal_json_encode($workflow_pids);
