@@ -7,7 +7,6 @@
 /**
  * Basic Enumeration functionality for Workflow Constants.
  * @author discoverygarden
- *
  */
 abstract class BasicEnum {
   protected static $constCache = NULL;
@@ -16,10 +15,8 @@ abstract class BasicEnum {
    * Return all constants via reflection.
    */
   protected static function getConstants() {
-    //if (self::$constCache === NULL) {
-      $reflect = new ReflectionClass(get_called_class());
-      self::$constCache = $reflect->getConstants();
-    //}
+    $reflect = new ReflectionClass(get_called_class());
+    self::$constCache = $reflect->getConstants();
     return self::$constCache;
   }
 
@@ -78,7 +75,6 @@ abstract class BasicEnum {
 /**
  * Most common WorkflowItem related constants.
  * @author discoverygarden
- *
  */
 abstract class WorkflowConst extends BasicEnum {
   // Workflow category.
@@ -129,7 +125,6 @@ abstract class WorkflowConst extends BasicEnum {
 /**
  * Assigned Category WorkflowItem constants.
  * @author discoverygarden
- *
  */
 abstract class AssignedCategory extends BasicEnum {
   const CREATED = "created";
