@@ -44,12 +44,7 @@ class CWRCWorkflowAPIUnitTestCase extends IslandoraWebTestCase {
    * @see DrupalUnitTestCase::setUp()
    */
   public function setUp() {
-    parent::setUp(array(
-      'islandora',
-      'islandora_basic_image',
-      'islandora_basic_collection',
-      'islandora_workflow_rest')
-    );
+    parent::setUp('islandora_workflow_rest');
   }
 
   /**
