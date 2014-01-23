@@ -8,7 +8,6 @@
  * Generic Workflow item helper with basic validation.
  *
  * @author discoverygarden
- *
  */
 class WorkflowItem {
   public $workName;

@@ -66,9 +66,9 @@ class CWRCWorkflowAPI {
    *   Collection pid to limit the results.
    * @param array $required
    *   An array of required attributes
-   * @param number $offset
+   * @param int $offset
    *   Query offset.
-   * @param number $limit
+   * @param int $limit
    *   Query limit.
    *
    * @return array
@@ -252,7 +252,7 @@ class CWRCWorkflowAPI {
     $this->doc = $dom_doc;
     $this->schema = "$module_path/data/workflow.rng";
     // TODO: the current scheam does not vaidate, get the latest.
-    // $this->validateSchema();
+    // $this->validateSchema() call here.
     // Setup xpath for querying on this object.
     $this->xpath = new DOMXPath($this->doc);
     $this->xpath->registerNamespace("php", "http://php.net/xpath");
@@ -454,17 +454,5 @@ class CWRCWorkflowAPI {
     $tbody = $this->doc->getElementsByTagName('cwrc')->item(0);
     $workflow_steps = $this->xpath->query($query, $tbody);
     return $this->dnl2array($workflow_steps);
-  }
-
-  /**
-   * Echo out nodes, debug only.
-   *
-   * @param unknown $nodes
-   *   An array of nodes to debug.
-   */
-  protected function debugNode($nodes) {
-    foreach ($nodes as $i => $tag) {
-      echo $i, ': ', var_dump($tag->nodeValue), ' HTML: ', $this->doc->saveHTML($tag), "\n";
-    }
   }
 }
