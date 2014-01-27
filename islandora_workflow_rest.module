@@ -217,10 +217,6 @@ function islandora_workflow_rest_build_add_workflow($form) {
   return $form;
 }
 
-function islandora_workflow_rest_entry_form_validate($node, $form, &$form_state) {
-  dsm(array(), "hit validate");
-}
-
 /**
  * Implements hook_form_submit().
  */
