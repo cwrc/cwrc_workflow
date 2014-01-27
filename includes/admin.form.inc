@@ -17,7 +17,6 @@
  */
 function islandora_workflow_rest_admin($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
-  $data = islandora_workflow_rest_get_all_stamps();
   $form['workflow_stamp_fs'] = array(
     '#type' => 'fieldset',
     '#title' => t('Add Stamp'),
