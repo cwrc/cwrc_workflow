@@ -23,6 +23,20 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
+  $form['workflow_query_fs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Configure SOLR Query'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+  $form['workflow_query_fs']['workflow_solr_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('SOLR Query Field'),
+    '#description' => t('Configure the SOLR query Workflow will use with the rest interface.'),
+    '#size' => 45,
+    '#autocomplete_path' => 'islandora_workflow_rest/autocomplete_luke',
+    '#default_value' => variable_get('workflow_solr_field', ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD),
+  );
   $form['workflow_stamp_fs']['workflow_stamp_field'] = array(
     '#type' => 'textfield',
     '#title' => t('Add additional stamps'),
@@ -94,5 +108,8 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
         }
       }
       break;
+  }
+  if (ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD != $form_state['input']['workflow_solr_field']) {
+    variable_set('workflow_solr_field', $form_state['input']['workflow_solr_field']);
   }
 }

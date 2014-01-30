@@ -77,7 +77,7 @@ class CWRCWorkflowAPI {
   public static function findWorkflowPids($custom_query = NULL, $collection_pid = NULL, $required = array(), $offset = 0, $limit = 5) {
     // Find all objects with a workflow datastream/attributes
     // in an optional collection.
-    $query = 'workflow_userID_ms:*';
+    $query = ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD . ":*";
     $simple = TRUE;
     if (isset($custom_query)) {
       $query = $custom_query;
@@ -127,13 +127,17 @@ class CWRCWorkflowAPI {
    */
   public static function updateDatastream(CWRCWorkflowAPI $work, AbstractObject $object) {
     try {
+      // Construct the datastream if it does not exist.
       if (!$object["WORKFLOW"]) {
         $ds = $object->constructDatastream("WORKFLOW");
         $ds->label = 'WORKFLOW DS';
         $ds->mimetype = 'text/xml';
+        $ds->content = $work->toString();
         $object->ingestDatastream($ds);
       }
-      $object['WORKFLOW']->content = $work->toString();
+      else {
+        $object['WORKFLOW']->content = $work->toString();
+      }
     }
     catch (Exception $e) {
       throw new InvalidArgumentException($e);
@@ -228,7 +232,7 @@ class CWRCWorkflowAPI {
   }
 
   /**
-   * Returns a clone of this objects DOMDocument.
+   * Returns a clone of this object's DOMDocument.
    *
    * @return DOMDocument
    *   This objects DOMDocument.

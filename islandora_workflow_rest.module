@@ -4,6 +4,9 @@
  * The main module file for the Islanora workflow rest interface.
  */
 
+// Default constant 
+define('ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD', 'workflow_userID_ms');
+
 /**
  * Implements hook_menu().
  */
@@ -57,6 +60,15 @@ function islandora_workflow_rest_menu() {
     'islandora_workflow_rest/v1/workflow_query' => array(
       'page callback' => 'islandora_workflow_rest_find_workflows',
       'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+    ),
+      // Configure default SOLR Fields.
+    'islandora_workflow_rest/autocomplete_luke' => array(
+      'title' => 'Islandora Solr Luke autocomplete',
+      'description' => 'Autocomplete callback to populate solr text fields.',
+      'page callback' => 'islandora_workflow_rest_autocomplete_luke',
+      'access arguments' => array('administer islandora solr'),
+      'file' => 'includes/utilities.inc',
       'type' => MENU_CALLBACK,
     ),
   );

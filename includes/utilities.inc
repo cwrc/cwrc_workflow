@@ -125,3 +125,31 @@ function islandora_workflow_rest_get_request_parameters() {
       throw new Exception('Method Not Allowed', 405);
   }
 }
+
+/**
+ * Admin autocomplete callback which returns solr fields from Luke.
+ *
+ * @param string $string
+ *   String filled out in the autocomplete textfield.
+ *
+ * @return json
+ *   A json array containing the Solr luke values that contain the given string.
+ */
+function islandora_workflow_rest_autocomplete_luke($string = '') {
+  $luke = islandora_solr_get_luke();
+  $result = array();
+  foreach ($luke['fields'] as $term => $value) {
+    if (stripos($term, $string) !== FALSE) {
+      // Search case insensitive, but keep the case on replace.
+      $term_str = preg_replace("/$string/i", "<strong>\$0</strong>", $term);
+
+      // Add strong elements to highlight the found string.
+      $result[$term] = $term_str . '<strong style="position: absolute; right: 5px;">(' . $value['type'] . ')</strong>';
+    }
+  }
+  // Sort alphabetically.
+  ksort($result);
+
+  drupal_json_output($result);
+  exit();
+}
