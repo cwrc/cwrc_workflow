@@ -136,6 +136,7 @@ function islandora_workflow_rest_get_request_parameters() {
  *   A json array containing the Solr luke values that contain the given string.
  */
 function islandora_workflow_rest_autocomplete_luke($string = '') {
+  module_load_include('inc', 'islandora_solr', 'includes/luke');
   $luke = islandora_solr_get_luke();
   $result = array();
   foreach ($luke['fields'] as $term => $value) {

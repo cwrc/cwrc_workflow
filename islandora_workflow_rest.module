@@ -4,7 +4,7 @@
  * The main module file for the Islanora workflow rest interface.
  */
 
-// Default constant 
+// Default constant.
 define('ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD', 'workflow_userID_ms');
 
 /**
