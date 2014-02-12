@@ -352,19 +352,22 @@ class CWRCWorkflowAPI {
   protected function createActivity(DOMElement $parent, WorkflowItem $child) {
     $node = $this->doc->createElement($child->workName);
     foreach ($child->typeAttributes as $key => $value) {
-      if ($key != WorkflowConst::NOTE) {
+      // Crazy if sidesteps the message for the assignment.
+      if ($key == WorkflowConst::CATEGORY || $key == WorkflowConst::STAMP || $key == WorkflowConst::STATUS) {
         $node->setAttribute($key, $value);
       }
     }
     $parent->appendChild($node);
-    if (isset($child->typeAttributes['note'])) {
-      // Add the note text if it is supplied.
+    // Add the note text if it is supplied.
+    if (isset($child->typeAttributes[WorkflowConst::NOTE])) {
       $note = $this->doc->createElement(WorkflowConst::NOTE);
       $note_body = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::NOTE]);
       $note->innerHTML = $child->typeAttributes[WorkflowConst::NOTE];
       $note->appendChild($note_body);
       $node->appendChild($note);
     }
+    $message = $this->createMessage($child);
+    $node->appendChild($message);
   }
 
   /**
@@ -380,6 +383,20 @@ class CWRCWorkflowAPI {
     $assigned->setAttribute("category", $child->typeAttributes['category']);
 
     $parent->appendChild($assigned);
+    $message = $this->createMessage($child);
+    $assigned->appendChild($message);
+  }
+
+  /**
+   * Generate a message for assigned or activity nodes.
+   *
+   * @param WorkflowItem $child
+   *   WorkflowItem with expected params.
+   *
+   * @return DOMElement
+   *   The Dom Element as message.
+   */
+  protected function createMessage(WorkflowItem $child) {
     $message = $this->doc->createElement(WorkflowConst::MESSAGE);
     if ($child->typeAttributes[WorkflowConst::RECIPIENT]) {
       $recipient = $this->doc->createElement(WorkflowConst::RECIPIENT);
@@ -400,9 +417,8 @@ class CWRCWorkflowAPI {
       $body->appendChild($body_note);
       $message->appendChild($body);
     }
-    $assigned->appendChild($message);
+    return $message;
   }
-
 
   /**
    * Get the last workflow step add to the datastream.

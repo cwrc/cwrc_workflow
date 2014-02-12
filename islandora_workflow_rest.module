@@ -124,14 +124,24 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
     '#collapsed' => TRUE,
   );
   $options = array();
-  if (isset($all_workflows['cwrc']['workflow']) && $all_workflows['cwrc']['workflow'] != "") {
-    foreach ($all_workflows['cwrc'] as $key => $value) {
+  // Multi entry.
+  if (isset($all_workflows['cwrc']['workflow'][0]['attributes']) && $all_workflows['cwrc']['workflow'] != "") {
+    foreach ($all_workflows['cwrc']['workflow'] as $key => $value) {
       $options[$key] = array(
         'workflowID' => $value['attributes']['workflowID'],
         'userID' => $value['attributes']['userID'],
         'category' => (isset($value['activity']['attributes']['category']) ? $value['activity']['attributes']['category'] : ""),
       );
     }
+  }
+  // Single entry.
+  if (isset($all_workflows['cwrc']['workflow']['attributes'])) {
+    $options['workflow'] = array(
+      'workflowID' => $all_workflows['cwrc']['workflow']['attributes']['workflowID'],
+      'userID' => $all_workflows['cwrc']['workflow']['attributes']['userID'],
+      'category' => (isset($all_workflows['cwrc']['workflow']['activity']['attributes']['category']) ?
+        $all_workflows['cwrc']['workflow']['activity']['attributes']['category'] : ""),
+    );
   }
 
   $header = array(
@@ -175,7 +185,7 @@ function islandora_workflow_rest_build_add_workflow($form) {
   }
   $form['workflow_wfs_add_fs']['user'] = array(
     '#type' => 'textfield',
-    '#title' => t('Assign to'),
+    '#title' => t('User'),
     '#default_value' => "",
     '#size' => 60,
     '#maxlength' => 128,
@@ -199,27 +209,51 @@ function islandora_workflow_rest_build_add_workflow($form) {
     '#title' => t('Note'),
     '#type' => 'textarea',
   );
+  $form['workflow_wfs_add_fs']['wf_ass_message'] = array(
+    '#title' => t('Message'),
+    '#type' => 'textarea',
+  );
+  // Activity input form fieldset.
   $form['workflow_wfs_add_fs']['workflow_fs_activity'] = array(
     '#type' => 'fieldset',
     '#title' => t('Activity'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_note'] = array(
-    '#title' => t('Activity Note'),
+  $form['workflow_wfs_add_fs']['workflow_fs_activity']['act_user'] = array(
+    '#type' => 'textfield',
+    '#title' => t('User'),
+    '#default_value' => "",
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#required' => TRUE,
+  );
+  $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_message'] = array(
+    '#title' => t('Message'),
     '#type' => 'textarea',
+  );
+  $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_note'] = array(
+    '#title' => t('Note'),
+    '#type' => 'textarea',
+  );
+  $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subject'),
+    '#default_value' => "",
+    '#size' => 60,
+    '#maxlength' => 128,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_act_category'] = array(
     '#type' => 'select',
     '#title' => t('Activity Category'),
     '#options' => $assigned_categorys,
   );
-  $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_stamp'] = array(
+  $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_stamp'] = array(
     '#type' => 'select',
     '#title' => t('Stamp'),
     '#options' => $stamps,
   );
-  $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_status'] = array(
+  $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_status'] = array(
     '#type' => 'select',
     '#title' => t('Status'),
     '#options' => array(
@@ -230,7 +264,7 @@ function islandora_workflow_rest_build_add_workflow($form) {
     ),
     '#default_value' => 'sample_category',
   );
-  $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_tool'] = array(
+  $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_tool'] = array(
     '#type' => 'textfield',
     '#title' => t('Tool'),
     '#default_value' => "",
@@ -253,16 +287,20 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $assigned_params = array();
   $assigned_params['recipient'] = $form_state['values']['user'];
   $assigned_params['category'] = $form_state['values']['assign_category'];
-  $assigned_params['body'] = $form_state['values']['wf_ass_note'];
+  $assigned_params['body'] = $form_state['values']['wf_ass_message'];
   $assigned_params['subject'] = $form_state['values']['assign_subject'];
+  $assigned_params['note'] = $form_state['values']['wf_ass_note'];
 
   $activity_params = array();
-  $activity_params['note'] = $form_state['values']['wf_ass_note'];
+  $activity_params['recipient'] = $form_state['values']['act_user'];
+  $activity_params['subject'] = $form_state['values']['wf_act_subject'];
+  $activity_params['note'] = $form_state['values']['wf_act_note'];
+  $activity_params['body'] = $form_state['values']['wf_act_message'];
   $activity_params['category'] = $form_state['values']['wf_ass_act_category'];
-  $activity_params['stamp'] = $form_state['values']['wf_ass_stamp'];
-  $activity_params['status'] = $form_state['values']['wf_ass_status'];
+  $activity_params['stamp'] = $form_state['values']['wf_act_stamp'];
+  $activity_params['status'] = $form_state['values']['wf_act_status'];
 
-  $activity_tool = $form_state['values']['wf_ass_tool'];
+  $activity_tool = $form_state['values']['wf_act_tool'];
 
   $islandora_object = islandora_object_load($form_state['values']['islandora_object']);
   if (!$islandora_object['WORKFLOW']) {
