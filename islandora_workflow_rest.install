@@ -37,6 +37,13 @@ function islandora_workflow_rest_schema() {
 }
 
 /**
+ * Implements hook_uninstall().
+ */
+function islandora_workflow_rest_uninstall() {
+  variable_del('workflow_solr_field');
+}
+
+/**
  * Implements hook_install().
  */
 function islandora_workflow_rest_install() {

@@ -4,7 +4,7 @@
  * The main module file for the Islanora workflow rest interface.
  */
 
-// Default constant 
+// Default constant.
 define('ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD', 'workflow_userID_ms');
 
 /**
@@ -95,11 +95,27 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
   $all_workflows = drupal_json_decode($json, TRUE);
   $form['islandora_object'] = array('#type' => 'hidden', '#value' => $object->id);
 
+  $form['workflow_wfds_fs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('View Workflow Datastream'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  $form['workflow_wfds_fs']['datastream_link'] = array(
+    '#type' => 'link',
+    '#title' => t('View Formatted Datastream'),
+    '#href' => "islandora/object/$object->id/datastream/WORKFLOW/view",
+  );
+  $form['workflow_wfds_fs']['workflow_ds_content'] = array(
+    '#title' => t('Workflow Datastream Contents'),
+    '#type' => 'textarea',
+    '#default_value' => $workflow->toString(),
+  );
   $form['workflow_wfs_fs'] = array(
     '#type' => 'fieldset',
     '#title' => t('View Workflows'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
   );
   $form['workflow_wfs_add_fs'] = array(
     '#type' => 'fieldset',
@@ -109,7 +125,7 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
   );
   $options = array();
   if (isset($all_workflows['cwrc']['workflow']) && $all_workflows['cwrc']['workflow'] != "") {
-    foreach ($all_workflows['cwrc']['workflow'] as $key => $value) {
+    foreach ($all_workflows['cwrc'] as $key => $value) {
       $options[$key] = array(
         'workflowID' => $value['attributes']['workflowID'],
         'userID' => $value['attributes']['userID'],
