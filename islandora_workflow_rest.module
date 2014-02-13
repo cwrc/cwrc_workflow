@@ -83,6 +83,9 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
   module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
 
+  module_load_include('inc', 'php_lib', 'DOMHelpers');
+  dom_document_pretty_print_include_files();
+
   $workflow = NULL;
   if (!$object['WORKFLOW']) {
     $workflow = CWRCWorkflowAPI::fromTemplate($object['WORKFLOW']);
@@ -107,9 +110,9 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
     '#href' => "islandora/object/$object->id/datastream/WORKFLOW/view",
   );
   $form['workflow_wfds_fs']['workflow_ds_content'] = array(
+    '#type' => 'item',
     '#title' => t('Workflow Datastream Contents'),
-    '#type' => 'textarea',
-    '#default_value' => $workflow->toString(),
+    '#markup' => islandora_workflow_rest_pretty_print_ds($object['WORKFLOW']->content),
   );
   $form['workflow_wfs_fs'] = array(
     '#type' => 'fieldset',
@@ -157,10 +160,25 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
     '#attributes' => array(),
     '#empty' => t("There are no workflows."),
   );
-
   $form = islandora_workflow_rest_build_add_workflow($form);
-
   return $form;
+}
+
+/**
+ * Pretty print datastream content.
+ * 
+ * @param string $content
+ *   An objects datastream content.
+ *
+ * @return array
+ *   Formated xml/html for content.
+ */
+function islandora_workflow_rest_pretty_print_ds($content) {
+  module_load_include('inc', 'php_lib', 'DOMHelpers');
+  $doc = new DOMDocument();
+  $doc->loadXML($content);
+  $return = dom_document_pretty_print($doc, TRUE);
+  return $return;
 }
 
 /**
