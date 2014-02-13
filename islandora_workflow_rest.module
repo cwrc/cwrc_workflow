@@ -355,10 +355,10 @@ function islandora_workflow_rest_test_workflow_step() {
         $response["response"][$key] = "TRUE";
       }
     }
-    return drupal_json_encode($response);
+    return drupal_json_output($response);
   }
   catch (Exception $e) {
-    return drupal_json_encode($e);
+    return drupal_json_output($e);
   }
 }
 
@@ -381,10 +381,10 @@ function islandora_workflow_rest_get_last_workflow_step() {
       return drupal_json_output("$object->id does not have a workflow datastream.");
     }
     $workflow = CWRCWorkflowAPI::fromDatastream($object['WORKFLOW']);
-    return drupal_json_encode($workflow->entryToArray());
+    return drupal_json_output($workflow->entryToArray());
   }
   catch (Exception $e) {
-    return drupal_json_encode($e);
+    return drupal_json_output($e);
   }
 
 }
@@ -405,7 +405,7 @@ function islandora_workflow_rest_get_full_workflow() {
       return drupal_json_output("$object->id does not have a workflow datastream.");
     }
     $workflow = CWRCWorkflowAPI::fromDatastream($object['WORKFLOW']);
-    return $workflow->workflowToJson();
+    echo $workflow->workflowToJson();
   }
   catch (Exception $e) {
     return drupal_json_encode($e);
@@ -449,10 +449,10 @@ function islandora_workflow_rest_add_workflow_step() {
     );
     $workflow->addWorkflowStep($islandora_object->id, $entry, $activity, $assigned);
     CWRCWorkflowAPI::updateDatastream($workflow, $islandora_object);
-    return drupal_json_encode($workflow->entryToArray());
+    return drupal_json_output($workflow->entryToArray());
   }
   catch (Exception $e) {
-    return drupal_json_encode($e);
+    return drupal_json_output($e);
   }
 }
 
@@ -473,9 +473,9 @@ function islandora_workflow_rest_find_workflows() {
     $custom_query = (isset($params['query']) ? json_decode($params['query']) : NULL);
 
     $workflow_pids = CWRCWorkflowAPI::findWorkflowPids($custom_query, $collection_pid, $required);
-    return drupal_json_encode($workflow_pids);
+    return drupal_json_output($workflow_pids);
   }
   catch (Exception $e) {
-    return drupal_json_encode($e);
+    return drupal_json_output($e);
   }
 }
