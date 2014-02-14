@@ -398,19 +398,19 @@ class CWRCWorkflowAPI {
    */
   protected function createMessage(WorkflowItem $child) {
     $message = $this->doc->createElement(WorkflowConst::MESSAGE);
-    if ($child->typeAttributes[WorkflowConst::RECIPIENT]) {
+    if (isset($child->typeAttributes[WorkflowConst::RECIPIENT])) {
       $recipient = $this->doc->createElement(WorkflowConst::RECIPIENT);
       $recipient->setAttribute("userID", $child->typeAttributes[WorkflowConst::RECIPIENT]);
       $message->appendChild($recipient);
     }
-    if ($child->typeAttributes[WorkflowConst::SUBJECT]) {
+    if (isset($child->typeAttributes[WorkflowConst::SUBJECT])) {
       $subject = $this->doc->createElement(WorkflowConst::SUBJECT);
       $subject_note = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::SUBJECT]);
       $subject->innerHTML = $child->text;
       $subject->appendChild($subject_note);
       $message->appendChild($subject);
     }
-    if ($child->typeAttributes[WorkflowConst::BODY]) {
+    if (isset($child->typeAttributes[WorkflowConst::BODY])) {
       $body = $this->doc->createElement(WorkflowConst::BODY);
       $body_note = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::BODY]);
       $body->innerHTML = $child->typeAttributes[WorkflowConst::BODY];
