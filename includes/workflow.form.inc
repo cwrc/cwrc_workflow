@@ -5,11 +5,17 @@
  */
 
 /**
+ * Workflow Rest entry form.
  *
  * @param unknown $form
+ *   Current form.
  * @param unknown $form_state
+ *   Current form state.
  * @param AbstractObject $object
- * @return unknown
+ *   The fedora object being processed.
+ *
+ * @return array
+ *   The new form.
  */
 function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject $object) {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
@@ -33,66 +39,66 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
   $form['islandora_object'] = array('#type' => 'hidden', '#value' => $object->id);
 
   $form['workflow_wfds_fs'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('View Workflow Datastream'),
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
+    '#type' => 'fieldset',
+    '#title' => t('View Workflow Datastream'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
   );
   $form['workflow_wfds_fs']['datastream_link'] = array(
-      '#type' => 'link',
-      '#title' => t('View Formatted Datastream'),
-      '#href' => "islandora/object/$object->id/datastream/WORKFLOW/view",
+    '#type' => 'link',
+    '#title' => t('View Formatted Datastream'),
+    '#href' => "islandora/object/$object->id/datastream/WORKFLOW/view",
   );
   $form['workflow_wfds_fs']['workflow_ds_content'] = array(
-      '#type' => 'item',
-      '#title' => t('Workflow Datastream Contents'),
-      '#markup' => islandora_workflow_rest_pretty_print_ds($object['WORKFLOW']->content),
+    '#type' => 'item',
+    '#title' => t('Workflow Datastream Contents'),
+    '#markup' => islandora_workflow_rest_pretty_print_ds($object['WORKFLOW']->content),
   );
   $form['workflow_wfs_fs'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('View Workflows'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => t('View Workflows'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
   $form['workflow_wfs_add_fs'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Add Workflow'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => t('Add Workflow'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
   $options = array();
   // Multi entry.
   if (isset($all_workflows['cwrc']['workflow'][0]['attributes']) && $all_workflows['cwrc']['workflow'] != "") {
     foreach ($all_workflows['cwrc']['workflow'] as $key => $value) {
       $options[$key] = array(
-          'workflowID' => $value['attributes']['workflowID'],
-          'userID' => $value['attributes']['userID'],
-          'category' => (isset($value['activity']['attributes']['category']) ? $value['activity']['attributes']['category'] : ""),
+        'workflowID' => $value['attributes']['workflowID'],
+        'userID' => $value['attributes']['userID'],
+        'category' => (isset($value['activity']['attributes']['category']) ? $value['activity']['attributes']['category'] : ""),
       );
     }
   }
   // Single entry.
   if (isset($all_workflows['cwrc']['workflow']['attributes'])) {
     $options['workflow'] = array(
-        'workflowID' => $all_workflows['cwrc']['workflow']['attributes']['workflowID'],
-        'userID' => $all_workflows['cwrc']['workflow']['attributes']['userID'],
-        'category' => (isset($all_workflows['cwrc']['workflow']['activity']['attributes']['category']) ?
-            $all_workflows['cwrc']['workflow']['activity']['attributes']['category'] : ""),
+      'workflowID' => $all_workflows['cwrc']['workflow']['attributes']['workflowID'],
+      'userID' => $all_workflows['cwrc']['workflow']['attributes']['userID'],
+      'category' => (isset($all_workflows['cwrc']['workflow']['activity']['attributes']['category']) ?
+        $all_workflows['cwrc']['workflow']['activity']['attributes']['category'] : ""),
     );
   }
 
   $header = array(
-      'workflowID' => t('Workflow ID'),
-      'userID' => t('User ID'),
-      'category' => t('Category'),
+    'workflowID' => t('Workflow ID'),
+    'userID' => t('User ID'),
+    'category' => t('Category'),
   );
   $form['workflow_wfs_fs']['table'] = array(
-      '#theme' => 'table',
-      '#type' => 'tableselect',
-      '#header' => $header,
-      '#rows' => $options,
-      '#attributes' => array(),
-      '#empty' => t("There are no workflows."),
+    '#theme' => 'table',
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#rows' => $options,
+    '#attributes' => array(),
+    '#empty' => t("There are no workflows."),
   );
   $form = islandora_workflow_rest_build_add_workflow($form);
   return $form;
@@ -119,97 +125,97 @@ function islandora_workflow_rest_build_add_workflow($form) {
     $stamps[$data->stamp] = $data->stamp;
   }
   $form['workflow_wfs_add_fs']['user'] = array(
-      '#type' => 'textfield',
-      '#title' => t('User'),
-      '#default_value' => "",
-      '#size' => 60,
-      '#maxlength' => 128,
-      '#required' => TRUE,
+    '#type' => 'textfield',
+    '#title' => t('User'),
+    '#default_value' => "",
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#required' => TRUE,
   );
 
   $form['workflow_wfs_add_fs']['assign_category'] = array(
-      '#type' => 'select',
-      '#title' => t('Assignment Category'),
-      '#options' => $assigned_categorys,
-      '#default_value' => 'sample_category',
+    '#type' => 'select',
+    '#title' => t('Assignment Category'),
+    '#options' => $assigned_categorys,
+    '#default_value' => 'sample_category',
   );
   $form['workflow_wfs_add_fs']['assign_subject'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Subject'),
-      '#default_value' => "",
-      '#size' => 60,
-      '#maxlength' => 128,
+    '#type' => 'textfield',
+    '#title' => t('Subject'),
+    '#default_value' => "",
+    '#size' => 60,
+    '#maxlength' => 128,
   );
   $form['workflow_wfs_add_fs']['wf_ass_note'] = array(
-      '#title' => t('Note'),
-      '#type' => 'textarea',
+    '#title' => t('Note'),
+    '#type' => 'textarea',
   );
   $form['workflow_wfs_add_fs']['wf_ass_message'] = array(
-      '#title' => t('Message'),
-      '#type' => 'textarea',
+    '#title' => t('Message'),
+    '#type' => 'textarea',
   );
   // Activity input form fieldset.
   $form['workflow_wfs_add_fs']['workflow_fs_activity'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Activity'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => t('Activity'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['act_user'] = array(
-      '#type' => 'textfield',
-      '#title' => t('User'),
-      '#default_value' => "",
-      '#size' => 60,
-      '#maxlength' => 128,
-      '#required' => TRUE,
+    '#type' => 'textfield',
+    '#title' => t('User'),
+    '#default_value' => "",
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#required' => TRUE,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_message'] = array(
-      '#title' => t('Message'),
-      '#type' => 'textarea',
+    '#title' => t('Message'),
+    '#type' => 'textarea',
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_note'] = array(
-      '#title' => t('Note'),
-      '#type' => 'textarea',
+    '#title' => t('Note'),
+    '#type' => 'textarea',
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_subject'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Subject'),
-      '#default_value' => "",
-      '#size' => 60,
-      '#maxlength' => 128,
+    '#type' => 'textfield',
+    '#title' => t('Subject'),
+    '#default_value' => "",
+    '#size' => 60,
+    '#maxlength' => 128,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_act_category'] = array(
-      '#type' => 'select',
-      '#title' => t('Activity Category'),
-      '#options' => $assigned_categorys,
+    '#type' => 'select',
+    '#title' => t('Activity Category'),
+    '#options' => $assigned_categorys,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_stamp'] = array(
-      '#type' => 'select',
-      '#title' => t('Stamp'),
-      '#options' => $stamps,
+    '#type' => 'select',
+    '#title' => t('Stamp'),
+    '#options' => $stamps,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_status'] = array(
-      '#type' => 'select',
-      '#title' => t('Status'),
-      '#options' => array(
-          'Complete' => t('Complete'),
-          'In Progress' => t('In Progress'),
-          'Pending' => t('Pending'),
-          'Incomplete' => t('Incomplete'),
-      ),
-      '#default_value' => 'sample_category',
+    '#type' => 'select',
+    '#title' => t('Status'),
+    '#options' => array(
+      'Complete' => t('Complete'),
+      'In Progress' => t('In Progress'),
+      'Pending' => t('Pending'),
+      'Incomplete' => t('Incomplete'),
+    ),
+    '#default_value' => 'sample_category',
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_tool'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Tool'),
-      '#default_value' => "",
-      '#size' => 60,
-      '#maxlength' => 128,
-      '#required' => FALSE,
+    '#type' => 'textfield',
+    '#title' => t('Tool'),
+    '#default_value' => "",
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#required' => FALSE,
   );
   $form['workflow_wfs_add_fs']['submit'][] = array(
-      '#type' => 'submit',
-      '#value' => t('Add'),
+    '#type' => 'submit',
+    '#value' => t('Add'),
   );
   return $form;
 }
@@ -247,13 +253,13 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   }
 
   $activity = new WorkflowItem(WorkflowConst::ACTIVITY,
-      $activity_params
+    $activity_params
   );
   $assigned = new WorkflowItem(WorkflowConst::ASSIGNED,
-      $assigned_params
+    $assigned_params
   );
   $entry = new WorkflowItem(WorkflowConst::WORKFLOW,
-      array('toolID' => $activity_tool)
+    array('toolID' => $activity_tool)
   );
 
   $workflow->addWorkflowStep($islandora_object->id, $entry, $activity, $assigned);
