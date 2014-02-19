@@ -154,3 +154,20 @@ function islandora_workflow_rest_autocomplete_luke($string = '') {
   drupal_json_output($result);
   exit();
 }
+
+/**
+ * Pretty print datastream content.
+ *
+ * @param string $content
+ *   An objects datastream content.
+ *
+ * @return array
+ *   Formated xml/html for content.
+ */
+function islandora_workflow_rest_pretty_print_ds($content) {
+  module_load_include('inc', 'php_lib', 'DOMHelpers');
+  $doc = new DOMDocument();
+  $doc->loadXML($content);
+  $return = dom_document_pretty_print($doc, TRUE);
+  return $return;
+}
