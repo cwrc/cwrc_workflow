@@ -114,6 +114,7 @@ abstract class WorkflowConst extends BasicEnum {
   const SUBJECT = "subject";
   const BODY = "body";
 
+  const PROCESS = "process";
   const CWRC = "cwrc";
   const WORKFLOW = "workflow";
   const ACTIVITY = "activity";
