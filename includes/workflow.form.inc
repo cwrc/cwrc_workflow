@@ -127,87 +127,70 @@ function islandora_workflow_rest_build_add_workflow($form) {
 
   // Activity input form fieldset.
   $form['workflow_wfs_add_fs']['workflow_fs_activity'] = array(
-  		'#type' => 'fieldset',
-  		'#title' => t('Activity'),
-  		'#collapsible' => TRUE,
-  		'#collapsed' => FALSE,
+    '#type' => 'fieldset',
+    '#title' => t('Activity'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
   );
-  // Assigned input form fieldset
+  // Assigned input form fieldset.
   $form['workflow_wfs_add_fs']['workflow_fs_assigned'] = array(
-  		'#type' => 'fieldset',
-  		'#title' => t('Assign'),
-  		'#collapsible' => TRUE,
-  		'#collapsed' => FALSE,
+    '#type' => 'fieldset',
+    '#title' => t('Assign'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
   );
-  
   // Basic Activity fields.
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_act_category'] = array(
-  		'#type' => 'select',
-  		'#title' => t('Category'),
-  		'#options' => $assigned_categorys,
+    '#type' => 'select',
+    '#title' => t('Category'),
+    '#options' => $assigned_categorys,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_stamp'] = array(
-  		'#type' => 'select',
-  		'#title' => t('Stamp'),
-  		'#options' => $stamps,
+    '#type' => 'select',
+    '#title' => t('Stamp'),
+    '#options' => $stamps,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_status'] = array(
-  		'#type' => 'select',
-  		'#title' => t('Status'),
-  		'#options' => array(
-  				'Complete' => t('Complete'),
-  				'In Progress' => t('In Progress'),
-  				'Pending' => t('Pending'),
-  				'Incomplete' => t('Incomplete'),
-  		),
-  		'#default_value' => 'sample_category',
+    '#type' => 'select',
+    '#title' => t('Status'),
+    '#options' => array(
+      'Complete' => t('Complete'),
+      'In Progress' => t('In Progress'),
+      'Pending' => t('Pending'),
+      'Incomplete' => t('Incomplete'),
+    ),
+    '#default_value' => 'sample_category',
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_note'] = array(
-  		'#title' => t('Note'),
-  		'#type' => 'textarea',
+    '#title' => t('Note'),
+    '#type' => 'textarea',
   );
   // Activity input message form fieldset (Notification).
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_activity_message'] = array(
-  		'#type' => 'fieldset',
-  		'#title' => t('Notification'),
-  		'#collapsible' => TRUE,
-  		'#collapsed' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => t('Notification'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_activity_message']['act_user'] = array(
-  		'#type' => 'textfield',
-  		'#title' => t('User'),
-  		'#default_value' => "",
-  		'#size' => 60,
-  		'#maxlength' => 128,
-  		'#required' => FALSE,
+    '#type' => 'textfield',
+    '#title' => t('User'),
+    '#default_value' => "",
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#required' => FALSE,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_activity_message']['wf_act_subject'] = array(
-  		'#type' => 'textfield',
-  		'#title' => t('Subject'),
-  		'#default_value' => "",
-  		'#size' => 60,
-  		'#maxlength' => 128,
+    '#type' => 'textfield',
+    '#title' => t('Subject'),
+    '#default_value' => "",
+    '#size' => 60,
+    '#maxlength' => 128,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_activity_message']['wf_act_message'] = array(
-  		'#title' => t('Message'),
-  		'#type' => 'textarea',
+    '#title' => t('Message'),
+    '#type' => 'textarea',
   );
-
-  
-  // TODO: this did not show up in the approved form. Remove? only in API?
-//   $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_assigned_message']['wf_act_tool'] = array(
-//   		'#type' => 'textfield',
-//   		'#title' => t('Tool'),
-//   		'#default_value' => "",
-//   		'#size' => 60,
-//   		'#maxlength' => 128,
-//   		'#required' => FALSE,
-//   );
-  ////////////////////////////////
-  
-  
-  
-  
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
@@ -215,38 +198,35 @@ function islandora_workflow_rest_build_add_workflow($form) {
     '#default_value' => 'sample_category',
   );
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_process'] = array(
-  		'#type' => 'textfield',
-  		'#title' => t('Process'),
-  		'#default_value' => "",
-  		'#size' => 60,
-  		'#maxlength' => 128,
-  		'#required' => FALSE,
+    '#type' => 'textfield',
+    '#title' => t('Process'),
+    '#default_value' => "",
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#required' => FALSE,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_note'] = array(
     '#title' => t('Note'),
     '#type' => 'textarea',
   );
-  
   $form['workflow_wfs_add_fs']['submit'][] = array(
     '#type' => 'submit',
     '#value' => t('Add'),
   );
-  
-  // Assigned notification field.
   // Assigned input message form fieldset (Notification).
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['workflow_fs_assigned_message'] = array(
-  		'#type' => 'fieldset',
-  		'#title' => t('Notification'),
-  		'#collapsible' => TRUE,
-  		'#collapsed' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => t('Notification'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['workflow_fs_assigned_message']['user'] = array(
-  		'#type' => 'textfield',
-  		'#title' => t('User'),
-  		'#default_value' => "",
-  		'#size' => 60,
-  		'#maxlength' => 128,
-  		'#required' => FALSE,
+    '#type' => 'textfield',
+    '#title' => t('User'),
+    '#default_value' => "",
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#required' => FALSE,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['workflow_fs_assigned_message']['assign_subject'] = array(
     '#type' => 'textfield',
@@ -259,7 +239,6 @@ function islandora_workflow_rest_build_add_workflow($form) {
     '#title' => t('Message'),
     '#type' => 'textarea',
   );
-  
   return $form;
 }
 
@@ -272,7 +251,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $assigned_params = array();
   $activity_params = array();
 
-  // Activity parameters
+  // Activity parameters.
   $activity_params['category'] = $form_state['values']['wf_ass_act_category'];
   $activity_params['stamp'] = $form_state['values']['wf_act_stamp'];
   $activity_params['status'] = $form_state['values']['wf_act_status'];
