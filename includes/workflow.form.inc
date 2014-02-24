@@ -35,6 +35,8 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
     $workflow = CWRCWorkflowAPI::fromDatastream($object['WORKFLOW']);
   }
   $json = $workflow->workflowToJson();
+  $last_workflow_step = $workflow->entryToArray();
+
   $all_workflows = drupal_json_decode($json, TRUE);
   $form['islandora_object'] = array('#type' => 'hidden', '#value' => $object->id);
 
@@ -100,7 +102,7 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
     '#attributes' => array(),
     '#empty' => t("There are no workflows."),
   );
-  $form = islandora_workflow_rest_build_add_workflow($form);
+  $form = islandora_workflow_rest_build_add_workflow($form, $last_workflow_step);
   return $form;
 }
 
@@ -113,18 +115,30 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
  * @return array
  *   The returned form.
  */
-function islandora_workflow_rest_build_add_workflow($form) {
+function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
 
   $assigned_categorys = AssignedCategory::getAllConstants();
+  $assigned_categorys['SELECT'] = "Select";
+  $pid_namespace = explode(":", $form['islandora_object']['#value']);
 
   $stamps = array();
+  $stamps["select"] = "Select";
   $results = islandora_workflow_rest_get_all_stamps();
   while ($data = $results->fetchObject()) {
-    $stamps[$data->stamp] = $data->stamp;
+    $exploded = explode(":", $data->stamp);
+    if ($pid_namespace[0] == $exploded[0]) {
+      $stamps[$data->stamp] = $data->descr;
+    }
   }
-
+  $status_arr = array(
+    'select' => t('Select'),
+    'Complete' => t('Complete'),
+    'In Progress' => t('In Progress'),
+    'Pending' => t('Pending'),
+    'Incomplete' => t('Incomplete'),
+  );
   // Activity input form fieldset.
   $form['workflow_wfs_add_fs']['workflow_fs_activity'] = array(
     '#type' => 'fieldset',
@@ -144,22 +158,19 @@ function islandora_workflow_rest_build_add_workflow($form) {
     '#type' => 'select',
     '#title' => t('Category'),
     '#options' => $assigned_categorys,
+    '#default_value' => (count($last_workflow) >= 1 ? $last_workflow['response']['workflow']['activity']['attributes']['category'] : "SELECT"),
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_stamp'] = array(
     '#type' => 'select',
     '#title' => t('Stamp'),
     '#options' => $stamps,
+    '#default_value' => (count($last_workflow) >= 1 ? $last_workflow['response']['workflow']['activity']['attributes']['stamp'] : "select"),
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_status'] = array(
     '#type' => 'select',
     '#title' => t('Status'),
-    '#options' => array(
-      'Complete' => t('Complete'),
-      'In Progress' => t('In Progress'),
-      'Pending' => t('Pending'),
-      'Incomplete' => t('Incomplete'),
-    ),
-    '#default_value' => 'sample_category',
+    '#options' => $status_arr,
+    '#default_value' => (count($last_workflow) >= 1 ? $last_workflow['response']['workflow']['activity']['attributes']['status'] : "select"),
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_note'] = array(
     '#title' => t('Note'),
@@ -195,7 +206,7 @@ function islandora_workflow_rest_build_add_workflow($form) {
     '#type' => 'select',
     '#title' => t('Category'),
     '#options' => $assigned_categorys,
-    '#default_value' => 'sample_category',
+    '#default_value' => (count($last_workflow) >= 1 ? $last_workflow['response']['workflow']['assigned']['attributes']['category'] : "SELECT"),
   );
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_process'] = array(
     '#type' => 'textfield',
@@ -240,6 +251,31 @@ function islandora_workflow_rest_build_add_workflow($form) {
     '#type' => 'textarea',
   );
   return $form;
+}
+
+/**
+ * Implements hook_form_validate().
+ */
+function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
+  // Both notifications require "all or nothing" input.
+  if ($form_state['values']['act_user'] != "") {
+    if ($form_state['values']['wf_act_subject'] == "" || $form_state['values']['wf_act_message']) {
+      form_set_error('Activity Notifications Data', 'All Activity Notification fields must be complete');
+    }
+  }
+  if ($form_state['values']['user'] != "") {
+    if ($form_state['values']['assign_subject'] == "" || $form_state['values']['assign_message']) {
+      form_set_error('Assign Notification Data', 'All Assign Notification fields must be complete');
+    }
+  }
+
+  // Be sure the default "Select" in combo boxes has been set to something else.
+  if (strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
+     strtoupper($form_state['values']['wf_act_stamp']) == "SELECT" ||
+     strtoupper($form_state['values']['wf_act_status']) == "SELECT" ||
+     strtoupper($form_state['values']['assign_category']) == "SELECT") {
+    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status.');
+  }
 }
 
 /**
