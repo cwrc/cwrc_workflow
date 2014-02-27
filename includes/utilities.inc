@@ -59,7 +59,7 @@ function islandora_workflow_rest_get_stamp($stamp) {
  * @return array
  *   The list of workflow stamps.
  */
-function islandora_workflow_rest_get_all_stamps($limit = 1000) {
+function islandora_workflow_rest_get_all_stamps($limit = 10) {
   $query = db_select('islandora_workflow_rest_stamps', 'r');
   $query->fields('r', array("lid", "stamp", "descr"));
   $table_sort = $query->extend('TableSort');

@@ -163,7 +163,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
 
   $stamps = array();
   $stamps["select"] = "Select";
-  $results = islandora_workflow_rest_get_all_stamps();
+  $results = islandora_workflow_rest_get_all_stamps(1000);
   while ($data = $results->fetchObject()) {
     $exploded = explode(":", $data->stamp);
     if ($pid_namespace[0] == $exploded[0]) {
