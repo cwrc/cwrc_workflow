@@ -5,6 +5,43 @@
  */
 
 /**
+ * Activity/Assigned user auto complete.
+ *
+ * @param unknown $string
+ *   String to find against matching users.
+ */
+function islandora_workflow_rest_user_autocomplete($string) {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+
+  $pieces = explode(",", $string);
+  $matches = array();
+  $result = db_select('users')
+  ->fields('users', array('name'))
+  ->condition('name', db_like($pieces[count($pieces) - 1]) . '%', 'LIKE')
+  ->range(0, 10)
+  ->execute();
+
+  foreach ($result as $user) {
+    $matches[$user->name] = check_plain($user->name);
+  }
+  // This may seam crazy, but adds support for csv autocomplete.
+  if (count($pieces) > 1) {
+    $key_string;
+    foreach ($pieces as $piece) {
+      if ($piece != $pieces[count($pieces) - 1]) {
+        $key_string .= $piece . ",";
+      }
+    }
+    $return = array();
+    foreach ($matches as $final_key => $final_value) {
+      $return[$key_string . $final_value] = $final_value;
+    }
+    $matches = $return;
+  }
+  drupal_json_output($matches);
+}
+
+/**
  * Workflow Rest entry form.
  *
  * @param unknown $form
@@ -22,8 +59,9 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
   module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
-
   module_load_include('inc', 'php_lib', 'DOMHelpers');
+  $module_path = drupal_get_path('module', 'islandora_workflow_rest');
+
   dom_document_pretty_print_include_files();
 
   $workflow = NULL;
@@ -185,10 +223,12 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_activity_message']['act_user'] = array(
     '#type' => 'textfield',
+    '#id' => 'email-auto-complete-act-user',
     '#title' => t('User'),
     '#default_value' => "",
     '#size' => 60,
     '#maxlength' => 128,
+    '#autocomplete_path' => 'islandora_workflow_rest/user/autocomplete',
     '#required' => FALSE,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_activity_message']['wf_act_subject'] = array(
@@ -232,10 +272,12 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     '#collapsed' => TRUE,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['workflow_fs_assigned_message']['user'] = array(
+    '#id' => 'email-auto-complete-ass-user',
     '#type' => 'textfield',
     '#title' => t('User'),
     '#default_value' => "",
     '#size' => 60,
+    '#autocomplete_path' => 'islandora_workflow_rest/user/autocomplete',
     '#maxlength' => 128,
     '#required' => FALSE,
   );
@@ -259,16 +301,15 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
 function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
   // Both notifications require "all or nothing" input.
   if ($form_state['values']['act_user'] != "") {
-    if ($form_state['values']['wf_act_subject'] == "" || $form_state['values']['wf_act_message']) {
+    if ($form_state['values']['wf_act_subject'] == "" || $form_state['values']['wf_act_message'] == "") {
       form_set_error('Activity Notifications Data', 'All Activity Notification fields must be complete');
     }
   }
   if ($form_state['values']['user'] != "") {
-    if ($form_state['values']['assign_subject'] == "" || $form_state['values']['assign_message']) {
+    if ($form_state['values']['assign_subject'] == "" || $form_state['values']['assign_message'] == "") {
       form_set_error('Assign Notification Data', 'All Assign Notification fields must be complete');
     }
   }
-
   // Be sure the default "Select" in combo boxes has been set to something else.
   if (strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
      strtoupper($form_state['values']['wf_act_stamp']) == "SELECT" ||
@@ -282,6 +323,8 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
  * Implements hook_form_submit().
  */
 function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+
   $islandora_object = islandora_object_load($form_state['values']['islandora_object']);
 
   $assigned_params = array();
@@ -326,6 +369,41 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $entry = new WorkflowItem(WorkflowConst::WORKFLOW,
     array('toolID' => $activity_tool)
   );
+
+  // Get the last workflow step, if exists.
+  $last_workflow = $workflow->entryToArray();
+  if ($last_workflow) {
+    $last_wf_string = islandora_workflow_rest_prepair_workflow_string($last_workflow);
+  }
+  else {
+    $last_wf_string = "";
+  }
+
   $workflow->addWorkflowStep($islandora_object->id, $entry, $activity, $assigned);
   CWRCWorkflowAPI::updateDatastream($workflow, $islandora_object);
+
+  // Get the current workflow step.
+  $this_workflow = $workflow->entryToArray();
+  $this_wf_string = islandora_workflow_rest_prepair_workflow_string($this_workflow);
+
+  if ($form_state['values']['act_user'] != "") {
+    // Email activity notification.
+    $params['body'] = $form_state['values']['wf_act_message'] . "\n\n" .
+      $this_wf_string . "\n\n" . $last_wf_string;
+    $params['link'] = url("islandora/object/$islandora_object->id/workflow");
+    $params['subject'] = $form_state['values']['wf_act_subject'];
+    $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['act_user']);
+
+    islandora_workflow_rest_notify($params, $islandora_object->id);
+  }
+  if ($form_state['values']['user'] != "") {
+    // Email Assigned notification.
+    $params['body'] = $form_state['values']['assign_message'] . "\n\n" .
+      $this_wf_string . "\n\n" . $last_wf_string;
+    $params['link'] = url("islandora/object/$islandora_object->id/workflow");
+    $params['subject'] = $form_state['values']['assign_subject'];
+    $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['user']);
+
+    islandora_workflow_rest_notify($params, $islandora_object->id);
+  }
 }

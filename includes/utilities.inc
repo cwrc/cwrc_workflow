@@ -171,3 +171,63 @@ function islandora_workflow_rest_pretty_print_ds($content) {
   $return = dom_document_pretty_print($doc, TRUE);
   return $return;
 }
+
+/**
+ * Retrive an array of accounts for a give CSV of usernames.
+ *
+ * @param string $string
+ *   CSV string with valid drupal user names.
+ *
+ * @return array
+ *   An array of user accounts.
+ */
+function islandora_workflow_rest_load_users_from_csv($string) {
+  $accounts = array();
+  $pieces = explode(",", $string);
+  foreach ($pieces as $key => $value) {
+    $accounts[] = user_load_by_name($value);
+  }
+  return $accounts;
+}
+
+/**
+ * Transform a workflow entry into email text.
+ *
+ * @param array $workflow_item
+ *   The workflow item as array to transform.
+ *
+ * @return string
+ *   The string entry for notification emails.
+ */
+function islandora_workflow_rest_prepair_workflow_string($workflow_item) {
+  // Check if there IS a workflow entry.
+  $text = "";
+  if (isset($workflow_item['response'])) {
+    $text = "Workflow Entry (" . $workflow_item['response']['workflow']['attributes']['workflowID'] . "):\n";
+    $text .= "--Stamp: " . $workflow_item['response']['workflow']['activity']['attributes']['category'] . "\n";
+    $text .= "--Category: " . $workflow_item['response']['workflow']['activity']['attributes']['stamp'] . "\n";
+    $text .= "--Status: " . $workflow_item['response']['workflow']['activity']['attributes']['status'] . "\n";
+  }
+  return $text;
+}
+
+/**
+ * Email helper, using drupal_mail.
+ *
+ * @param array $params
+ *   Required email notification parameters.
+ *
+ * @param unknown $pid
+ *   An abstract object pid with workflow.
+ */
+function islandora_workflow_rest_notify($params, $pid) {
+  foreach ($params['accounts'] as $account) {
+    $params['mail_account'] = $account;
+    drupal_mail('islandora_workflow_rest',
+      'notice',
+      $account->mail,
+      user_preferred_language($account),
+      $params
+    );
+  }
+}

@@ -63,6 +63,12 @@ function islandora_workflow_rest_menu() {
       'access callback' => TRUE,
       'type' => MENU_CALLBACK,
     ),
+    'islandora_workflow_rest/user/autocomplete' => array(
+      'page callback' => 'islandora_workflow_rest_user_autocomplete',
+      'access callback' => TRUE,
+      'file' => 'includes/workflow.form.inc',
+      'type' => MENU_CALLBACK,
+    ),
       // Configure default SOLR Fields.
     'islandora_workflow_rest/autocomplete_luke' => array(
       'title' => 'Islandora Solr Luke autocomplete',
@@ -73,6 +79,34 @@ function islandora_workflow_rest_menu() {
       'type' => MENU_CALLBACK,
     ),
   );
+}
+
+/**
+ * Implements hook_mail().
+ */
+function islandora_workflow_rest_mail($key, &$message, $params) {
+  global $base_url;
+
+  $data['user'] = $params['mail_account'];
+  $options['language'] = $message['language'];
+  $variables = array(
+    "@username" => format_username($data['user']),
+    "@site" => $base_url,
+    "@message" => $params['body'],
+    "@link" => $base_url . $params['link'],
+  );
+
+  user_mail_tokens($variables, $data, $options);
+  switch ($key) {
+    case 'notice':
+      $langcode = $message['language']->language;
+      $message['subject'] = t('Notification from @site', $variables, array('langcode' => $langcode));
+      $message['body'][] = t("Dear @username\n\n@message\n\n@link\n\n",
+        $variables,
+        array('langcode' => $langcode)
+      );
+      break;
+  }
 }
 
 /**
