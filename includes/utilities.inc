@@ -220,7 +220,7 @@ function islandora_workflow_rest_prepare_workflow_string($workflow_item) {
  * @param unknown $pid
  *   An abstract object pid with workflow.
  */
-function islandora_workflow_rest_notify($params, $pid) {
+function islandora_workflow_rest_notify($params) {
   foreach ($params['accounts'] as $account) {
     $params['mail_account'] = $account;
     drupal_mail('islandora_workflow_rest',

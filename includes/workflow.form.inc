@@ -401,7 +401,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
     $params['subject'] = $form_state['values']['wf_act_subject'];
     $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['act_user']);
 
-    islandora_workflow_rest_notify($params, $islandora_object->id);
+    islandora_workflow_rest_notify($params);
   }
   if ($form_state['values']['user'] != "") {
     // Email Assigned notification.
@@ -411,6 +411,6 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
     $params['subject'] = $form_state['values']['assign_subject'];
     $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['user']);
 
-    islandora_workflow_rest_notify($params, $islandora_object->id);
+    islandora_workflow_rest_notify($params);
   }
 }
