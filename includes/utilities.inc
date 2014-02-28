@@ -199,7 +199,7 @@ function islandora_workflow_rest_load_users_from_csv($string) {
  * @return string
  *   The string entry for notification emails.
  */
-function islandora_workflow_rest_prepair_workflow_string($workflow_item) {
+function islandora_workflow_rest_prepare_workflow_string($workflow_item) {
   // Check if there IS a workflow entry.
   $text = "";
   if (isset($workflow_item['response'])) {
