@@ -95,17 +95,6 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
     "@message" => $params['body'],
     "@link" => $base_url . $params['link'],
   );
-  if (module_exists('privatemsg')) {
-    // Utilize the Privatemsg module notification system.
-    // Send a message to the user with privatemsg_new_thread.
-    privatemsg_new_thread(array($data['user']),
-      t('Notification from @site', $variables, array('langcode' => $langcode)),
-      t("Dear @username\n\n@message\n\n@link\n\n",
-        $variables,
-        array('langcode' => $langcode)
-      )
-    );
-  }
   user_mail_tokens($variables, $data, $options);
   switch ($key) {
     case 'notice':
@@ -116,6 +105,17 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
         array('langcode' => $langcode)
       );
       break;
+  }
+  if (module_exists('privatemsg')) {
+    // Utilize the Privatemsg module notification system.
+    // Send a message to the user with privatemsg_new_thread.
+    privatemsg_new_thread(array($data['user']),
+      t('Notification from @site', $variables, array('langcode' => $message['language']->language)),
+      t("Dear @username\n\n@message\n\n@link\n\n",
+        $variables,
+        array('langcode' => $langcode)
+      )
+    );
   }
 }
 

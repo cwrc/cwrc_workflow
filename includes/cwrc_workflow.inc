@@ -337,10 +337,10 @@ class CWRCWorkflowAPI {
       }
     }
     $parent->appendChild($element);
-    if (isset($activity)) {
+    if (isset($activity) && count($activity->typeAttributes) > 0) {
       $this->createActivity($element, $activity);
     }
-    if (isset($assigned)) {
+    if (isset($assigned) && count($assigned->typeAttributes) > 0) {
       $this->createAssigned($element, $assigned);
     }
   }

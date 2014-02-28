@@ -188,7 +188,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     '#type' => 'fieldset',
     '#title' => t('Assign'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
   );
   // Basic Activity fields.
   $wf_ass_act_category_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['category']) ?
@@ -269,7 +269,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   );
   $form['workflow_wfs_add_fs']['submit'][] = array(
     '#type' => 'submit',
-    '#value' => t('Add'),
+    '#value' => t('Submit'),
   );
   // Assigned input message form fieldset (Notification).
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['workflow_fs_assigned_message'] = array(
@@ -318,11 +318,16 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
     }
   }
   // Be sure the default "Select" in combo boxes has been set to something else.
-  if (strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
+  if ($form_state['values']['wf_act_note'] != "" &&
+     (strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
      strtoupper($form_state['values']['wf_act_stamp']) == "SELECT" ||
-     strtoupper($form_state['values']['wf_act_status']) == "SELECT" ||
-     strtoupper($form_state['values']['assign_category']) == "SELECT") {
-    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status.');
+     strtoupper($form_state['values']['wf_act_status']) == "SELECT")) {
+    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status. a');
+  }
+  if (($form_state['values']['assign_category']) == "SELECT" &&
+      ($form_state['values']['assign_process'] != "" ||
+      $form_state['values']['assign_note'] != "")) {
+    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status. b');
   }
 }
 
@@ -385,7 +390,6 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   else {
     $last_wf_string = "";
   }
-
   $workflow->addWorkflowStep($islandora_object->id, $entry, $activity, $assigned);
   CWRCWorkflowAPI::updateDatastream($workflow, $islandora_object);
 
