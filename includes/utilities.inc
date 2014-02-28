@@ -216,9 +216,6 @@ function islandora_workflow_rest_prepare_workflow_string($workflow_item) {
  *
  * @param array $params
  *   Required email notification parameters.
- *
- * @param unknown $pid
- *   An abstract object pid with workflow.
  */
 function islandora_workflow_rest_notify($params) {
   foreach ($params['accounts'] as $account) {
