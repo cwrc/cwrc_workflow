@@ -168,6 +168,9 @@ class CWRCWorkflowAPI {
     else {
       $node = $this->getLastWorkflowStep();
     }
+    if ($node == NULL) {
+      return array();
+    }
     // Create a new document.
     $newdoc = new DOMDocument();
     $newdoc->formatOutput = TRUE;
@@ -188,6 +191,7 @@ class CWRCWorkflowAPI {
     $xml_array = $this->xmlToArray($this->doc);
     return drupal_json_encode($xml_array);
   }
+
   /**
    * Convert an DOMDocument to an array().
    *
@@ -333,10 +337,10 @@ class CWRCWorkflowAPI {
       }
     }
     $parent->appendChild($element);
-    if (isset($activity)) {
+    if (isset($activity) && count($activity->typeAttributes) > 0) {
       $this->createActivity($element, $activity);
     }
-    if (isset($assigned)) {
+    if (isset($assigned) && count($assigned->typeAttributes) > 0) {
       $this->createAssigned($element, $assigned);
     }
   }

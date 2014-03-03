@@ -63,6 +63,12 @@ function islandora_workflow_rest_menu() {
       'access callback' => TRUE,
       'type' => MENU_CALLBACK,
     ),
+    'islandora_workflow_rest/user/autocomplete' => array(
+      'page callback' => 'islandora_workflow_rest_user_autocomplete',
+      'access callback' => TRUE,
+      'file' => 'includes/workflow.form.inc',
+      'type' => MENU_CALLBACK,
+    ),
       // Configure default SOLR Fields.
     'islandora_workflow_rest/autocomplete_luke' => array(
       'title' => 'Islandora Solr Luke autocomplete',
@@ -76,6 +82,44 @@ function islandora_workflow_rest_menu() {
 }
 
 /**
+ * Implements hook_mail().
+ */
+function islandora_workflow_rest_mail($key, &$message, $params) {
+  global $base_url;
+
+  $data['user'] = $params['mail_account'];
+  $options['language'] = $message['language'];
+  $variables = array(
+    "@username" => format_username($data['user']),
+    "@site" => $base_url,
+    "@message" => $params['body'],
+    "@link" => $base_url . $params['link'],
+  );
+  user_mail_tokens($variables, $data, $options);
+  switch ($key) {
+    case 'notice':
+      $langcode = $message['language']->language;
+      $message['subject'] = t('Notification from @site', $variables, array('langcode' => $langcode));
+      $message['body'][] = t("Dear @username\n\n@message\n\n@link\n\n",
+        $variables,
+        array('langcode' => $langcode)
+      );
+      break;
+  }
+  if (module_exists('privatemsg')) {
+    // Utilize the Privatemsg module notification system.
+    // Send a message to the user with privatemsg_new_thread.
+    privatemsg_new_thread(array($data['user']),
+      t('Notification from @site', $variables, array('langcode' => $message['language']->language)),
+      t("Dear @username\n\n@message\n\n@link\n\n",
+        $variables,
+        array('langcode' => $langcode)
+      )
+    );
+  }
+}
+
+/**
  * Test a workflow for particular attributes.
  */
 function islandora_workflow_rest_test_workflow_step() {
@@ -86,6 +130,9 @@ function islandora_workflow_rest_test_workflow_step() {
     module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
 
     $params = islandora_workflow_rest_get_request_parameters();
+    if (!isset($params['PID'])) {
+      return drupal_json_output(array("Error" => "PID was not supplied for this request."));
+    }
     $object = islandora_object_load($params['PID']);
     if (!$object['WORKFLOW']) {
       return drupal_json_output("$object->id does not have a workflow datastream.");
@@ -151,6 +198,9 @@ function islandora_workflow_rest_get_full_workflow() {
     module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
 
     $params = islandora_workflow_rest_get_request_parameters();
+    if (!isset($params['PID'])) {
+      return drupal_json_output(array("Error" => "PID was not supplied for this request."));
+    }
     $object = islandora_object_load($params['PID']);
     if (!$object['WORKFLOW']) {
       return drupal_json_output("$object->id does not have a workflow datastream.");
@@ -174,6 +224,9 @@ function islandora_workflow_rest_add_workflow_step() {
     module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
 
     $params = islandora_workflow_rest_get_request_parameters();
+    if (!isset($params['PID'])) {
+      return drupal_json_output(array("Error" => "PID was not supplied for this request."));
+    }
 
     // Assign parameter values from GET request.
     $activity_params = (isset($params['activity']) ? json_decode($params['activity'], TRUE) : array());

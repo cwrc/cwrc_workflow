@@ -30,26 +30,39 @@ class WorkflowItem {
     $this->workName = $name;
     $this->typeAttributes = $attributes;
     $this->text = $inner_text;
-
     // Validate attributes, and stamp values.
     foreach ($attributes as $key => $value) {
       if ($key != WorkflowConst::BODY) {
-        if ($key == WorkflowConst::STAMP) {
-          // Validate the stamp value.
-          $stamp = islandora_workflow_rest_get_stamp($value);
-          if ($stamp == "") {
-            // Stamp is not a pre approved stamp, throw exception.
-            throw new InvalidArgumentException("$stamp is not a valid stamp attribute, supplied for $name");
+        if (strtoupper($value) != "SELECT") {
+          if ($key == WorkflowConst::STAMP) {
+            // Validate the stamp value.
+            $stamp = islandora_workflow_rest_get_stamp($value);
+            if ($stamp == "") {
+              // Stamp is not a pre approved stamp, throw exception.
+              throw new InvalidArgumentException("$stamp is not a valid stamp attribute, supplied for $name");
+            }
           }
-        }
-        if (!WorkflowConst::isValidName($key)) {
-          throw new InvalidArgumentException("$key is not a valid attribute in any WorkflowItem node. value:  $value");
+          if (!WorkflowConst::isValidName($key)) {
+            throw new InvalidArgumentException("$key is not a valid attribute in any WorkflowItem node. value:  $value");
+          }
         }
       }
     }
     // Lets make sure this is a valid WorkflowItem.
     if (!WorkflowConst::isValidName($name)) {
       throw new InvalidArgumentException("$name is not a valid WorkflowNode");
+    }
+    $this->validate();
+  }
+
+  /**
+   * Additional typeAttributes validation.
+   */
+  protected function validate() {
+    foreach ($this->typeAttributes as $key => $value) {
+      if (strtoupper($value) == "SELECT" || strlen($value) == 0) {
+        unset($this->typeAttributes[$key]);
+      }
     }
   }
 }
