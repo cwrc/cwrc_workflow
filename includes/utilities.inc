@@ -220,7 +220,8 @@ function islandora_workflow_rest_prepare_workflow_string($workflow_item) {
 function islandora_workflow_rest_notify($params) {
   foreach ($params['accounts'] as $account) {
     $params['mail_account'] = $account;
-    drupal_mail('islandora_workflow_rest',
+    drupal_mail(
+      'islandora_workflow_rest',
       'notice',
       $account->mail,
       user_preferred_language($account),
