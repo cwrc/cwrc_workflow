@@ -33,6 +33,43 @@ function islandora_workflow_rest_schema() {
     ),
     'primary key' => array('lid'),
   );
+
+  $schema['islandora_workflow_rest_ds_logs'] = array(
+    'description' => 'Table that stores Datastream modification logs.',
+    'fields' => array(
+      'lid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The UID for a ds modification.',
+      ),
+    'type' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'description' => 'Modified, added or deleted.',
+    ),
+    'usr' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+      'description' => 'The userID who last touched the data stream.',
+    ),
+    'md_dsid' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+      'description' => 'The modified datastream ID.',
+    ),
+    'mod_delay' => array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+      'description' => 'The time, in seconds, where similar events will not be logged.',
+    ),
+  ),
+  'primary key' => array('lid'),
+  );
   return $schema;
 }
 

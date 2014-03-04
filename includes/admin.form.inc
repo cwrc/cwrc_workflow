@@ -29,6 +29,16 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
+  $form['workflow_cm_fs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Configure Content Models'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+
+  // Add our content models to monitor on change.
+  $form['workflow_cm_fs']['content_models'] = islandora_workflow_rest_admin_cm_table_form();
+
   $form['workflow_query_fs']['workflow_solr_field'] = array(
     '#type' => 'textfield',
     '#title' => t('SOLR Query Field'),

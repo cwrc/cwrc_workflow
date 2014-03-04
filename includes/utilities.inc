@@ -229,3 +229,35 @@ function islandora_workflow_rest_notify($params) {
     );
   }
 }
+
+function islandora_workflow_rest_admin_cm_table_form() {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  module_load_include('inc', 'islandora_basic_collection', 'includes/utilities');
+
+  $form = array();
+
+  $policy_content_models = array();
+  $content_models = islandora_get_content_models();
+  $options = array();
+  foreach ($content_models as $data) {
+    $options[$data['pid']]['pid'] = $data['pid'];
+    $options[$data['pid']]['label'] = $data['label'];
+  }
+  $header = array(
+    'pid' => t('PID'),
+    'label' => t('Label'),
+  );
+  $form['content_models'] = array(
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#options' => $options,
+    '#attributes' => array(),
+    '#empty' => t("There are no content models??"),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+  $form['pager'] = array('#markup' => theme('pager'));
+  return $form;
+}
