@@ -37,7 +37,7 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
-  
+
   // Add our content models to monitor on change.
   $form['manage_workflow']['workflow_cm_fs']['content_models'] = islandora_workflow_rest_admin_cm_table_form();
   $form['manage_workflow']['workflow_cm_fs']['pager'] = array('#markup' => theme('pager'));
@@ -115,6 +115,7 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
         }
       }
       break;
+
     case "Delete":
       foreach ($form_state['values']['Stamps'] as $list_identifier => $is_checked) {
         if ($is_checked) {
@@ -122,6 +123,7 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
         }
       }
       break;
+
     case "Update":
       foreach ($form_state['values']['content_model_table'] as $list_identifier => $is_checked) {
         $entry_is_checked = ($is_checked ? 1 : 0);
@@ -134,6 +136,7 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
         );
       }
       break;
+
   }
   if (ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD != $form_state['input']['workflow_solr_field']) {
     variable_set('workflow_solr_field', $form_state['input']['workflow_solr_field']);

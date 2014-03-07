@@ -43,38 +43,38 @@ function islandora_workflow_rest_schema() {
         'not null' => TRUE,
         'description' => 'The UID for a ds modification.',
       ),
-    'type' => array(
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => FALSE,
-      'description' => 'Modified, added or deleted.',
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'Modified, added or deleted.',
+      ),
+      'usr' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The userID who last touched the data stream.',
+      ),
+      'dsid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The modified datastream ID.',
+      ),
+      'delay' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The time, in seconds, where similar events will not be logged.',
+      ),
+      'pid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The object pid that has been modified.',
+      ),
     ),
-    'usr' => array(
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => FALSE,
-      'description' => 'The userID who last touched the data stream.',
-    ),
-    'dsid' => array(
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => FALSE,
-      'description' => 'The modified datastream ID.',
-    ),
-    'delay' => array(
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => FALSE,
-      'description' => 'The time, in seconds, where similar events will not be logged.',
-    ),
-    'pid' => array(
-      'type' => 'varchar',
-      'length' => 255,
-      'not null' => FALSE,
-      'description' => 'The object pid that has been modified.',
-    ),
-  ),
-  'primary key' => array('lid'),
+    'primary key' => array('lid'),
   );
 
   $schema['islandora_workflow_rest_ds_log_admin'] = array(
@@ -180,7 +180,7 @@ function islandora_workflow_rest_install() {
   // Now, set up the islandora_workflow_rest_ds_log_admin
   // table defaults, using all available content models.
   $content_models = islandora_get_content_models();
-  foreach($content_models as $key => $value) {
+  foreach ($content_models as $key => $value) {
     // Set default values.
     islandora_workflow_rest_set_ds_log_admin(
       "TN",

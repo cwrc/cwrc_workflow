@@ -69,15 +69,19 @@ function islandora_workflow_rest_get_all_stamps($limit = 10) {
   return $stamps;
 }
 
-///////////////////////////////////
-
 /**
+ * Set a new Conten Model log entry.
  * 
  * @param string $type
+ *   The type of edit (EX: add, delete...).
  * @param string $user
+ *   The user making the modification.
  * @param string $dsid
+ *   The DataStream ID.
  * @param string $delay
+ *   The Delay, in seconds, between logging.
  * @param string $pid
+ *   The Content Model's PID.
  */
 function islandora_workflow_rest_set_ds_log($type, $user, $dsid, $delay, $pid) {
   db_insert('islandora_workflow_rest_ds_logs')
@@ -88,17 +92,22 @@ function islandora_workflow_rest_set_ds_log($type, $user, $dsid, $delay, $pid) {
       'dsid' => $dsid,
       'delay' => $delay,
       'pid' => $pid,
-  ))
+    )
+  )
   ->execute();
 }
 
 /**
- * 
+ * Remove a Datastream Log Entry.
+ *
  * @param string $pid
+ *   The Content Model's PID.
  * @param string $dsid
+ *   The DataStream ID.
  * @param string $user
+ *   The user making the modification.
  */
-function islandora_workflow_rest_remove_ds_log($pid, $dsid, $user) {
+function islandora_workflow_rest_remove_ds_log($pid, $dsid = "", $user = "") {
   db_delete('islandora_workflow_rest_ds_logs')
   ->condition('pid', $pid)
   ->condition('dsid', $dsid)
@@ -107,9 +116,13 @@ function islandora_workflow_rest_remove_ds_log($pid, $dsid, $user) {
 }
 
 /**
- * 
+ * Return a list of Data Stream logs by PID.
+ *
  * @param string $pid
- * @return string
+ *   The pid to retrieve DS Logs.
+ *
+ * @return array
+ *   An array of Data Stream logs by PID.
  */
 function islandora_workflow_rest_get_ds_logs_by_pid($pid) {
   $list = db_select('islandora_workflow_rest_ds_logs', 'c')
@@ -122,7 +135,7 @@ function islandora_workflow_rest_get_ds_logs_by_pid($pid) {
 /**
  * Retrieve existing ds logs, via pager.
  *
- * @param number $limit
+ * @param int $limit
  *   The number to limit the page results to.
  *
  * @return array
@@ -139,7 +152,7 @@ function islandora_workflow_rest_get_all_ds_logs($limit = 10) {
 }
 
 /**
- * set a new ds log admin entry.
+ * Set a new ds log admin entry.
  *
  * @param string $dsid
  *   The DSID to update to.
@@ -149,7 +162,8 @@ function islandora_workflow_rest_get_all_ds_logs($limit = 10) {
  *   The PID of the Content Model to update.
  * @param string $label
  *   The label of the Content Model.
- * @param number $monitor
+ * @param int $monitor
+ *   0 or 1, indicating that this CM is being monitored.
  */
 function islandora_workflow_rest_set_ds_log_admin($dsid, $delay, $pid, $label, $monitor = 0) {
   db_insert('islandora_workflow_rest_ds_log_admin')
@@ -174,7 +188,7 @@ function islandora_workflow_rest_set_ds_log_admin($dsid, $delay, $pid, $label, $
  *   The DSID to update to.
  * @param string $delay
  *   The new Delay, in seconds, between logging.
- * @param number $monitor
+ * @param int $monitor
  *   0 or 1, indicating that this CM is being monitored.
  */
 function islandora_workflow_rest_update_ds_log_admin($pid, $dsid = "", $delay = "", $monitor = 0) {
@@ -214,9 +228,9 @@ function islandora_workflow_rest_delete_ds_logs_admin($pid) {
 }
 
 /**
- * Get all ds admin logs
+ * Get all ds admin logs.
  *
- * @param number $limit
+ * @param int $limit
  *   Limit the results, used via pager.
  *
  * @return array
@@ -396,6 +410,7 @@ function islandora_workflow_rest_notify($params) {
  * Create the configure content models table.
  *
  * @return array
+ *   The form as array to be rendered by drupal.
  */
 function islandora_workflow_rest_admin_cm_table_form() {
   global $user;
