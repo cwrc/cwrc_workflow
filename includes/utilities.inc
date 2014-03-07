@@ -69,6 +69,168 @@ function islandora_workflow_rest_get_all_stamps($limit = 10) {
   return $stamps;
 }
 
+///////////////////////////////////
+
+/**
+ * 
+ * @param string $type
+ * @param string $user
+ * @param string $dsid
+ * @param string $delay
+ * @param string $pid
+ */
+function islandora_workflow_rest_set_ds_log($type, $user, $dsid, $delay, $pid) {
+  db_insert('islandora_workflow_rest_ds_logs')
+  ->fields(
+    array(
+      'type' => $type,
+      'usr' => $user,
+      'dsid' => $dsid,
+      'delay' => $delay,
+      'pid' => $pid,
+  ))
+  ->execute();
+}
+
+/**
+ * 
+ * @param string $pid
+ * @param string $dsid
+ * @param string $user
+ */
+function islandora_workflow_rest_remove_ds_log($pid, $dsid, $user) {
+  db_delete('islandora_workflow_rest_ds_logs')
+  ->condition('pid', $pid)
+  ->condition('dsid', $dsid)
+  ->condition('usr', $user)
+  ->execute();
+}
+
+/**
+ * 
+ * @param string $pid
+ * @return string
+ */
+function islandora_workflow_rest_get_ds_logs_by_pid($pid) {
+  $list = db_select('islandora_workflow_rest_ds_logs', 'c')
+  ->fields('c')
+  ->condition('pid', $pid)
+  ->execute();
+  return $list;
+}
+
+/**
+ * Retrieve existing ds logs, via pager.
+ *
+ * @param number $limit
+ *   The number to limit the page results to.
+ *
+ * @return array
+ *   An array of Monitor log entry's.
+ */
+function islandora_workflow_rest_get_all_ds_logs($limit = 10) {
+  $query = db_select('islandora_workflow_rest_ds_logs', 'r');
+  $query->fields('r', array("lid", "type", "dsid", "delay", "pid", "usr"));
+  $table_sort = $query->extend('TableSort');
+  $pager = $table_sort->extend('PagerDefault')->limit($limit);
+  $ds_logs = $pager->execute();
+
+  return $ds_logs;
+}
+
+/**
+ * set a new ds log admin entry.
+ *
+ * @param string $dsid
+ *   The DSID to update to.
+ * @param string $delay
+ *   The new Delay, in seconds, between logging.
+ * @param string $pid
+ *   The PID of the Content Model to update.
+ * @param string $label
+ *   The label of the Content Model.
+ * @param number $monitor
+ */
+function islandora_workflow_rest_set_ds_log_admin($dsid, $delay, $pid, $label, $monitor = 0) {
+  db_insert('islandora_workflow_rest_ds_log_admin')
+  ->fields(
+    array(
+      'dsid' => $dsid,
+      'delay' => $delay,
+      'pid' => $pid,
+      'label' => $label,
+      'monitor' => $monitor,
+    )
+  )
+  ->execute();
+}
+
+/**
+ * Update an existing ds log admin entry.
+ *
+ * @param string $pid
+ *   The PID of the Content Model to update.
+ * @param string $dsid
+ *   The DSID to update to.
+ * @param string $delay
+ *   The new Delay, in seconds, between logging.
+ * @param number $monitor
+ *   0 or 1, indicating that this CM is being monitored.
+ */
+function islandora_workflow_rest_update_ds_log_admin($pid, $dsid = "", $delay = "", $monitor = 0) {
+  db_update('islandora_workflow_rest_ds_log_admin')
+  ->fields(array('dsid' => $dsid, 'delay' => $delay, 'monitor' => $monitor))
+  ->condition('pid', $pid)
+  ->execute();
+}
+
+/**
+ * Get ds admin log entry by pid.
+ *
+ * @param string $pid
+ *   The PID to retrieve ds log entrys for.
+ *
+ * @return array
+ *   An array of ds log entry's.
+ */
+function islandora_workflow_rest_get_ds_log_admin_by_pid($pid) {
+  $list = db_select('islandora_workflow_rest_ds_log_admin', 'c')
+  ->fields('c')
+  ->condition('pid', $pid)
+  ->execute();
+  return $list;
+}
+
+/**
+ * Delete ds admin log entry.
+ *
+ * @param string $pid
+ *   The Content Model PID to remove entry.
+ */
+function islandora_workflow_rest_delete_ds_logs_admin($pid) {
+  db_delete('islandora_workflow_rest_ds_log_admin')
+  ->condition('pid', $pid)
+  ->execute();
+}
+
+/**
+ * Get all ds admin logs
+ *
+ * @param number $limit
+ *   Limit the results, used via pager.
+ *
+ * @return array
+ *   An array of admin logs.
+ */
+function islandora_workflow_rest_get_all_ds_logs_admin($limit = 10) {
+  $query = db_select('islandora_workflow_rest_ds_log_admin', 'r');
+  $query->fields('r', array("lid", "pid", "label", "dsid", "delay", "monitor"));
+  $table_sort = $query->extend('TableSort');
+  $pager = $table_sort->extend('PagerDefault')->limit($limit);
+  $ds_logs = $pager->execute();
+  return $ds_logs;
+}
+
 /**
  * Gets the payload from a PUT/DELETE request.
  *
@@ -230,34 +392,55 @@ function islandora_workflow_rest_notify($params) {
   }
 }
 
+/**
+ * Create the configure content models table.
+ *
+ * @return array
+ */
 function islandora_workflow_rest_admin_cm_table_form() {
+  global $user;
+
   module_load_include('inc', 'islandora', 'includes/utilities');
   module_load_include('inc', 'islandora_basic_collection', 'includes/utilities');
-
   $form = array();
 
-  $policy_content_models = array();
-  $content_models = islandora_get_content_models();
+  $data = islandora_workflow_rest_get_all_ds_logs_admin(10);
   $options = array();
-  foreach ($content_models as $data) {
-    $options[$data['pid']]['pid'] = $data['pid'];
-    $options[$data['pid']]['label'] = $data['label'];
+  $item_checked = array();
+  while ($content_model = $data->fetchObject()) {
+    $monitor_datastream = array(
+      '#type' => 'textfield',
+      '#value' => $content_model->dsid,
+      '#title' => 'Datastream ID',
+      '#title_display' => 'invisible',
+      '#name' => $content_model->pid . '[dsid_entry]',
+    );
+    $logging_delay = array(
+      '#type' => 'textfield',
+      '#value' => $content_model->delay,
+      '#title' => 'Logging Delay',
+      '#title_display' => 'invisible',
+      '#name' => $content_model->pid . '[delay_entry]',
+    );
+    $options[$content_model->pid]['pid'] = $content_model->pid;
+    $options[$content_model->pid]['label'] = $content_model->label;
+    $options[$content_model->pid]['dsid'] = array('data' => $monitor_datastream);
+    $options[$content_model->pid]['delay'] = array('data' => $logging_delay);
+    $item_checked[$content_model->pid] = $content_model->monitor;
   }
   $header = array(
     'pid' => t('PID'),
     'label' => t('Label'),
+    'dsid' => t('Datastream ID'),
+    'delay' => t('Logging Delay'),
   );
-  $form['content_models'] = array(
+  $form['content_model_table'] = array(
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
-    '#attributes' => array(),
+    '#default_value' => $item_checked,
+    '#attributes' => '',
     '#empty' => t("There are no content models??"),
   );
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-  );
-  $form['pager'] = array('#markup' => theme('pager'));
   return $form;
 }
