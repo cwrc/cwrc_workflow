@@ -65,7 +65,6 @@ function islandora_workflow_rest_get_all_stamps($limit = 10) {
   $table_sort = $query->extend('TableSort');
   $pager = $table_sort->extend('PagerDefault')->limit($limit);
   $stamps = $pager->execute();
-
   return $stamps;
 }
 
@@ -401,7 +400,9 @@ function islandora_workflow_rest_notify($params) {
       'notice',
       $account->mail,
       user_preferred_language($account),
-      $params
+      $params,
+      "donotreplay@site.com",
+      TRUE
     );
   }
 }

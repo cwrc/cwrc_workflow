@@ -37,15 +37,6 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
-
-  // Add our content models to monitor on change.
-  $form['manage_workflow']['workflow_cm_fs']['content_models'] = islandora_workflow_rest_admin_cm_table_form();
-  $form['manage_workflow']['workflow_cm_fs']['pager'] = array('#markup' => theme('pager'));
-  $form['manage_workflow']['workflow_cm_fs']['content_models']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Update'),
-  );
-
   $form['manage_workflow']['workflow_query_fs']['workflow_solr_field'] = array(
     '#type' => 'textfield',
     '#title' => t('SOLR Query Field'),
@@ -67,7 +58,7 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#default_value' => "",
   );
   $options = array();
-  $results = islandora_workflow_rest_get_all_stamps();
+  $results = islandora_workflow_rest_get_all_stamps(10);
   while ($data = $results->fetchObject()) {
     $options[$data->stamp]['stamp'] = $data->stamp;
     $options[$data->stamp]['descr'] = $data->descr;
@@ -92,6 +83,20 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#value' => t('Delete'),
   );
   $form['manage_workflow']['workflow_stamp_fs']['pager'] = array('#markup' => theme('pager'));
+
+  // Add our content models to monitor on change.
+  $form['manage_workflow']['workflow_cm_fs']['content_models'] = islandora_workflow_rest_admin_cm_table_form();
+  $pager_params = array(
+    'tags' => array('first', 'previous', 'next', 'last'),
+    'element' => 1,
+    'parameters' => array(),
+    'quantity' => 10,
+  );
+  $form['manage_workflow']['workflow_cm_fs']['pager'] = array('#markup' => theme_pager($pager_params));
+  $form['manage_workflow']['workflow_cm_fs']['content_models']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+  );
   return $form;
 }
 

@@ -90,7 +90,7 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   $data['user'] = $params['mail_account'];
   $options['language'] = $message['language'];
   $variables = array(
-    "@username" => format_username($data['user']),
+    "@username" => format_username($params['mail_account']),
     "@site" => $base_url,
     "@message" => $params['body'],
     "@link" => $base_url . $params['link'],
@@ -107,13 +107,16 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   if (module_exists('privatemsg')) {
     // Utilize the Privatemsg module notification system.
     // Send a message to the user with privatemsg_new_thread.
-    privatemsg_new_thread(array($data['user']),
+    privatemsg_new_thread(array($params['mail_account']),
       t('Notification from @site', $variables, array('langcode' => $message['language']->language)),
       t("Dear @username\n\n@message\n\n@link\n\n",
         $variables,
         array('langcode' => $langcode)
       )
     );
+  }
+  if (!$params['force_email']) {
+    $message['send'] = FALSE;
   }
 }
 
