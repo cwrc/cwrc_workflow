@@ -13,11 +13,13 @@ before_install:
   - cd $HOME
   - git clone -b 7.x git://github.com/Islandora/islandora.git
   - git clone -b 7.x git://github.com/Islandora/islandora_solr_search.git
+  - git clone -b 7.x git://github.com/Islandora/islandora_basic_collection.git
   - export ISLANDORA_DIR=$HOME/islandora
   - $HOME/islandora/tests/scripts/travis_setup.sh
   - cd $HOME/drupal-*
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/islandora_workflow_rest
   - ln -s $HOME/islandora_solr_search sites/all/modules/islandora_solr_search
+  - ln -s $HOME/islandora_basic_collection sites/all/modules/islandora_basic_collection
   - drush en --yes islandora_workflow_rest
 script:
   - ant -buildfile sites/all/modules/islandora_workflow_rest/build.xml lint
