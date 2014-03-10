@@ -130,18 +130,23 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
       break;
 
     case "Update":
+      module_load_include('inc', 'islandora_basic_collection', 'includes/utilities');
+      $content_models = islandora_get_content_models();
       foreach ($form_state['values']['content_model_table'] as $list_identifier => $is_checked) {
         $entry_is_checked = ($is_checked ? 1 : 0);
+        // Remove all entries, update to match the form exactally.
+        islandora_workflow_rest_delete_ds_logs_admin($list_identifier);
         // Update db table to match.
-        islandora_workflow_rest_update_ds_log_admin(
-          $list_identifier,
-          $form_state['input'][$list_identifier]['dsid_entry'],
-          $form_state['input'][$list_identifier]['delay_entry'],
-          $entry_is_checked
-        );
+        if ($entry_is_checked) {
+          islandora_workflow_rest_set_ds_log_admin(
+            $form_state['input'][$list_identifier]['dsid_entry'],
+            $form_state['input'][$list_identifier]['delay_entry'],
+            $list_identifier,
+            $content_models[$list_identifier]['label']
+          );
+        }
       }
       break;
-
   }
   if (ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD != $form_state['input']['workflow_solr_field']) {
     variable_set('workflow_solr_field', $form_state['input']['workflow_solr_field']);

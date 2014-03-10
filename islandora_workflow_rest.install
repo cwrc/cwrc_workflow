@@ -110,12 +110,6 @@ function islandora_workflow_rest_schema() {
         'not null' => FALSE,
         'description' => 'The content model label.',
       ),
-      'monitor' => array(
-        'type' => 'int',
-        'default' => 0,
-        'not null' => FALSE,
-        'description' => 'enable datastream monitoring.',
-      ),
     ),
     'primary key' => array('lid'),
   );
@@ -175,19 +169,5 @@ function islandora_workflow_rest_install() {
     if (!isset($stamp) || $stamp == "") {
       islandora_workflow_rest_set_stamp($key, $value);
     }
-  }
-
-  // Now, set up the islandora_workflow_rest_ds_log_admin
-  // table defaults, using all available content models.
-  $content_models = islandora_get_content_models();
-  foreach ($content_models as $key => $value) {
-    // Set default values.
-    islandora_workflow_rest_set_ds_log_admin(
-      "TN",
-      "30",
-      $key,
-      $content_models[$key]['label'],
-      0
-    );
   }
 }

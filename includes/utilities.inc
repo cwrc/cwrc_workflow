@@ -161,10 +161,8 @@ function islandora_workflow_rest_get_all_ds_logs($limit = 10) {
  *   The PID of the Content Model to update.
  * @param string $label
  *   The label of the Content Model.
- * @param int $monitor
- *   0 or 1, indicating that this CM is being monitored.
  */
-function islandora_workflow_rest_set_ds_log_admin($dsid, $delay, $pid, $label, $monitor = 0) {
+function islandora_workflow_rest_set_ds_log_admin($dsid, $delay, $pid, $label) {
   db_insert('islandora_workflow_rest_ds_log_admin')
   ->fields(
     array(
@@ -172,7 +170,6 @@ function islandora_workflow_rest_set_ds_log_admin($dsid, $delay, $pid, $label, $
       'delay' => $delay,
       'pid' => $pid,
       'label' => $label,
-      'monitor' => $monitor,
     )
   )
   ->execute();
@@ -187,12 +184,10 @@ function islandora_workflow_rest_set_ds_log_admin($dsid, $delay, $pid, $label, $
  *   The DSID to update.
  * @param string $delay
  *   The new Delay, in seconds, between logging.
- * @param int $monitor
- *   0 or 1, indicating that this CM is being monitored.
  */
-function islandora_workflow_rest_update_ds_log_admin($pid, $dsid = "", $delay = "", $monitor = 0) {
+function islandora_workflow_rest_update_ds_log_admin($pid, $dsid = "", $delay = "") {
   db_update('islandora_workflow_rest_ds_log_admin')
-  ->fields(array('dsid' => $dsid, 'delay' => $delay, 'monitor' => $monitor))
+  ->fields(array('dsid' => $dsid, 'delay' => $delay))
   ->condition('pid', $pid)
   ->execute();
 }
@@ -237,7 +232,7 @@ function islandora_workflow_rest_delete_ds_logs_admin($pid) {
  */
 function islandora_workflow_rest_get_all_ds_logs_admin($limit = 10) {
   $query = db_select('islandora_workflow_rest_ds_log_admin', 'r');
-  $query->fields('r', array("lid", "pid", "label", "dsid", "delay", "monitor"));
+  $query->fields('r', array("lid", "pid", "label", "dsid", "delay"));
   $table_sort = $query->extend('TableSort');
   $pager = $table_sort->extend('PagerDefault')->limit($limit);
   $ds_logs = $pager->execute();
@@ -415,14 +410,15 @@ function islandora_workflow_rest_notify($params) {
  */
 function islandora_workflow_rest_admin_cm_table_form() {
   global $user;
-
   module_load_include('inc', 'islandora', 'includes/utilities');
   module_load_include('inc', 'islandora_basic_collection', 'includes/utilities');
   $form = array();
+  $content_models = islandora_get_content_models();
 
   $data = islandora_workflow_rest_get_all_ds_logs_admin(10);
   $options = array();
   $item_checked = array();
+  // All stored content models.
   while ($content_model = $data->fetchObject()) {
     $monitor_datastream = array(
       '#type' => 'textfield',
@@ -442,7 +438,31 @@ function islandora_workflow_rest_admin_cm_table_form() {
     $options[$content_model->pid]['label'] = $content_model->label;
     $options[$content_model->pid]['dsid'] = array('data' => $monitor_datastream);
     $options[$content_model->pid]['delay'] = array('data' => $logging_delay);
-    $item_checked[$content_model->pid] = $content_model->monitor;
+    $item_checked[$content_model->pid] = 1;
+  }
+  foreach ($content_models as $key => $value) {
+    if (!isset($options[$key])) {
+      // Add any additional content models as available.
+      $monitor_datastream = array(
+        '#type' => 'textfield',
+        '#value' => 'TN',
+        '#title' => 'Datastream ID',
+        '#title_display' => 'invisible',
+        '#name' => $key . '[dsid_entry]',
+      );
+      $logging_delay = array(
+        '#type' => 'textfield',
+        '#value' => '30',
+        '#title' => 'Logging Delay',
+        '#title_display' => 'invisible',
+        '#name' => $key . '[delay_entry]',
+      );
+      $options[$key]['pid'] = $key;
+      $options[$key]['label'] = $value['label'];
+      $options[$key]['dsid'] = array('data' => $monitor_datastream);
+      $options[$key]['delay'] = array('data' => $logging_delay);
+      $item_checked[$key] = 0;
+    }
   }
   $header = array(
     'pid' => t('PID'),

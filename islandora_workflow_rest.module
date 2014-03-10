@@ -121,44 +121,6 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
 }
 
 /**
- * Implements hook_islandora_postprocess_solution_pack().
- */
-function islandora_workflow_rest_islandora_postprocess_solution_pack($solution_pack) {
-  module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
-  // Because this module keeps its own list of monitored CM datastreams,
-  // when a solution pack is reinstalled, we should check for new
-  // content models, and allow there datastreams to be monitored as
-  // well.
-  $monitor_cms = islandora_workflow_rest_get_all_ds_logs_admin(1000);
-  $installed_cms = islandora_get_content_models();
-  $installed_cm_keys = array_keys($installed_cms);
-  $monitor_cm_keys  = array();
-  $monitored = array();
-  while ($content_model = $monitor_cms->fetchObject()) {
-    if (!in_array($content_model->pid, $installed_cm_keys)) {
-      // This content model is no longer in use,
-      // remove it from our monitoring table.
-      islandora_workflow_rest_delete_ds_logs_admin($content_model->pid);
-    }
-    array_push($monitor_cm_keys, $content_model->pid);
-  }
-  foreach ($monitor_cm_keys as $key) {
-    if (!in_array($key, $installed_cm_keys)) {
-      // This looks like a new Content Model, add it
-      // to the monitoring table, incase it needs to
-      // be managed here by the user later.
-      islandora_workflow_rest_set_ds_log_admin(
-        "TN",
-        "30",
-        $key,
-        $installed_cms[$key]['pid'],
-        0
-      );
-    }
-  }
-}
-
-/**
  * Test a workflow for particular attributes.
  */
 function islandora_workflow_rest_test_workflow_step() {
