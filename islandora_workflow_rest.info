@@ -2,6 +2,7 @@ name = "Islandora Workflow Rest"
 description = "An Islandora module to handle workflow REST API interface interaction."
 dependencies[] = islandora
 dependencies[] = islandora_solr
+dependencies[] = islandora_basic_collection
 package = Islandora
 version = 7.x-dev
 core = 7.x

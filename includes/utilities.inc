@@ -69,7 +69,7 @@ function islandora_workflow_rest_get_all_stamps($limit = 10) {
 }
 
 /**
- * Set a new Conten Model log entry.
+ * Set a new Content Model log entry.
  * 
  * @param string $type
  *   The type of edit (EX: add, delete...).
@@ -80,7 +80,7 @@ function islandora_workflow_rest_get_all_stamps($limit = 10) {
  * @param string $delay
  *   The Delay, in seconds, between logging.
  * @param string $pid
- *   The Content Model's PID.
+ *   The PID of the modified object.
  */
 function islandora_workflow_rest_set_ds_log($type, $user, $dsid, $delay, $pid) {
   db_insert('islandora_workflow_rest_ds_logs')
@@ -100,7 +100,7 @@ function islandora_workflow_rest_set_ds_log($type, $user, $dsid, $delay, $pid) {
  * Remove a Datastream Log Entry.
  *
  * @param string $pid
- *   The Content Model's PID.
+ *   The Fedora Objects PID.
  * @param string $dsid
  *   The DataStream ID.
  * @param string $user
@@ -118,7 +118,7 @@ function islandora_workflow_rest_remove_ds_log($pid, $dsid = "", $user = "") {
  * Return a list of Data Stream logs by PID.
  *
  * @param string $pid
- *   The pid to retrieve DS Logs.
+ *   The pid of the object to be queried.
  *
  * @return array
  *   An array of Data Stream logs by PID.
@@ -154,7 +154,7 @@ function islandora_workflow_rest_get_all_ds_logs($limit = 10) {
  * Set a new ds log admin entry.
  *
  * @param string $dsid
- *   The DSID to update to.
+ *   The DSID to update.
  * @param string $delay
  *   The new Delay, in seconds, between logging.
  * @param string $pid
@@ -184,7 +184,7 @@ function islandora_workflow_rest_set_ds_log_admin($dsid, $delay, $pid, $label, $
  * @param string $pid
  *   The PID of the Content Model to update.
  * @param string $dsid
- *   The DSID to update to.
+ *   The DSID to update.
  * @param string $delay
  *   The new Delay, in seconds, between logging.
  * @param int $monitor
