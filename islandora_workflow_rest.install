@@ -121,6 +121,7 @@ function islandora_workflow_rest_schema() {
  */
 function islandora_workflow_rest_uninstall() {
   variable_del('workflow_solr_field');
+  variable_del('islandora_workflow_rest_enable_namespace');
 }
 
 /**
