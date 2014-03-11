@@ -33,6 +33,86 @@ function islandora_workflow_rest_schema() {
     ),
     'primary key' => array('lid'),
   );
+
+  $schema['islandora_workflow_rest_ds_logs'] = array(
+    'description' => 'Table that stores Datastream modification logs.',
+    'fields' => array(
+      'lid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The UID for a ds modification.',
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'Modified, added or deleted.',
+      ),
+      'usr' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The userID who last touched the data stream.',
+      ),
+      'dsid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The modified datastream ID.',
+      ),
+      'delay' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The time, in seconds, where similar events will not be logged.',
+      ),
+      'pid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The object pid that has been modified.',
+      ),
+    ),
+    'primary key' => array('lid'),
+  );
+
+  $schema['islandora_workflow_rest_ds_log_admin'] = array(
+    'description' => 'Table that stores Datastream admin configurations.',
+    'fields' => array(
+      'lid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The UID for a ds modification.',
+      ),
+      'dsid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The modified datastream ID.',
+      ),
+      'delay' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The time, in seconds, that similar events will not be logged.',
+      ),
+      'pid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The content model pid.',
+      ),
+      'label' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The content model label.',
+      ),
+    ),
+    'primary key' => array('lid'),
+  );
   return $schema;
 }
 
@@ -48,6 +128,8 @@ function islandora_workflow_rest_uninstall() {
  */
 function islandora_workflow_rest_install() {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  module_load_include('inc', 'islandora_basic_collection', 'includes/utilities');
   // Add default stamp records.
   $stamps = array(
     "niso:AO" => "Author's Original",

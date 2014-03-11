@@ -17,19 +17,27 @@
  */
 function islandora_workflow_rest_admin($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
-  $form['workflow_stamp_fs'] = array(
+  $form['manage_workflow']['#type'] = 'vertical_tabs';
+
+  $form['manage_workflow']['workflow_stamp_fs'] = array(
     '#type' => 'fieldset',
     '#title' => t('Add Stamp'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
-  $form['workflow_query_fs'] = array(
+  $form['manage_workflow']['workflow_query_fs'] = array(
     '#type' => 'fieldset',
     '#title' => t('Configure SOLR Query'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
-  $form['workflow_query_fs']['workflow_solr_field'] = array(
+  $form['manage_workflow']['workflow_cm_fs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Configure Content Models'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+  $form['manage_workflow']['workflow_query_fs']['workflow_solr_field'] = array(
     '#type' => 'textfield',
     '#title' => t('SOLR Query Field'),
     '#description' => t('Configure the SOLR query Workflow will use with the rest interface.'),
@@ -37,22 +45,20 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#autocomplete_path' => 'islandora_workflow_rest/autocomplete_luke',
     '#default_value' => variable_get('workflow_solr_field', ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD),
   );
-  $form['workflow_stamp_fs']['workflow_stamp_field'] = array(
+  $form['manage_workflow']['workflow_stamp_fs']['workflow_stamp_field'] = array(
     '#type' => 'textfield',
     '#title' => t('Add additional stamps'),
     '#description' => t('Include additional stamp values (used when adding an activity via workflow API).'),
     '#default_value' => "",
-    '#weight' => 3,
   );
-  $form['workflow_stamp_fs']['workflow_stamp_desc'] = array(
+  $form['manage_workflow']['workflow_stamp_fs']['workflow_stamp_desc'] = array(
     '#type' => 'textfield',
     '#title' => t('Add workflow stamp description.'),
     '#description' => t('Add add a more detail description for a new workflow stamp'),
     '#default_value' => "",
-    '#weight' => 4,
   );
   $options = array();
-  $results = islandora_workflow_rest_get_all_stamps();
+  $results = islandora_workflow_rest_get_all_stamps(10);
   while ($data = $results->fetchObject()) {
     $options[$data->stamp]['stamp'] = $data->stamp;
     $options[$data->stamp]['descr'] = $data->descr;
@@ -61,22 +67,36 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     'stamp' => t('Name'),
     'descr' => t('Description'),
   );
-  $form['Stamps'] = array(
+  $form['manage_workflow']['workflow_stamp_fs']['Stamps'] = array(
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
     '#attributes' => array(),
     '#empty' => t("There are no stamps."),
   );
-  $form['submit'] = array(
+  $form['manage_workflow']['workflow_stamp_fs']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Add'),
   );
-  $form['delete'] = array(
+  $form['manage_workflow']['workflow_stamp_fs']['delete'] = array(
     '#type' => 'submit',
     '#value' => t('Delete'),
   );
-  $form['pager'] = array('#markup' => theme('pager'));
+  $form['manage_workflow']['workflow_stamp_fs']['pager'] = array('#markup' => theme('pager'));
+
+  // Add our content models to monitor on change.
+  $form['manage_workflow']['workflow_cm_fs']['content_models'] = islandora_workflow_rest_admin_cm_table_form();
+  $pager_params = array(
+    'tags' => array('first', 'previous', 'next', 'last'),
+    'element' => 1,
+    'parameters' => array(),
+    'quantity' => 10,
+  );
+  $form['manage_workflow']['workflow_cm_fs']['pager'] = array('#markup' => theme_pager($pager_params));
+  $form['manage_workflow']['workflow_cm_fs']['content_models']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+  );
   return $form;
 }
 
@@ -105,6 +125,25 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
       foreach ($form_state['values']['Stamps'] as $list_identifier => $is_checked) {
         if ($is_checked) {
           islandora_workflow_rest_remove_stamp($list_identifier);
+        }
+      }
+      break;
+
+    case "Update":
+      module_load_include('inc', 'islandora_basic_collection', 'includes/utilities');
+      $content_models = islandora_get_content_models();
+      foreach ($form_state['values']['content_model_table'] as $list_identifier => $is_checked) {
+        $entry_is_checked = ($is_checked ? 1 : 0);
+        // Remove all entries, update to match the form exactally.
+        islandora_workflow_rest_delete_ds_logs_admin($list_identifier);
+        // Update db table to match.
+        if ($entry_is_checked) {
+          islandora_workflow_rest_set_ds_log_admin(
+            $form_state['input'][$list_identifier]['dsid_entry'],
+            $form_state['input'][$list_identifier]['delay_entry'],
+            $list_identifier,
+            $content_models[$list_identifier]['label']
+          );
         }
       }
       break;

@@ -165,7 +165,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   $results = islandora_workflow_rest_get_all_stamps(1000);
   while ($data = $results->fetchObject()) {
     $exploded = explode(":", $data->stamp);
-    if ($pid_namespace[0] == $exploded[0]) {
+    if (strtoupper($pid_namespace[0]) == strtoupper($exploded[0])) {
       $stamps[$data->stamp] = $data->descr;
     }
   }
@@ -226,6 +226,10 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
+  $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_activity_message']['force_act_email'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Force mail notification.'),
+  );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_activity_message']['act_user'] = array(
     '#type' => 'textfield',
     '#id' => 'email-auto-complete-act-user',
@@ -278,6 +282,10 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
+  $form['workflow_wfs_add_fs']['workflow_fs_assigned']['workflow_fs_assigned_message']['force_ass_email'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Force mail notification.'),
+  );
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['workflow_fs_assigned_message']['user'] = array(
     '#id' => 'email-auto-complete-ass-user',
     '#type' => 'textfield',
@@ -322,12 +330,12 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
      (strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
      strtoupper($form_state['values']['wf_act_stamp']) == "SELECT" ||
      strtoupper($form_state['values']['wf_act_status']) == "SELECT")) {
-    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status. a');
+    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status.');
   }
   if (($form_state['values']['assign_category']) == "SELECT" &&
       ($form_state['values']['assign_process'] != "" ||
       $form_state['values']['assign_note'] != "")) {
-    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status. b');
+    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status.');
   }
 }
 
@@ -396,7 +404,6 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   // Get the current workflow step.
   $this_workflow = $workflow->entryToArray();
   $this_wf_string = islandora_workflow_rest_prepare_workflow_string($this_workflow);
-
   if ($form_state['values']['act_user'] != "") {
     // Email activity notification.
     $params['body'] = $form_state['values']['wf_act_message'] . "\n\n" .
@@ -404,7 +411,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
     $params['link'] = url("islandora/object/$islandora_object->id/workflow");
     $params['subject'] = $form_state['values']['wf_act_subject'];
     $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['act_user']);
-
+    $params['force_email'] = $form_state['values']['force_act_email'];
     islandora_workflow_rest_notify($params);
   }
   if ($form_state['values']['user'] != "") {
@@ -414,7 +421,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
     $params['link'] = url("islandora/object/$islandora_object->id/workflow");
     $params['subject'] = $form_state['values']['assign_subject'];
     $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['user']);
-
+    $params['force_email'] = $form_state['values']['force_ass_email'];
     islandora_workflow_rest_notify($params);
   }
 }
