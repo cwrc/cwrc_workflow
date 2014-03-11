@@ -311,36 +311,68 @@ GET
 ```JSON
 {
    "response":{
-      "workflow":{
-         "attributes":{
-            "date":"2014-01-16",
-            "userID":"1",
-            "time":"19:54:48",
-            "workflowID":"islandora_9_wk_3"
-         },
-         "activity":{
-            "attributes":{
-               "category":"sample remote",
-               "stamp":"niso:AO",
-               "status":"foo_bar"
-            },
-            "note":"sample text body"
-         },
-         "assigned":{
-            "attributes":{
-               "category":"content_contribution"
-            },
-            "message":{
-               "recipient":{
+      "stamp":[
+         {
+            "response":{
+               "workflow":{
                   "attributes":{
-                     "userID":"herbie"
+                     "date":"2014-03-04",
+                     "userID":"1",
+                     "time":"13:29:34",
+                     "workflowID":"islandora_root_wk_0"
+                  },
+                  "activity":{
+                     "attributes":{
+                        "category":"CREATED",
+                        "stamp":"islandora:AO",
+                        "status":"In Progress"
+                     },
+                     "note":"dsafsafa",
+                     "message":{
+                        "recipient":{
+                           "attributes":{
+                              "userID":"usera,userb"
+                           }
+                        },
+                        "subject":"mememe",
+                        "body":"go away."
+                     }
                   }
-               },
-               "subject":"muhaha",
-               "body":"sample remote text for body"
+               }
+            }
+         },
+         {
+            "response":{
+               "workflow":{
+                  "attributes":{
+                     "date":"2014-03-04",
+                     "userID":"1",
+                     "time":"13:32:50",
+                     "workflowID":"islandora_root_wk_1"
+                  },
+                  "activity":{
+                     "attributes":{
+                        "category":"CREATED",
+                        "stamp":"islandora:AO",
+                        "status":"In Progress"
+                     },
+                     "note":"sadfasfasdf",
+                     "message":{
+                        "recipient":{
+                           "attributes":{
+                              "userID":"usera,userb"
+                           }
+                        },
+                        "subject":"me",
+                        "body":"mess"
+                     }
+                  }
+               }
             }
          }
-      },...
+      ],
+      "q":[
+      ]
    }
 }
 ```
@@ -348,11 +380,10 @@ GET
 #### Example Response (simple:true)
 ```JSON
 {
-   "response":{
-      "pid":{
-         true
-      }
-   }
+  "response": {
+    "stamp": "TRUE",
+    "q": "TRUE"
+  }
 }
 ```
 

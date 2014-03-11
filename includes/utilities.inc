@@ -365,15 +365,18 @@ function islandora_workflow_rest_load_users_from_csv($string) {
  *
  * @param array $workflow_item
  *   The workflow item as array to transform.
+ * @param string $switch
+ *   'current' or 'previous', indicating step.
  *
  * @return string
  *   The string entry for notification emails.
  */
-function islandora_workflow_rest_prepare_workflow_string($workflow_item) {
+function islandora_workflow_rest_prepare_workflow_string($workflow_item, $switch) {
+  $concat = ($switch == "current" ? "Current " : "Previous ");
   // Check if there IS a workflow entry.
   $text = "";
   if (isset($workflow_item['response'])) {
-    $text = "Workflow Entry (" . $workflow_item['response']['workflow']['attributes']['workflowID'] . "):\n";
+    $text = "$concat Workflow Entry (" . $workflow_item['response']['workflow']['attributes']['workflowID'] . "):\n";
     $text .= "--Stamp: " . $workflow_item['response']['workflow']['activity']['attributes']['category'] . "\n";
     $text .= "--Category: " . $workflow_item['response']['workflow']['activity']['attributes']['stamp'] . "\n";
     $text .= "--Status: " . $workflow_item['response']['workflow']['activity']['attributes']['status'] . "\n";

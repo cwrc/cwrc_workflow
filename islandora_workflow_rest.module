@@ -87,10 +87,11 @@ function islandora_workflow_rest_menu() {
 function islandora_workflow_rest_mail($key, &$message, $params) {
   global $base_url;
 
+  $formated_name = format_username($params['mail_account']);
   $data['user'] = $params['mail_account'];
   $options['language'] = $message['language'];
   $variables = array(
-    "@username" => format_username($params['mail_account']),
+    "@username" => $formated_name,
     "@site" => $base_url,
     "@message" => $params['body'],
     "@link" => $base_url . $params['link'],
@@ -117,8 +118,17 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   }
   if (!$params['force_email']) {
     $message['send'] = FALSE;
+    drupal_set_message(t("Private message notification sent to @name",
+      array('@name' => $formated_name)),
+      'status'
+    );
   }
-  drupal_set_message(t('User notifications have been sent.'), 'status');
+  else {
+    drupal_set_message(t("Private message notification sent and email forceably sent to @name",
+      array('@name' => $formated_name)),
+      'status'
+    );
+  }
 }
 
 /**
@@ -256,7 +266,7 @@ function islandora_workflow_rest_add_workflow_step() {
     // Get the last workflow step, if exists.
     $last_workflow = $workflow->entryToArray();
     if ($last_workflow) {
-      $last_wf_string = islandora_workflow_rest_prepare_workflow_string($last_workflow);
+      $last_wf_string = islandora_workflow_rest_prepare_workflow_string($last_workflow, "previous");
     }
     else {
       $last_wf_string = "";
@@ -265,7 +275,7 @@ function islandora_workflow_rest_add_workflow_step() {
     CWRCWorkflowAPI::updateDatastream($workflow, $islandora_object);
     // Get the current workflow step.
     $this_workflow = $workflow->entryToArray();
-    $this_wf_string = islandora_workflow_rest_prepare_workflow_string($this_workflow);
+    $this_wf_string = islandora_workflow_rest_prepare_workflow_string($this_workflow, "current");
     if (isset($activity)) {
       // Email activity notification.
       $params['body'] = $activity_params->typeAttributes[WorkflowConst::BODY] . "\n\n" .

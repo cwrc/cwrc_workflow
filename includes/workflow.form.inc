@@ -158,6 +158,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
 
   $assigned_categorys = AssignedCategory::getAllConstants();
   $assigned_categorys['SELECT'] = "Select";
+  sort($assigned_categorys);
   $pid_namespace = explode(":", $form['islandora_object']['#value']);
 
   $stamps = array();
@@ -167,11 +168,11 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     $exploded = explode(":", $data->stamp);
     $restriction = variable_get('islandora_workflow_rest_enable_namespace', 0);
     if ($restriction == 0) {
-      $stamps[$data->stamp] = $data->descr;
+      $stamps[$data->stamp] = $data->stamp . ' - ' . $data->descr;
     }
     else {
       if (strtoupper($pid_namespace[0]) == strtoupper($exploded[0])) {
-        $stamps[$data->stamp] = $data->descr;
+        $stamps[$data->stamp] = $data->stamp . ' - ' . $data->descr;
       }
     }
   }
@@ -399,7 +400,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   // Get the last workflow step, if exists.
   $last_workflow = $workflow->entryToArray();
   if ($last_workflow) {
-    $last_wf_string = islandora_workflow_rest_prepare_workflow_string($last_workflow);
+    $last_wf_string = islandora_workflow_rest_prepare_workflow_string($last_workflow, "previous");
   }
   else {
     $last_wf_string = "";
@@ -407,9 +408,13 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $workflow->addWorkflowStep($islandora_object->id, $entry, $activity, $assigned);
   CWRCWorkflowAPI::updateDatastream($workflow, $islandora_object);
 
+  // At this point, the new workflow has been added
+  // to the WORKFLOW Datastream.
+  drupal_set_message(t("Workflow entry successfully entered."), "status");
+
   // Get the current workflow step.
   $this_workflow = $workflow->entryToArray();
-  $this_wf_string = islandora_workflow_rest_prepare_workflow_string($this_workflow);
+  $this_wf_string = islandora_workflow_rest_prepare_workflow_string($this_workflow, "current");
   if ($form_state['values']['act_user'] != "") {
     // Email activity notification.
     $params['body'] = $form_state['values']['wf_act_message'] . "\n\n" .
