@@ -81,7 +81,7 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
     '#type' => 'fieldset',
     '#title' => t('View Workflow Datastream'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
   );
   $form['workflow_wfds_fs']['datastream_link'] = array(
     '#type' => 'link',
@@ -95,13 +95,13 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
   );
   $form['workflow_wfs_fs'] = array(
     '#type' => 'fieldset',
-    '#title' => t('View Workflows'),
+    '#title' => t('View Workflow Stamps'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
   $form['workflow_wfs_add_fs'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Add Workflow'),
+    '#title' => t('Add Workflow Stamp'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
@@ -110,26 +110,26 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
   if (isset($all_workflows['cwrc']['workflow'][0]['attributes']) && $all_workflows['cwrc']['workflow'] != "") {
     foreach ($all_workflows['cwrc']['workflow'] as $key => $value) {
       $options[$key] = array(
-        'workflowID' => $value['attributes']['workflowID'],
+        'date' => $value['attributes']['date'],
         'userID' => $value['attributes']['userID'],
-        'category' => (isset($value['activity']['attributes']['category']) ? $value['activity']['attributes']['category'] : ""),
+        'stamp' => (isset($value['activity']['attributes']['stamp']) ? $value['activity']['attributes']['stamp'] : ""),
       );
     }
   }
   // Single entry.
   if (isset($all_workflows['cwrc']['workflow']['attributes'])) {
     $options['workflow'] = array(
-      'workflowID' => $all_workflows['cwrc']['workflow']['attributes']['workflowID'],
+      'date' => $all_workflows['cwrc']['workflow']['attributes']['date'],
       'userID' => $all_workflows['cwrc']['workflow']['attributes']['userID'],
-      'category' => (isset($all_workflows['cwrc']['workflow']['activity']['attributes']['category']) ?
-        $all_workflows['cwrc']['workflow']['activity']['attributes']['category'] : ""),
+      'stamp' => (isset($all_workflows['cwrc']['workflow']['activity']['attributes']['stamp']) ?
+        $all_workflows['cwrc']['workflow']['activity']['attributes']['stamp'] : ""),
     );
   }
 
   $header = array(
-    'workflowID' => t('Workflow ID'),
+    'date' => t('Date'),
     'userID' => t('User ID'),
-    'category' => t('Category'),
+    'stamp' => t('Stamp'),
   );
   $form['workflow_wfs_fs']['table'] = array(
     '#theme' => 'table',
@@ -165,8 +165,14 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   $results = islandora_workflow_rest_get_all_stamps(1000);
   while ($data = $results->fetchObject()) {
     $exploded = explode(":", $data->stamp);
-    if (strtoupper($pid_namespace[0]) == strtoupper($exploded[0])) {
+    $restriction = variable_get('islandora_workflow_rest_enable_namespace', 0);
+    if ($restriction == 0) {
       $stamps[$data->stamp] = $data->descr;
+    }
+    else {
+      if (strtoupper($pid_namespace[0]) == strtoupper($exploded[0])) {
+        $stamps[$data->stamp] = $data->descr;
+      }
     }
   }
   $status_arr = array(
@@ -186,7 +192,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   // Assigned input form fieldset.
   $form['workflow_wfs_add_fs']['workflow_fs_assigned'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Assign'),
+    '#title' => t('Assign (optional)'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
@@ -273,7 +279,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   );
   $form['workflow_wfs_add_fs']['submit'][] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Save'),
   );
   // Assigned input message form fieldset (Notification).
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['workflow_fs_assigned_message'] = array(

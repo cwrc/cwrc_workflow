@@ -37,6 +37,23 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
+  $form['manage_workflow']['workflow_ns_fs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Namespace Management'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+  $form['manage_workflow']['workflow_ns_fs']['manage_namespace'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable Stamp Namespace Restrictions.'),
+    '#description' => t('When enabled, only stamps whos namespace matches that of the give
+      object will be available in workflow entries.'),
+    '#default_value' => variable_get('islandora_workflow_rest_enable_namespace', 0),
+  );
+  $form['manage_workflow']['workflow_ns_fs']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Set'),
+  );
   $form['manage_workflow']['workflow_query_fs']['workflow_solr_field'] = array(
     '#type' => 'textfield',
     '#title' => t('SOLR Query Field'),
@@ -147,6 +164,11 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
         }
       }
       break;
+
+    case "Set":
+      variable_set('islandora_workflow_rest_enable_namespace', $form_state['values']['manage_namespace']);
+      break;
+
   }
   if (ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD != $form_state['input']['workflow_solr_field']) {
     variable_set('workflow_solr_field', $form_state['input']['workflow_solr_field']);

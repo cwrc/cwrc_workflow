@@ -118,6 +118,7 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   if (!$params['force_email']) {
     $message['send'] = FALSE;
   }
+  drupal_set_message(t('User notifications have been sent.'), 'status');
 }
 
 /**
