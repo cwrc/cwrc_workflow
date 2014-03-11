@@ -73,6 +73,11 @@ function islandora_workflow_rest_schema() {
         'not null' => FALSE,
         'description' => 'The object pid that has been modified.',
       ),
+      'timestamp' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'time of modification.',
+      ),
     ),
     'primary key' => array('lid'),
   );
