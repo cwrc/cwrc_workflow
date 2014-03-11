@@ -105,10 +105,18 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
      array('langcode' => $langcode)
     );
 
+  $strongarm = FALSE;
+  $pm_message = "";
   if (module_exists('privatemsg')) {
+    $pm_message = "Private message notification sent and";
+    $level = _pm_email_notify_user_level($data['user']->uid);
+    if ($level == PM_EMAIL_NOTIFY_LEVEL_DISABLED) {
+      $strongarm = TRUE;
+    }
     // Utilize the Privatemsg module notification system.
     // Send a message to the user with privatemsg_new_thread.
-    privatemsg_new_thread(array($params['mail_account']),
+    privatemsg_new_thread(
+      array($params['mail_account']),
       t('Notification from @site', $variables, array('langcode' => $message['language']->language)),
       t("Dear @username\n\n@message\n\n@link\n\n",
         $variables,
@@ -116,19 +124,19 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
       )
     );
   }
-  if (!$params['force_email']) {
-    $message['send'] = FALSE;
-    drupal_set_message(t("Private message notification sent to @name",
-      array('@name' => $formated_name)),
-      'status'
-    );
-  }
   else {
-    drupal_set_message(t("Private message notification sent and email forceably sent to @name",
-      array('@name' => $formated_name)),
-      'status'
-    );
+    $strongarm = TRUE;
   }
+  $message['send'] = $strongarm;
+  drupal_set_message(
+    t("@pmsg Email sent to @name @force",
+    array(
+      '@name' => $formated_name,
+      '@pmsg' => $pm_message,
+      '@force' => ($strongarm ? "(forced email delivery)" : ""),
+    )),
+    'status'
+  );
 }
 
 /**
