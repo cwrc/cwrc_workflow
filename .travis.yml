@@ -20,7 +20,7 @@ before_install:
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/islandora_workflow_rest
   - ln -s $HOME/islandora_solr_search sites/all/modules/islandora_solr_search
   - ln -s $HOME/islandora_solution_pack_collection sites/all/modules/islandora_solution_pack_collection
-  - drush en --yes islandora_workflow_rest
+  - drush en --yes -u 1 islandora_workflow_rest islandora_basic_collection
 script:
   - ant -buildfile sites/all/modules/islandora_workflow_rest/build.xml lint
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/islandora_workflow_rest
