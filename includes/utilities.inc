@@ -443,29 +443,32 @@ function islandora_workflow_rest_admin_cm_table_form() {
     $options[$content_model->pid]['delay'] = array('data' => $logging_delay);
     $item_checked[$content_model->pid] = 1;
   }
+  $set_keys = array_keys($options);
+  foreach ($options as $ckey => $coption) {
+    unset($content_models[$ckey]);
+  }
+  
   foreach ($content_models as $key => $value) {
-    if (!isset($options[$key])) {
-      // Add any additional content models as available.
-      $monitor_datastream = array(
-        '#type' => 'textfield',
-        '#value' => 'TN',
-        '#title' => 'Datastream ID',
-        '#title_display' => 'invisible',
-        '#name' => $key . '[dsid_entry]',
-      );
-      $logging_delay = array(
-        '#type' => 'textfield',
-        '#value' => '30',
-        '#title' => 'Logging Delay',
-        '#title_display' => 'invisible',
-        '#name' => $key . '[delay_entry]',
-      );
-      $options[$key]['pid'] = $key;
-      $options[$key]['label'] = $value['label'];
-      $options[$key]['dsid'] = array('data' => $monitor_datastream);
-      $options[$key]['delay'] = array('data' => $logging_delay);
-      $item_checked[$key] = 0;
-    }
+    // Add any additional content models as available.
+    $monitor_datastream = array(
+      '#type' => 'textfield',
+      '#value' => 'TN',
+      '#title' => 'Datastream ID',
+      '#title_display' => 'invisible',
+      '#name' => $key . '[dsid_entry]',
+    );
+    $logging_delay = array(
+      '#type' => 'textfield',
+      '#value' => '30',
+      '#title' => 'Logging Delay',
+      '#title_display' => 'invisible',
+      '#name' => $key . '[delay_entry]',
+    );
+    $options[$key]['pid'] = $key;
+    $options[$key]['label'] = $value['label'];
+    $options[$key]['dsid'] = array('data' => $monitor_datastream);
+    $options[$key]['delay'] = array('data' => $logging_delay);
+    $item_checked[$key] = 0;
   }
   $header = array(
     'pid' => t('PID'),

@@ -236,9 +236,12 @@ Content-Type: application/json
 | ------------- | ------------------------------------------------------------ |
 | PID           | Persistent identifier of the object, if not given the namespace will be used to create a new one (required).
 | toolID           | The tool identifier to add to the workflow (optional).
-| activity           | Json object in key value pairs, E.X. {"category":"content_contribution","stamp":"nis:AO","status":"foo_bar","note":"Note text"} (optional).
-| assigned           | Json object in key value pairs, E.X. {"category":"content_contribution","recipient":"user","subject":"foo_bar","body":"The body text"} (optional).
+| activity           | Json object in key value pairs, E.X. {"category":"content_contribution","stamp":"nis:AO","status":"foo_bar","note":"Note text"} *(optional).
+| assigned           | Json object in key value pairs, E.X. {"category":"content_contribution","recipient":"user","subject":"foo_bar","body":"The body text"} *(optional).
 
+#### Note *
+A notification email will only be sent if 'recipient', 'subject', and 'body' are ALL set in the activity/assigned json GET Request.
+EX: {"category":"sample remote","stamp":"niso:AO","status":"foo_bar","note":"sample text note","recipient":"me_guy","subject":"this is my subject","body":"this is my body text"}
 
 #### Response: 200 OK
 ##### Content-Type: application/json
@@ -401,8 +404,9 @@ Accept: application/json
 #### Get Variables
 | Name          | Description                                                  |
 | ------------- | ------------------------------------------------------------ |
-| collection_id     | Limit workflow query to a collection. (optional)
-| required     | Limit workflow query, required attribute fields. (optional)
+| collection_pid     | Limit workflow query to a collection by collection PID. (optional)
+| required     | Limit workflow query VIA required attribute fields, EX: required={"workflow_workflowID_ms":"islandora_root_wk_1"} (optional)
+| query     | SOLR query string, EX: 'PID:*'. collection_pid parameter and required paramater will still be applied to the query string if set. (optional)
 
 #### Response: 200 OK
 ##### Content-Type: application/json

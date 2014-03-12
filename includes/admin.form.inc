@@ -103,13 +103,6 @@ function islandora_workflow_rest_admin($form, &$form_state) {
 
   // Add our content models to monitor on change.
   $form['manage_workflow']['workflow_cm_fs']['content_models'] = islandora_workflow_rest_admin_cm_table_form();
-  $pager_params = array(
-    'tags' => array('first', 'previous', 'next', 'last'),
-    'element' => 1,
-    'parameters' => array(),
-    'quantity' => 10,
-  );
-  $form['manage_workflow']['workflow_cm_fs']['pager'] = array('#markup' => theme_pager($pager_params));
   $form['manage_workflow']['workflow_cm_fs']['content_models']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Update'),
