@@ -447,7 +447,7 @@ function islandora_workflow_rest_admin_cm_table_form() {
   foreach ($options as $ckey => $coption) {
     unset($content_models[$ckey]);
   }
-  
+
   foreach ($content_models as $key => $value) {
     // Add any additional content models as available.
     $monitor_datastream = array(

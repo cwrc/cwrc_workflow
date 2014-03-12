@@ -95,7 +95,6 @@ class CWRCWorkflowAPI {
         }
       }
     }
-    dsm($query, "final query");
     $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
     $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
     $solr->setCreateDocuments(FALSE);
@@ -115,7 +114,6 @@ class CWRCWorkflowAPI {
     catch (Exception $e) {
       watchdog_exception('Workflow item query: ', $e, 'Got an exception while searching for workflows.', array(), WATCHDOG_ERROR);
     }
-    dsm($query, "my query");
     return $json;
   }
 
