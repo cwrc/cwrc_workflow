@@ -500,7 +500,7 @@ function islandora_workflow_log_event($pid, $action, $dsid, $delay) {
   global $user;
   $threshold = time() - intval($delay);
   $user_id = $user->uid;
-  $query = "select * from islandora_workflow_rest_ds_logs
+  $query = "select * from {islandora_workflow_rest_ds_logs}
              where pid = '$pid'
              and type = '$action'
              and usr = '$user_id'

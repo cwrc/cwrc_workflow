@@ -43,6 +43,22 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
+  $form['manage_workflow']['workflow_si_fs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Server Identifier'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+  $form['manage_workflow']['workflow_si_fs']['workflow_si_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Set the server identifier.'),
+    '#description' => t('This value is added to user name in a workflow log.'),
+    '#default_value' => variable_get("islandora_workflow_rest_server_identifier", ""),
+  );
+  $form['manage_workflow']['workflow_si_fs']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update Server Identifier'),
+  );
   $form['manage_workflow']['workflow_ns_fs']['manage_namespace'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable Stamp Namespace Restrictions.'),
@@ -160,6 +176,10 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
 
     case "Set":
       variable_set('islandora_workflow_rest_enable_namespace', $form_state['values']['manage_namespace']);
+      break;
+
+    case "Update Server Identifier":
+      variable_set('islandora_workflow_rest_server_identifier', $form_state['values']['workflow_si_field']);
       break;
 
   }

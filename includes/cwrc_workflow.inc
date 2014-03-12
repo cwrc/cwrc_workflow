@@ -292,8 +292,9 @@ class CWRCWorkflowAPI {
     $result = $date->format('Y-m-d');
     $time = date('H:i:s');
     $user = user_uid_optional_load();
+    $server_identifier = variable_get('islandora_workflow_rest_server_identifier', '');
     $workflow->typeAttributes[WorkflowConst::DATE] = $result;
-    $workflow->typeAttributes[WorkflowConst::USERID] = $user->uid;
+    $workflow->typeAttributes[WorkflowConst::USERID] = $user->name . $server_identifier;
     $workflow->typeAttributes[WorkflowConst::TIME] = $time;
     $workflow->typeAttributes[WorkflowConst::WORKFLOWID] = $this->getNewWorkflowId();
   }
