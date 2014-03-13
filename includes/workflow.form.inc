@@ -157,7 +157,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   $collapsed = TRUE;
   if (isset($_GET['lid'])) {
     $lid = $_GET['lid'];
-    $query = "select * from islandora_workflow_rest_ds_logs
+    $query = "select * from {islandora_workflow_rest_ds_logs}
              where lid = '$lid'";
     $results = db_query($query)->fetchAssoc();
     $collapsed = FALSE;
@@ -208,12 +208,8 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   );
   // Basic Activity fields.
   $wf_ass_act_category_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['category']) ?
-<<<<<<< HEAD
     $last_workflow['response']['workflow']['activity']['attributes']['category'] : "SELECT");
   $default_index = array_search($wf_ass_act_category_default, $assigned_categorys);
-=======
-          $last_workflow['response']['workflow']['activity']['attributes']['category'] : "SELECT");
->>>>>>> 489f02ed22f93c01a651762c9c7615846e2c0775
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_act_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
@@ -273,12 +269,8 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     '#type' => 'textarea',
   );
   $assign_category_default = (isset($last_workflow['response']['workflow']['assigned']['attributes']['category']) ?
-<<<<<<< HEAD
     $last_workflow['response']['workflow']['assigned']['attributes']['category'] : "SELECT");
   $default_ass_index = array_search($assign_category_default, $assigned_categorys);
-=======
-          $last_workflow['response']['workflow']['assigned']['attributes']['category'] : "SELECT");
->>>>>>> 489f02ed22f93c01a651762c9c7615846e2c0775
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
@@ -400,22 +392,10 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
     $workflow = CWRCWorkflowAPI::fromDatastream($islandora_object['WORKFLOW']);
   }
 
-<<<<<<< HEAD
-  $activity = new WorkflowItem(WorkflowConst::ACTIVITY,
-    $activity_params
-  );
-  $assigned = new WorkflowItem(WorkflowConst::ASSIGNED,
-    $assigned_params
-  );
-  $entry = new WorkflowItem(WorkflowConst::WORKFLOW,
-    array('toolID' => $activity_tool)
-  );
-=======
   $activity = new WorkflowItem(WorkflowConst::ACTIVITY, $activity_params);
   $assigned = new WorkflowItem(WorkflowConst::ASSIGNED, $assigned_params);
   $entry = new WorkflowItem(WorkflowConst::WORKFLOW, array('toolID' => $activity_tool));
 
->>>>>>> 489f02ed22f93c01a651762c9c7615846e2c0775
   // Get the last workflow step, if exists.
   $last_workflow = $workflow->entryToArray();
   if ($last_workflow) {

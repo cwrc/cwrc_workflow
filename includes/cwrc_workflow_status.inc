@@ -18,7 +18,7 @@ function cwrc_workflow_management_form($form, &$form_state) {
   module_load_include('inc', 'islandora', 'includes/datastream.version');
   global $user;
   $user_id = $user->uid;
-  $query = "select * from islandora_workflow_rest_ds_logs
+  $query = "select * from {islandora_workflow_rest_ds_logs}
              where usr = '$user_id'
              and state = 'new'
       order by pid, dsid desc";
