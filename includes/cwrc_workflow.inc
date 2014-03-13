@@ -37,7 +37,7 @@ class CWRCWorkflowAPI {
    *   Instance of CWRCWorkflowAPI from plain template.
    */
   public static function fromTemplate() {
-    $schema = '<?xml-model href="http://cwrc.ca/schema/workflow.rng" '.
+    $schema = '<?xml-model href="http://cwrc.ca/schema/workflow.rng" ' .
     'type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>';
     $set_doc = new DOMDocument();
     $set_doc->loadXML('<?xml version="1.0" encoding="UTF-8" ?>' . $schema . '<cwrc></cwrc>');
@@ -416,13 +416,13 @@ class CWRCWorkflowAPI {
       $recipient = $this->doc->createElement(WorkflowConst::RECIPIENT);
       $recipient->setAttribute("userID", $child->typeAttributes[WorkflowConst::RECIPIENT]);
       $message->appendChild($recipient);
-      
+
       $subject = $this->doc->createElement(WorkflowConst::SUBJECT);
       $subject_note = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::SUBJECT]);
       $subject->innerHTML = $child->text;
       $subject->appendChild($subject_note);
       $message->appendChild($subject);
-      
+
       $body = $this->doc->createElement(WorkflowConst::BODY);
       $body_note = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::BODY]);
       $body->innerHTML = $child->typeAttributes[WorkflowConst::BODY];

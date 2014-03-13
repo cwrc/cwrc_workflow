@@ -200,7 +200,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   // Basic Activity fields.
   $wf_ass_act_category_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['category']) ?
     $last_workflow['response']['workflow']['activity']['attributes']['category'] : "SELECT");
-  $default_index = array_search($wf_ass_act_category_default,$assigned_categorys);
+  $default_index = array_search($wf_ass_act_category_default, $assigned_categorys);
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_act_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
@@ -261,7 +261,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   );
   $assign_category_default = (isset($last_workflow['response']['workflow']['assigned']['attributes']['category']) ?
     $last_workflow['response']['workflow']['assigned']['attributes']['category'] : "SELECT");
-  $default_ass_index = array_search($assign_category_default,$assigned_categorys);
+  $default_ass_index = array_search($assign_category_default, $assigned_categorys);
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
