@@ -279,7 +279,6 @@ function islandora_workflow_rest_add_workflow_step() {
     else {
       $workflow = CWRCWorkflowAPI::fromDatastream($islandora_object['WORKFLOW']);
     }
-
     $activity = new WorkflowItem(WorkflowConst::ACTIVITY,
       $activity_params
     );
