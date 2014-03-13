@@ -37,8 +37,10 @@ class CWRCWorkflowAPI {
    *   Instance of CWRCWorkflowAPI from plain template.
    */
   public static function fromTemplate() {
+    $schema = '<?xml-model href="http://cwrc.ca/schema/workflow.rng" '.
+    'type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>';
     $set_doc = new DOMDocument();
-    $set_doc->loadXML('<?xml version="1.0" encoding="UTF-8" ?><cwrc></cwrc>');
+    $set_doc->loadXML('<?xml version="1.0" encoding="UTF-8" ?>' . $schema . '<cwrc></cwrc>');
     return new CWRCWorkflowAPI($set_doc);
   }
 
