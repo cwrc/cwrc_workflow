@@ -490,15 +490,16 @@ function islandora_workflow_rest_admin_cm_table_form() {
  * @param string $delay
  *   Event will not be logged if change has been logged within delay time
  */
-function islandora_workflow_log_event($pid, $action, $dsid, $delay) {
+function islandora_workflow_log_event($pid, $action, $dsid, $delay, $timestamp) {
   global $user;
-  $threshold = time() - intval($delay);
+  $threshold = strtotime($timestamp) - intval($delay);
   $user_id = $user->uid;
   $query = "select * from islandora_workflow_rest_ds_logs
              where pid = '$pid'
              and type = '$action'
              and usr = '$user_id'
              and dsid = '$dsid'
+             and state = 'new'
              and timestamp > $threshold";
   $result = db_query($query)->fetchAssoc();
   if (!$result) {
@@ -509,8 +510,44 @@ function islandora_workflow_log_event($pid, $action, $dsid, $delay) {
           'usr' => $user->uid,
           'dsid' => $dsid,
           'delay' => $delay,
-          'timestamp' => time(),
+          'timestamp' => strtotime($timestamp),
+          'state' => 'new',
         ))
         ->execute();
+  }
+}
+
+/**
+ * Perform update function from dtastream add and alter hooks.
+ *
+ * @param AbstractObject $object
+ *   Object representing Fedora parent object
+ * @param AbstractDatastream $datastream
+ *   Object representing fedora datastream
+ * @param string $action
+ *   CRUD action
+ */
+function islandora_workflow_add_or_modify(AbstractObject $object, AbstractDatastream $datastream, $action) {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+  $tracked = FALSE;
+  $delay = 0;
+  $tuque = new IslandoraTuque();
+  $tuque->cache->delete($object->id);
+  $object = islandora_object_load($object->id);
+  $datastream = $object[$datastream->id];
+  foreach ($object->models as $model) {
+    $result = islandora_workflow_rest_get_ds_log_admin_by_pid($model);
+    while ($record = $result->fetchAssoc()) {
+      $tracked_dsids = array_map('trim', explode(',', $record['dsid']));
+      if (in_array($datastream->id, $tracked_dsids)) {
+        $delay = $record['delay'];
+        $tracked = TRUE;
+        $fedora_timestamp = $datastream->createdDate;
+        break;
+      }
+    }
+  }
+  if ($tracked) {
+    islandora_workflow_log_event($object->id, $action, $datastream->id, $delay, $fedora_timestamp);
   }
 }
