@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * The main module file for the Islanora workflow rest interface.
@@ -12,6 +13,15 @@ define('ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD', 'workflow_userID_ms');
  */
 function islandora_workflow_rest_menu() {
   return array(
+    'cwrc_workflow' => array(
+      'title' => 'My Workflow Logs',
+      'description' => 'Manage logged workflow events',
+      'type' => MENU_NORMAL_ITEM,
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('cwrc_workflow_management_form'),
+      'file' => 'includes/cwrc_workflow_status.inc',
+      'access arguments' => array('access content'),
+    ),
     // Workflow datastream form entry point tab.
     'islandora/object/%islandora_object/workflow' => array(
       'title' => 'Workflow',
@@ -32,32 +42,32 @@ function islandora_workflow_rest_menu() {
       'file' => 'includes/admin.form.inc',
       'type' => MENU_NORMAL_ITEM,
     ),
-      // Add workflow Step.
+    // Add workflow Step.
     'islandora_workflow_rest/v1/add_workflow' => array(
       'page callback' => 'islandora_workflow_rest_add_workflow_step',
       'page arguments' => array(3),
       'access callback' => TRUE,
       'type' => MENU_CALLBACK,
     ),
-      // Get last workflow item.
+    // Get last workflow item.
     'islandora_workflow_rest/v1/get_last_workflow' => array(
       'page callback' => 'islandora_workflow_rest_get_last_workflow_step',
       'access callback' => TRUE,
       'type' => MENU_CALLBACK,
     ),
-     // Get full workflow datastream.
+    // Get full workflow datastream.
     'islandora_workflow_rest/v1/get_full_workflow' => array(
       'page callback' => 'islandora_workflow_rest_get_full_workflow',
       'access callback' => TRUE,
       'type' => MENU_CALLBACK,
     ),
-     // Test for stamp/category on object WORKFLOW datastream.
+    // Test for stamp/category on object WORKFLOW datastream.
     'islandora_workflow_rest/v1/has_entry' => array(
       'page callback' => 'islandora_workflow_rest_test_workflow_step',
       'access callback' => TRUE,
       'type' => MENU_CALLBACK,
     ),
-      // Find all pids with given stamp/category, within an optional collection.
+    // Find all pids with given stamp/category, within an optional collection.
     'islandora_workflow_rest/v1/workflow_query' => array(
       'page callback' => 'islandora_workflow_rest_find_workflows',
       'access callback' => TRUE,
@@ -69,13 +79,21 @@ function islandora_workflow_rest_menu() {
       'file' => 'includes/workflow.form.inc',
       'type' => MENU_CALLBACK,
     ),
-      // Configure default SOLR Fields.
+    // Configure default SOLR Fields.
     'islandora_workflow_rest/autocomplete_luke' => array(
       'title' => 'Islandora Solr Luke autocomplete',
       'description' => 'Autocomplete callback to populate solr text fields.',
       'page callback' => 'islandora_workflow_rest_autocomplete_luke',
       'access arguments' => array('administer islandora solr'),
       'file' => 'includes/utilities.inc',
+      'type' => MENU_CALLBACK,
+    ),
+    'islandora_workflow_rest/skip_entries/%' => array(
+      'title' => 'Skip checked entries',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('cwrc_workflow_skip_entries_form', 2),
+      'access arguments' => array('administer islandora solr'),
+      'file' => 'includes/cwrc_workflow_status.inc',
       'type' => MENU_CALLBACK,
     ),
   );
@@ -100,10 +118,8 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   user_mail_tokens($variables, $data, $options);
   $langcode = $message['language']->language;
   $message['subject'] = t('Notification from @site', $variables, array('langcode' => $langcode));
-  $message['body'][] = t("Dear @username\n\n@message\n\n@link\n\n",
-    $variables,
-     array('langcode' => $langcode)
-    );
+  $message['body'][] = t("Dear @username\n\n@message\n\n@link\n\n", $variables, array('langcode' => $langcode)
+  );
 
   $strongarm = FALSE;
   $pm_message = "";
@@ -115,6 +131,7 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
     }
     // Utilize the Privatemsg module notification system.
     // Send a message to the user with privatemsg_new_thread.
+<<<<<<< HEAD
     privatemsg_new_thread(
       array($params['mail_account']),
       t('Notification from @site', $variables, array('langcode' => $message['language']->language)),
@@ -122,6 +139,10 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
         $variables,
         array('langcode' => $langcode)
       )
+=======
+    privatemsg_new_thread(array($params['mail_account']), t('Notification from @site', $variables, array('langcode' => $message['language']->language)), t("Dear @username\n\n@message\n\n@link\n\n", $variables, array('langcode' => $langcode)
+        )
+>>>>>>> 489f02ed22f93c01a651762c9c7615846e2c0775
     );
   }
   else {
@@ -204,7 +225,6 @@ function islandora_workflow_rest_get_last_workflow_step() {
   catch (Exception $e) {
     return drupal_json_output($e);
   }
-
 }
 
 /**
@@ -279,14 +299,17 @@ function islandora_workflow_rest_add_workflow_step() {
     else {
       $workflow = CWRCWorkflowAPI::fromDatastream($islandora_object['WORKFLOW']);
     }
+<<<<<<< HEAD
     $activity = new WorkflowItem(WorkflowConst::ACTIVITY,
       $activity_params
+=======
+
+    $activity = new WorkflowItem(WorkflowConst::ACTIVITY, $activity_params
+>>>>>>> 489f02ed22f93c01a651762c9c7615846e2c0775
     );
-    $assigned = new WorkflowItem(WorkflowConst::ASSIGNED,
-      $assigned_params
+    $assigned = new WorkflowItem(WorkflowConst::ASSIGNED, $assigned_params
     );
-    $entry = new WorkflowItem(WorkflowConst::WORKFLOW,
-      $tool_id
+    $entry = new WorkflowItem(WorkflowConst::WORKFLOW, $tool_id
     );
     // Get the last workflow step, if exists.
     $last_workflow = $workflow->entryToArray();
@@ -305,8 +328,13 @@ function islandora_workflow_rest_add_workflow_step() {
         isset($activity->typeAttributes[WorkflowConst::SUBJECT]) &&
         isset($activity->typeAttributes[WorkflowConst::RECIPIENT])) {
       // Email activity notification.
+<<<<<<< HEAD
       $params['body'] = $activity->typeAttributes[WorkflowConst::BODY] . "\n\n" .
         $this_wf_string . "\n\n" . $last_wf_string;
+=======
+      $params['body'] = $activity_params->typeAttributes[WorkflowConst::BODY] . "\n\n" .
+          $this_wf_string . "\n\n" . $last_wf_string;
+>>>>>>> 489f02ed22f93c01a651762c9c7615846e2c0775
       $params['link'] = url("islandora/object/$islandora_object->id/workflow");
       $params['subject'] = $activity->typeAttributes[WorkflowConst::SUBJECT];
       $params['accounts'] = islandora_workflow_rest_load_users_from_csv($activity->typeAttributes[WorkflowConst::RECIPIENT]);
@@ -318,7 +346,7 @@ function islandora_workflow_rest_add_workflow_step() {
         isset($assigned->typeAttributes[WorkflowConst::RECIPIENT])) {
       // Email Assigned notification.
       $params['body'] = $assigned_params->typeAttributes[WorkflowConst::BODY] . "\n\n" .
-        $this_wf_string . "\n\n" . $last_wf_string;
+          $this_wf_string . "\n\n" . $last_wf_string;
       $params['link'] = url("islandora/object/$islandora_object->id/workflow");
       $params['subject'] = $assigned_params->typeAttributes[WorkflowConst::SUBJECT];
       $params['accounts'] = islandora_workflow_rest_load_users_from_csv($assigned_params->typeAttributes[WorkflowConst::RECIPIENT]);
@@ -356,23 +384,17 @@ function islandora_workflow_rest_find_workflows() {
 }
 
 /**
- * Implements hook_islandora_datastream_alter().
+ * Implements hook_islandora_datastream_ingested().
  */
-function islandora_workflow_rest_islandora_datastream_alter(AbstractObject $object, AbstractDatastream $datastream, array &$context) {
+function islandora_workflow_rest_islandora_datastream_ingested(AbstractObject $object, AbstractDatastream $datastream) {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
-  $tracked = FALSE;
-  $delay = 0;
-  foreach ($object->models as $model) {
-    $result = islandora_workflow_rest_get_ds_log_admin_by_pid($model);
-    while ($record = $result->fetchAssoc()) {
-      $tracked_dsids = array_map('trim', explode(',', $record['dsid']));
-      if (in_array($datastream->id, $tracked_dsids)) {
-        $delay = $record['delay'];
-        $tracked = TRUE;
-      }
-    }
-  }
-  if ($tracked) {
-    islandora_workflow_log_event($object->id, $context['action'], $datastream->id, $delay);
-  }
+  islandora_workflow_add_or_modify($object, $datastream, 'created');
+}
+
+/**
+ * Implements hook_islandora_datastream_modified().
+ */
+function islandora_workflow_rest_islandora_datastream_modified(AbstractObject $object, AbstractDatastream $datastream) {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+  islandora_workflow_add_or_modify($object, $datastream, 'modified');
 }
