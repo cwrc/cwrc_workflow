@@ -374,7 +374,9 @@ class CWRCWorkflowAPI {
       $node->appendChild($note);
     }
     $message = $this->createMessage($child);
-    $node->appendChild($message);
+    if (!is_null($message)) {
+      $node->appendChild($message);
+    }
   }
 
   /**
@@ -391,7 +393,9 @@ class CWRCWorkflowAPI {
 
     $parent->appendChild($assigned);
     $message = $this->createMessage($child);
-    $assigned->appendChild($message);
+    if (!is_null($message)) {
+      $assigned->appendChild($message);
+    }
   }
 
   /**
@@ -404,20 +408,21 @@ class CWRCWorkflowAPI {
    *   The Dom Element as message.
    */
   protected function createMessage(WorkflowItem $child) {
-    $message = $this->doc->createElement(WorkflowConst::MESSAGE);
-    if (isset($child->typeAttributes[WorkflowConst::RECIPIENT])) {
+    $message = NULL;
+    if (isset($child->typeAttributes[WorkflowConst::RECIPIENT]) &&
+        isset($child->typeAttributes[WorkflowConst::SUBJECT]) &&
+        isset($child->typeAttributes[WorkflowConst::BODY])) {
+      $message = $this->doc->createElement(WorkflowConst::MESSAGE);
       $recipient = $this->doc->createElement(WorkflowConst::RECIPIENT);
       $recipient->setAttribute("userID", $child->typeAttributes[WorkflowConst::RECIPIENT]);
       $message->appendChild($recipient);
-    }
-    if (isset($child->typeAttributes[WorkflowConst::SUBJECT])) {
+      
       $subject = $this->doc->createElement(WorkflowConst::SUBJECT);
       $subject_note = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::SUBJECT]);
       $subject->innerHTML = $child->text;
       $subject->appendChild($subject_note);
       $message->appendChild($subject);
-    }
-    if (isset($child->typeAttributes[WorkflowConst::BODY])) {
+      
       $body = $this->doc->createElement(WorkflowConst::BODY);
       $body_note = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::BODY]);
       $body->innerHTML = $child->typeAttributes[WorkflowConst::BODY];
