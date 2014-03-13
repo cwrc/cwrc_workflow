@@ -340,11 +340,11 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
       (strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
       strtoupper($form_state['values']['wf_act_stamp']) == "SELECT" ||
       strtoupper($form_state['values']['wf_act_status']) == "SELECT")) {
-    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status.');
+    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status');
   }
-  if (($form_state['values']['assign_category']) == "SELECT" ||
+  if ($form_state['values']['assign_category'] == "SELECT" &&
       $form_state['values']['assign_note'] != "") {
-    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status.');
+    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status');
   }
 }
 
