@@ -131,7 +131,6 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
     }
     // Utilize the Privatemsg module notification system.
     // Send a message to the user with privatemsg_new_thread.
-<<<<<<< HEAD
     privatemsg_new_thread(
       array($params['mail_account']),
       t('Notification from @site', $variables, array('langcode' => $message['language']->language)),
@@ -139,10 +138,6 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
         $variables,
         array('langcode' => $langcode)
       )
-=======
-    privatemsg_new_thread(array($params['mail_account']), t('Notification from @site', $variables, array('langcode' => $message['language']->language)), t("Dear @username\n\n@message\n\n@link\n\n", $variables, array('langcode' => $langcode)
-        )
->>>>>>> 489f02ed22f93c01a651762c9c7615846e2c0775
     );
   }
   else {
@@ -299,13 +294,8 @@ function islandora_workflow_rest_add_workflow_step() {
     else {
       $workflow = CWRCWorkflowAPI::fromDatastream($islandora_object['WORKFLOW']);
     }
-<<<<<<< HEAD
     $activity = new WorkflowItem(WorkflowConst::ACTIVITY,
       $activity_params
-=======
-
-    $activity = new WorkflowItem(WorkflowConst::ACTIVITY, $activity_params
->>>>>>> 489f02ed22f93c01a651762c9c7615846e2c0775
     );
     $assigned = new WorkflowItem(WorkflowConst::ASSIGNED, $assigned_params
     );
@@ -328,13 +318,8 @@ function islandora_workflow_rest_add_workflow_step() {
         isset($activity->typeAttributes[WorkflowConst::SUBJECT]) &&
         isset($activity->typeAttributes[WorkflowConst::RECIPIENT])) {
       // Email activity notification.
-<<<<<<< HEAD
       $params['body'] = $activity->typeAttributes[WorkflowConst::BODY] . "\n\n" .
         $this_wf_string . "\n\n" . $last_wf_string;
-=======
-      $params['body'] = $activity_params->typeAttributes[WorkflowConst::BODY] . "\n\n" .
-          $this_wf_string . "\n\n" . $last_wf_string;
->>>>>>> 489f02ed22f93c01a651762c9c7615846e2c0775
       $params['link'] = url("islandora/object/$islandora_object->id/workflow");
       $params['subject'] = $activity->typeAttributes[WorkflowConst::SUBJECT];
       $params['accounts'] = islandora_workflow_rest_load_users_from_csv($activity->typeAttributes[WorkflowConst::RECIPIENT]);
