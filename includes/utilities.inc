@@ -355,8 +355,13 @@ function islandora_workflow_rest_pretty_print_ds($content) {
 function islandora_workflow_rest_load_users_from_csv($string) {
   $accounts = array();
   $pieces = explode(",", $string);
-  foreach ($pieces as $key => $value) {
-    $accounts[] = user_load_by_name($value);
+  try {
+    foreach ($pieces as $key => $value) {
+      $accounts[] = user_load_by_name($value);
+    }
+  }
+  catch (Exception $e) {
+    throw new Exception('Supplied account does not exist on this system');
   }
   return $accounts;
 }

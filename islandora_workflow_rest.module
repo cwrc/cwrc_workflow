@@ -253,6 +253,24 @@ function islandora_workflow_rest_add_workflow_step() {
     $tool_id = (isset($params['toolID']) ? array("toolID" => json_decode($params['toolID'])) : array());
     $assigned_params = (isset($params['assigned']) ? json_decode($params['assigned'], TRUE) : array());
 
+    $assigned_accounts = array();
+    $activity_accounts = array();
+    if (isset($activity_params['recipient'])) {
+      $activity_accounts = islandora_workflow_rest_load_users_from_csv($activity_params['recipient']);
+      foreach ($activity_accounts as $account) {
+        if (!$account) {
+          return drupal_json_output(array("Error" => "Supplied user is not in this system"));
+        }
+      }
+    }
+    if (isset($assigned_params['recipient'])) {
+      $assigned_accounts = islandora_workflow_rest_load_users_from_csv($assigned_params['recipient']);
+      foreach ($assigned_accounts as $account) {
+        if (!$account) {
+          return drupal_json_output(array("Error" => "Supplied user is not in this system"));
+        }
+      }
+    }
     $islandora_object = islandora_object_load($params['PID']);
     if (!$islandora_object['WORKFLOW']) {
       $workflow = CWRCWorkflowAPI::fromTemplate();
@@ -330,7 +348,7 @@ function islandora_workflow_rest_find_workflows() {
     $required = (isset($params['required']) ? json_decode($params['required'], TRUE) : array());
     $custom_query = (isset($params['query']) ? $params['query'] : NULL);
 
-    $workflow_pids = CWRCWorkflowAPI::findWorkflowPids($custom_query, $collection_pid, $required);
+    $workflow_pids = CWRCWorkflowAPI::findWorkflowPids($custom_query, $collection_pid, $required, 0, 5, TRUE);
     return drupal_json_output($workflow_pids);
   }
   catch (Exception $e) {

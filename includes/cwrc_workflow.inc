@@ -76,7 +76,7 @@ class CWRCWorkflowAPI {
    * @return array
    *   An array of workflow items.
    */
-  public static function findWorkflowPids($custom_query = NULL, $collection_pid = NULL, $required = array(), $offset = 0, $limit = 5) {
+  public static function findWorkflowPids($custom_query = NULL, $collection_pid = NULL, $required = array(), $offset = 0, $limit = 5, $simple_override = FALSE) {
     // Find all objects with a workflow datastream/attributes
     // in an optional collection.
     $query = ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD . ":*";
@@ -91,10 +91,7 @@ class CWRCWorkflowAPI {
     }
     if (isset($required)) {
       foreach ($required as $key => $value) {
-        $concat = (isset($value) && WorkflowConst::isValidName($key) ? WorkflowConst::getConstantValue("CHECK_" . $key) . ":" . $value : "");
-        if ($concat != "") {
-          $query .= ' AND ' . $concat;
-        }
+        $query .= "AND $key:" . '"' . $value . '"';
       }
     }
     $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
@@ -103,7 +100,7 @@ class CWRCWorkflowAPI {
     try {
       $results = $solr->search($query, $offset, $limit);
       $data = json_decode($results->getRawResponse(), TRUE);
-      if ($simple == TRUE) {
+      if ($simple == TRUE || $simple_override == TRUE) {
         // We only want the PID's for these objects.
         foreach ($data['response']['docs'] as $key => $value) {
           $data[$key] = $data['response']['docs'][$key]['PID'];

@@ -268,14 +268,6 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     '#options' => $assigned_categorys,
     '#default_value' => ($default_ass_index >= 0 ? $default_ass_index : 0),
   );
-  $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_process'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Process'),
-    '#default_value' => "",
-    '#size' => 60,
-    '#maxlength' => 128,
-    '#required' => FALSE,
-  );
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_note'] = array(
     '#title' => t('Note'),
     '#type' => 'textarea',
@@ -341,9 +333,8 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
      strtoupper($form_state['values']['wf_act_status']) == "SELECT")) {
     form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status.');
   }
-  if (($form_state['values']['assign_category']) == "SELECT" &&
-      ($form_state['values']['assign_process'] != "" ||
-      $form_state['values']['assign_note'] != "")) {
+  if (($form_state['values']['assign_category']) == "SELECT" ||
+      $form_state['values']['assign_note'] != "") {
     form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status.');
   }
 }
@@ -375,7 +366,6 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
 
   // Assign parameters.
   $assigned_params['category'] = $assigned_categorys[$form_state['values']['assign_category']];
-  $assigned_params['process'] = $form_state['values']['assign_process'];
   $assigned_params['note'] = $form_state['values']['assign_note'];
   // Assign Notification.
   $assigned_params['recipient'] = $form_state['values']['user'];
