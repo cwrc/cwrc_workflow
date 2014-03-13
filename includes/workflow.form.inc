@@ -200,11 +200,12 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   // Basic Activity fields.
   $wf_ass_act_category_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['category']) ?
     $last_workflow['response']['workflow']['activity']['attributes']['category'] : "SELECT");
+  $default_index = array_search($wf_ass_act_category_default,$assigned_categorys);
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_act_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
     '#options' => $assigned_categorys,
-    '#default_value' => $wf_ass_act_category_default,
+    '#default_value' => ($default_index >= 0 ? $default_index : 0),
   );
   $wf_act_stamp_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['stamp']) ?
     $last_workflow['response']['workflow']['activity']['attributes']['stamp'] : "select");
@@ -260,11 +261,12 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   );
   $assign_category_default = (isset($last_workflow['response']['workflow']['assigned']['attributes']['category']) ?
     $last_workflow['response']['workflow']['assigned']['attributes']['category'] : "SELECT");
+  $default_ass_index = array_search($assign_category_default,$assigned_categorys);
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
     '#options' => $assigned_categorys,
-    '#default_value' => $assign_category_default,
+    '#default_value' => ($default_ass_index >= 0 ? $default_ass_index : 0),
   );
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_process'] = array(
     '#type' => 'textfield',
@@ -354,11 +356,15 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
 
   $islandora_object = islandora_object_load($form_state['values']['islandora_object']);
 
+  $assigned_categorys = AssignedCategory::getAllConstants();
+  $assigned_categorys['SELECT'] = "Select";
+  sort($assigned_categorys);
+
   $assigned_params = array();
   $activity_params = array();
 
   // Activity parameters.
-  $activity_params['category'] = $form_state['values']['wf_ass_act_category'];
+  $activity_params['category'] = $assigned_categorys[$form_state['values']['wf_ass_act_category']];
   $activity_params['stamp'] = $form_state['values']['wf_act_stamp'];
   $activity_params['status'] = $form_state['values']['wf_act_status'];
   $activity_params['note'] = $form_state['values']['wf_act_note'];
@@ -368,7 +374,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $activity_params['body'] = $form_state['values']['wf_act_message'];
 
   // Assign parameters.
-  $assigned_params['category'] = $form_state['values']['assign_category'];
+  $assigned_params['category'] = $assigned_categorys[$form_state['values']['assign_category']];
   $assigned_params['process'] = $form_state['values']['assign_process'];
   $assigned_params['note'] = $form_state['values']['assign_note'];
   // Assign Notification.
@@ -396,7 +402,6 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $entry = new WorkflowItem(WorkflowConst::WORKFLOW,
     array('toolID' => $activity_tool)
   );
-
   // Get the last workflow step, if exists.
   $last_workflow = $workflow->entryToArray();
   if ($last_workflow) {
@@ -406,6 +411,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
     $last_wf_string = "";
   }
   $workflow->addWorkflowStep($islandora_object->id, $entry, $activity, $assigned);
+
   CWRCWorkflowAPI::updateDatastream($workflow, $islandora_object);
 
   // At this point, the new workflow has been added
