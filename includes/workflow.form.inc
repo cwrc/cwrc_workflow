@@ -178,10 +178,10 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   }
   $status_arr = array(
     'select' => t('Select'),
-    'Complete' => t('Complete'),
-    'In Progress' => t('In Progress'),
-    'Pending' => t('Pending'),
-    'Incomplete' => t('Incomplete'),
+    'c' => t('Complete'),
+    'ipr' => t('In Progress'),
+    'p' => t('Pending'),
+    'i' => t('Incomplete'),
   );
   // Activity input form fieldset.
   $form['workflow_wfs_add_fs']['workflow_fs_activity'] = array(
