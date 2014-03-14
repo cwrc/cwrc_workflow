@@ -43,6 +43,22 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
+  $form['manage_workflow']['workflow_si_fs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Server Identifier'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+  );
+  $form['manage_workflow']['workflow_si_fs']['workflow_si_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Set the server identifier.'),
+    '#description' => t('This value is added to user name in a workflow log.'),
+    '#default_value' => variable_get("islandora_workflow_rest_server_identifier", ""),
+  );
+  $form['manage_workflow']['workflow_si_fs']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update Server Identifier'),
+  );
   $form['manage_workflow']['workflow_ns_fs']['manage_namespace'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable Stamp Namespace Restrictions.'),
@@ -61,6 +77,10 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#size' => 45,
     '#autocomplete_path' => 'islandora_workflow_rest/autocomplete_luke',
     '#default_value' => variable_get('workflow_solr_field', ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD),
+  );
+  $form['manage_workflow']['workflow_query_fs']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update SOLR Field'),
   );
   $form['manage_workflow']['workflow_stamp_fs']['workflow_stamp_field'] = array(
     '#type' => 'textfield',
@@ -103,13 +123,6 @@ function islandora_workflow_rest_admin($form, &$form_state) {
 
   // Add our content models to monitor on change.
   $form['manage_workflow']['workflow_cm_fs']['content_models'] = islandora_workflow_rest_admin_cm_table_form();
-  $pager_params = array(
-    'tags' => array('first', 'previous', 'next', 'last'),
-    'element' => 1,
-    'parameters' => array(),
-    'quantity' => 10,
-  );
-  $form['manage_workflow']['workflow_cm_fs']['pager'] = array('#markup' => theme_pager($pager_params));
   $form['manage_workflow']['workflow_cm_fs']['content_models']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Update'),
@@ -169,8 +182,12 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
       variable_set('islandora_workflow_rest_enable_namespace', $form_state['values']['manage_namespace']);
       break;
 
-  }
-  if (ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD != $form_state['input']['workflow_solr_field']) {
-    variable_set('workflow_solr_field', $form_state['input']['workflow_solr_field']);
+    case "Update Server Identifier":
+      variable_set('islandora_workflow_rest_server_identifier', $form_state['values']['workflow_si_field']);
+      break;
+
+    case "Update SOLR Field":
+      variable_set('workflow_solr_field', $form_state['values']['workflow_solr_field']);
+      break;
   }
 }

@@ -73,6 +73,17 @@ function islandora_workflow_rest_schema() {
         'not null' => FALSE,
         'description' => 'The object pid that has been modified.',
       ),
+      'timestamp' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'time of modification.',
+      ),
+      'state' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'State of log entry.  Should be new, skipped, or tagged',
+      ),
     ),
     'primary key' => array('lid'),
   );
@@ -122,6 +133,7 @@ function islandora_workflow_rest_schema() {
 function islandora_workflow_rest_uninstall() {
   variable_del('workflow_solr_field');
   variable_del('islandora_workflow_rest_enable_namespace');
+  variable_del('islandora_workflow_rest_server_identifier');
 }
 
 /**

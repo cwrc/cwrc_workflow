@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Workflow entry form.
@@ -16,10 +17,10 @@ function islandora_workflow_rest_user_autocomplete($string) {
   $pieces = explode(",", $string);
   $matches = array();
   $result = db_select('users')
-  ->fields('users', array('name'))
-  ->condition('name', db_like($pieces[count($pieces) - 1]) . '%', 'LIKE')
-  ->range(0, 10)
-  ->execute();
+      ->fields('users', array('name'))
+      ->condition('name', db_like($pieces[count($pieces) - 1]) . '%', 'LIKE')
+      ->range(0, 10)
+      ->execute();
 
   foreach ($result as $user) {
     $matches[$user->name] = check_plain($user->name);
@@ -103,7 +104,7 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
     '#type' => 'fieldset',
     '#title' => t('Add Workflow Stamp'),
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed' => FALSE,
   );
   $options = array();
   // Multi entry.
@@ -122,7 +123,7 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
       'date' => $all_workflows['cwrc']['workflow']['attributes']['date'],
       'userID' => $all_workflows['cwrc']['workflow']['attributes']['userID'],
       'stamp' => (isset($all_workflows['cwrc']['workflow']['activity']['attributes']['stamp']) ?
-        $all_workflows['cwrc']['workflow']['activity']['attributes']['stamp'] : ""),
+          $all_workflows['cwrc']['workflow']['activity']['attributes']['stamp'] : ""),
     );
   }
 
@@ -153,11 +154,20 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
  *   The returned form.
  */
 function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
+  $collapsed = TRUE;
+  if (isset($_GET['lid'])) {
+    $lid = $_GET['lid'];
+    $query = "select * from {islandora_workflow_rest_ds_logs}
+             where lid = '$lid'";
+    $results = db_query($query)->fetchAssoc();
+    $collapsed = FALSE;
+  }
   module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
 
   $assigned_categorys = AssignedCategory::getAllConstants();
   $assigned_categorys['SELECT'] = "Select";
+  sort($assigned_categorys);
   $pid_namespace = explode(":", $form['islandora_object']['#value']);
 
   $stamps = array();
@@ -167,27 +177,27 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     $exploded = explode(":", $data->stamp);
     $restriction = variable_get('islandora_workflow_rest_enable_namespace', 0);
     if ($restriction == 0) {
-      $stamps[$data->stamp] = $data->descr;
+      $stamps[$data->stamp] = $data->stamp . ' - ' . $data->descr;
     }
     else {
       if (strtoupper($pid_namespace[0]) == strtoupper($exploded[0])) {
-        $stamps[$data->stamp] = $data->descr;
+        $stamps[$data->stamp] = $data->stamp . ' - ' . $data->descr;
       }
     }
   }
   $status_arr = array(
     'select' => t('Select'),
-    'Complete' => t('Complete'),
-    'In Progress' => t('In Progress'),
-    'Pending' => t('Pending'),
-    'Incomplete' => t('Incomplete'),
+    'c' => t('Complete'),
+    'ipr' => t('In Progress'),
+    'p' => t('Pending'),
+    'i' => t('Incomplete'),
   );
   // Activity input form fieldset.
   $form['workflow_wfs_add_fs']['workflow_fs_activity'] = array(
     '#type' => 'fieldset',
     '#title' => t('Activity'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => $collapsed,
   );
   // Assigned input form fieldset.
   $form['workflow_wfs_add_fs']['workflow_fs_assigned'] = array(
@@ -199,14 +209,15 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   // Basic Activity fields.
   $wf_ass_act_category_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['category']) ?
     $last_workflow['response']['workflow']['activity']['attributes']['category'] : "SELECT");
+  $default_index = array_search($wf_ass_act_category_default, $assigned_categorys);
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_act_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
     '#options' => $assigned_categorys,
-    '#default_value' => $wf_ass_act_category_default,
+    '#default_value' => ($default_index >= 0 ? $default_index : 0),
   );
   $wf_act_stamp_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['stamp']) ?
-    $last_workflow['response']['workflow']['activity']['attributes']['stamp'] : "select");
+          $last_workflow['response']['workflow']['activity']['attributes']['stamp'] : "select");
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_stamp'] = array(
     '#type' => 'select',
     '#title' => t('Stamp'),
@@ -214,7 +225,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     '#default_value' => $wf_act_stamp_default,
   );
   $wf_act_status_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['status']) ?
-    $last_workflow['response']['workflow']['activity']['attributes']['status'] : "select");
+          $last_workflow['response']['workflow']['activity']['attributes']['status'] : "select");
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_status'] = array(
     '#type' => 'select',
     '#title' => t('Status'),
@@ -259,19 +270,12 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   );
   $assign_category_default = (isset($last_workflow['response']['workflow']['assigned']['attributes']['category']) ?
     $last_workflow['response']['workflow']['assigned']['attributes']['category'] : "SELECT");
+  $default_ass_index = array_search($assign_category_default, $assigned_categorys);
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
     '#options' => $assigned_categorys,
-    '#default_value' => $assign_category_default,
-  );
-  $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_process'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Process'),
-    '#default_value' => "",
-    '#size' => 60,
-    '#maxlength' => 128,
-    '#required' => FALSE,
+    '#default_value' => ($default_ass_index >= 0 ? $default_ass_index : 0),
   );
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_note'] = array(
     '#title' => t('Note'),
@@ -333,15 +337,14 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
   }
   // Be sure the default "Select" in combo boxes has been set to something else.
   if ($form_state['values']['wf_act_note'] != "" &&
-     (strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
-     strtoupper($form_state['values']['wf_act_stamp']) == "SELECT" ||
-     strtoupper($form_state['values']['wf_act_status']) == "SELECT")) {
-    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status.');
+      (strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
+      strtoupper($form_state['values']['wf_act_stamp']) == "SELECT" ||
+      strtoupper($form_state['values']['wf_act_status']) == "SELECT")) {
+    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status');
   }
-  if (($form_state['values']['assign_category']) == "SELECT" &&
-      ($form_state['values']['assign_process'] != "" ||
-      $form_state['values']['assign_note'] != "")) {
-    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status.');
+  if ($form_state['values']['assign_category'] == "SELECT" &&
+      $form_state['values']['assign_note'] != "") {
+    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status');
   }
 }
 
@@ -353,11 +356,15 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
 
   $islandora_object = islandora_object_load($form_state['values']['islandora_object']);
 
+  $assigned_categorys = AssignedCategory::getAllConstants();
+  $assigned_categorys['SELECT'] = "Select";
+  sort($assigned_categorys);
+
   $assigned_params = array();
   $activity_params = array();
 
   // Activity parameters.
-  $activity_params['category'] = $form_state['values']['wf_ass_act_category'];
+  $activity_params['category'] = $assigned_categorys[$form_state['values']['wf_ass_act_category']];
   $activity_params['stamp'] = $form_state['values']['wf_act_stamp'];
   $activity_params['status'] = $form_state['values']['wf_act_status'];
   $activity_params['note'] = $form_state['values']['wf_act_note'];
@@ -367,8 +374,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $activity_params['body'] = $form_state['values']['wf_act_message'];
 
   // Assign parameters.
-  $assigned_params['category'] = $form_state['values']['assign_category'];
-  $assigned_params['process'] = $form_state['values']['assign_process'];
+  $assigned_params['category'] = $assigned_categorys[$form_state['values']['assign_category']];
   $assigned_params['note'] = $form_state['values']['assign_note'];
   // Assign Notification.
   $assigned_params['recipient'] = $form_state['values']['user'];
@@ -386,34 +392,33 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
     $workflow = CWRCWorkflowAPI::fromDatastream($islandora_object['WORKFLOW']);
   }
 
-  $activity = new WorkflowItem(WorkflowConst::ACTIVITY,
-    $activity_params
-  );
-  $assigned = new WorkflowItem(WorkflowConst::ASSIGNED,
-    $assigned_params
-  );
-  $entry = new WorkflowItem(WorkflowConst::WORKFLOW,
-    array('toolID' => $activity_tool)
-  );
+  $activity = new WorkflowItem(WorkflowConst::ACTIVITY, $activity_params);
+  $assigned = new WorkflowItem(WorkflowConst::ASSIGNED, $assigned_params);
+  $entry = new WorkflowItem(WorkflowConst::WORKFLOW, array('toolID' => $activity_tool));
 
   // Get the last workflow step, if exists.
   $last_workflow = $workflow->entryToArray();
   if ($last_workflow) {
-    $last_wf_string = islandora_workflow_rest_prepare_workflow_string($last_workflow);
+    $last_wf_string = islandora_workflow_rest_prepare_workflow_string($last_workflow, "previous");
   }
   else {
     $last_wf_string = "";
   }
   $workflow->addWorkflowStep($islandora_object->id, $entry, $activity, $assigned);
+
   CWRCWorkflowAPI::updateDatastream($workflow, $islandora_object);
+
+  // At this point, the new workflow has been added
+  // to the WORKFLOW Datastream.
+  drupal_set_message(t("Workflow entry successfully entered."), "status");
 
   // Get the current workflow step.
   $this_workflow = $workflow->entryToArray();
-  $this_wf_string = islandora_workflow_rest_prepare_workflow_string($this_workflow);
+  $this_wf_string = islandora_workflow_rest_prepare_workflow_string($this_workflow, "current");
   if ($form_state['values']['act_user'] != "") {
     // Email activity notification.
     $params['body'] = $form_state['values']['wf_act_message'] . "\n\n" .
-      $this_wf_string . "\n\n" . $last_wf_string;
+        $this_wf_string . "\n\n" . $last_wf_string;
     $params['link'] = url("islandora/object/$islandora_object->id/workflow");
     $params['subject'] = $form_state['values']['wf_act_subject'];
     $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['act_user']);
@@ -423,11 +428,18 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   if ($form_state['values']['user'] != "") {
     // Email Assigned notification.
     $params['body'] = $form_state['values']['assign_message'] . "\n\n" .
-      $this_wf_string . "\n\n" . $last_wf_string;
+        $this_wf_string . "\n\n" . $last_wf_string;
     $params['link'] = url("islandora/object/$islandora_object->id/workflow");
     $params['subject'] = $form_state['values']['assign_subject'];
     $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['user']);
     $params['force_email'] = $form_state['values']['force_ass_email'];
     islandora_workflow_rest_notify($params);
+  }
+  if (isset($_GET['lid'])) {
+    $lid = $_GET['lid'];
+    db_update('islandora_workflow_rest_ds_logs')
+        ->fields(array('state' => 'tagged'))
+        ->condition('lid', $lid)
+        ->execute();
   }
 }

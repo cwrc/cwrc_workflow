@@ -236,9 +236,12 @@ Content-Type: application/json
 | ------------- | ------------------------------------------------------------ |
 | PID           | Persistent identifier of the object, if not given the namespace will be used to create a new one (required).
 | toolID           | The tool identifier to add to the workflow (optional).
-| activity           | Json object in key value pairs, E.X. {"category":"content_contribution","stamp":"nis:AO","status":"foo_bar","note":"Note text"} (optional).
-| assigned           | Json object in key value pairs, E.X. {"category":"content_contribution","recipient":"user","subject":"foo_bar","body":"The body text"} (optional).
+| activity           | Json object in key value pairs, E.X. {"category":"content_contribution","stamp":"nis:AO","status":"foo_bar","note":"Note text"} *(optional).
+| assigned           | Json object in key value pairs, E.X. {"category":"content_contribution","recipient":"user","subject":"foo_bar","body":"The body text"} *(optional).
 
+#### Note *
+A notification email will only be sent if 'recipient', 'subject', and 'body' are ALL set in the activity/assigned json GET Request.
+EX: {"category":"sample remote","stamp":"niso:AO","status":"foo_bar","note":"sample text note","recipient":"me_guy","subject":"this is my subject","body":"this is my body text"}
 
 #### Response: 200 OK
 ##### Content-Type: application/json
@@ -311,36 +314,68 @@ GET
 ```JSON
 {
    "response":{
-      "workflow":{
-         "attributes":{
-            "date":"2014-01-16",
-            "userID":"1",
-            "time":"19:54:48",
-            "workflowID":"islandora_9_wk_3"
-         },
-         "activity":{
-            "attributes":{
-               "category":"sample remote",
-               "stamp":"niso:AO",
-               "status":"foo_bar"
-            },
-            "note":"sample text body"
-         },
-         "assigned":{
-            "attributes":{
-               "category":"content_contribution"
-            },
-            "message":{
-               "recipient":{
+      "stamp":[
+         {
+            "response":{
+               "workflow":{
                   "attributes":{
-                     "userID":"herbie"
+                     "date":"2014-03-04",
+                     "userID":"1",
+                     "time":"13:29:34",
+                     "workflowID":"islandora_root_wk_0"
+                  },
+                  "activity":{
+                     "attributes":{
+                        "category":"CREATED",
+                        "stamp":"islandora:AO",
+                        "status":"In Progress"
+                     },
+                     "note":"dsafsafa",
+                     "message":{
+                        "recipient":{
+                           "attributes":{
+                              "userID":"usera,userb"
+                           }
+                        },
+                        "subject":"mememe",
+                        "body":"go away."
+                     }
                   }
-               },
-               "subject":"muhaha",
-               "body":"sample remote text for body"
+               }
+            }
+         },
+         {
+            "response":{
+               "workflow":{
+                  "attributes":{
+                     "date":"2014-03-04",
+                     "userID":"1",
+                     "time":"13:32:50",
+                     "workflowID":"islandora_root_wk_1"
+                  },
+                  "activity":{
+                     "attributes":{
+                        "category":"CREATED",
+                        "stamp":"islandora:AO",
+                        "status":"In Progress"
+                     },
+                     "note":"sadfasfasdf",
+                     "message":{
+                        "recipient":{
+                           "attributes":{
+                              "userID":"usera,userb"
+                           }
+                        },
+                        "subject":"me",
+                        "body":"mess"
+                     }
+                  }
+               }
             }
          }
-      },...
+      ],
+      "q":[
+      ]
    }
 }
 ```
@@ -348,11 +383,10 @@ GET
 #### Example Response (simple:true)
 ```JSON
 {
-   "response":{
-      "pid":{
-         true
-      }
-   }
+  "response": {
+    "stamp": "TRUE",
+    "q": "TRUE"
+  }
 }
 ```
 
@@ -370,8 +404,9 @@ Accept: application/json
 #### Get Variables
 | Name          | Description                                                  |
 | ------------- | ------------------------------------------------------------ |
-| collection_id     | Limit workflow query to a collection. (optional)
-| required     | Limit workflow query, required attribute fields. (optional)
+| collection_pid     | Limit workflow query to a collection by collection PID. (optional)
+| required     | Limit workflow query VIA required attribute fields, EX: required={"workflow_workflowID_ms":"islandora_root_wk_1"} (optional)
+| query     | SOLR query string, EX: 'PID:*'. collection_pid parameter and required paramater will still be applied to the query string if set. (optional)
 
 #### Response: 200 OK
 ##### Content-Type: application/json

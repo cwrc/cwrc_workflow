@@ -37,8 +37,12 @@ class CWRCWorkflowAPI {
    *   Instance of CWRCWorkflowAPI from plain template.
    */
   public static function fromTemplate() {
+    $xml = <<<XML
+<?xml version="1.0" encoding="UTF-8" ?>
+<cwrc></cwrc>
+XML;
     $set_doc = new DOMDocument();
-    $set_doc->loadXML('<?xml version="1.0" encoding="UTF-8" ?><cwrc></cwrc>');
+    $set_doc->loadXML($xml);
     return new CWRCWorkflowAPI($set_doc);
   }
 
@@ -74,7 +78,7 @@ class CWRCWorkflowAPI {
    * @return array
    *   An array of workflow items.
    */
-  public static function findWorkflowPids($custom_query = NULL, $collection_pid = NULL, $required = array(), $offset = 0, $limit = 5) {
+  public static function findWorkflowPids($custom_query = NULL, $collection_pid = NULL, $required = array(), $offset = 0, $limit = 5, $simple_override = FALSE) {
     // Find all objects with a workflow datastream/attributes
     // in an optional collection.
     $query = ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD . ":*";
@@ -89,10 +93,7 @@ class CWRCWorkflowAPI {
     }
     if (isset($required)) {
       foreach ($required as $key => $value) {
-        $concat = (isset($value) && WorkflowConst::isValidName($key) ? WorkflowConst::getConstantValue("CHECK_" . $key) . ":" . $value : "");
-        if ($concat != "") {
-          $query .= ' AND ' . $concat;
-        }
+        $query .= "AND $key:" . '"' . $value . '"';
       }
     }
     $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
@@ -101,7 +102,7 @@ class CWRCWorkflowAPI {
     try {
       $results = $solr->search($query, $offset, $limit);
       $data = json_decode($results->getRawResponse(), TRUE);
-      if ($simple == TRUE) {
+      if ($simple == TRUE || $simple_override == TRUE) {
         // We only want the PID's for these objects.
         foreach ($data['response']['docs'] as $key => $value) {
           $data[$key] = $data['response']['docs'][$key]['PID'];
@@ -292,8 +293,9 @@ class CWRCWorkflowAPI {
     $result = $date->format('Y-m-d');
     $time = date('H:i:s');
     $user = user_uid_optional_load();
+    $server_identifier = variable_get('islandora_workflow_rest_server_identifier', '');
     $workflow->typeAttributes[WorkflowConst::DATE] = $result;
-    $workflow->typeAttributes[WorkflowConst::USERID] = $user->uid;
+    $workflow->typeAttributes[WorkflowConst::USERID] = $user->name . $server_identifier;
     $workflow->typeAttributes[WorkflowConst::TIME] = $time;
     $workflow->typeAttributes[WorkflowConst::WORKFLOWID] = $this->getNewWorkflowId();
   }
@@ -371,7 +373,9 @@ class CWRCWorkflowAPI {
       $node->appendChild($note);
     }
     $message = $this->createMessage($child);
-    $node->appendChild($message);
+    if (!is_null($message)) {
+      $node->appendChild($message);
+    }
   }
 
   /**
@@ -388,7 +392,9 @@ class CWRCWorkflowAPI {
 
     $parent->appendChild($assigned);
     $message = $this->createMessage($child);
-    $assigned->appendChild($message);
+    if (!is_null($message)) {
+      $assigned->appendChild($message);
+    }
   }
 
   /**
@@ -401,20 +407,21 @@ class CWRCWorkflowAPI {
    *   The Dom Element as message.
    */
   protected function createMessage(WorkflowItem $child) {
-    $message = $this->doc->createElement(WorkflowConst::MESSAGE);
-    if (isset($child->typeAttributes[WorkflowConst::RECIPIENT])) {
+    $message = NULL;
+    if (isset($child->typeAttributes[WorkflowConst::RECIPIENT]) &&
+        isset($child->typeAttributes[WorkflowConst::SUBJECT]) &&
+        isset($child->typeAttributes[WorkflowConst::BODY])) {
+      $message = $this->doc->createElement(WorkflowConst::MESSAGE);
       $recipient = $this->doc->createElement(WorkflowConst::RECIPIENT);
       $recipient->setAttribute("userID", $child->typeAttributes[WorkflowConst::RECIPIENT]);
       $message->appendChild($recipient);
-    }
-    if (isset($child->typeAttributes[WorkflowConst::SUBJECT])) {
+
       $subject = $this->doc->createElement(WorkflowConst::SUBJECT);
       $subject_note = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::SUBJECT]);
       $subject->innerHTML = $child->text;
       $subject->appendChild($subject_note);
       $message->appendChild($subject);
-    }
-    if (isset($child->typeAttributes[WorkflowConst::BODY])) {
+
       $body = $this->doc->createElement(WorkflowConst::BODY);
       $body_note = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::BODY]);
       $body->innerHTML = $child->typeAttributes[WorkflowConst::BODY];

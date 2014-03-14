@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Holds helper functions for islandora_workflow_rest.
@@ -12,11 +13,11 @@
  */
 function islandora_workflow_rest_set_stamp($stamp, $descr = "") {
   db_insert('islandora_workflow_rest_stamps')
-  ->fields(array(
-    'stamp' => $stamp,
-    'descr' => $descr,
-  ))
-  ->execute();
+      ->fields(array(
+        'stamp' => $stamp,
+        'descr' => $descr,
+      ))
+      ->execute();
 }
 
 /**
@@ -27,8 +28,8 @@ function islandora_workflow_rest_set_stamp($stamp, $descr = "") {
  */
 function islandora_workflow_rest_remove_stamp($stamp) {
   db_delete('islandora_workflow_rest_stamps')
-  ->condition('stamp', $stamp)
-  ->execute();
+      ->condition('stamp', $stamp)
+      ->execute();
 }
 
 /**
@@ -42,9 +43,9 @@ function islandora_workflow_rest_remove_stamp($stamp) {
  */
 function islandora_workflow_rest_get_stamp($stamp) {
   $list = db_select('islandora_workflow_rest_stamps', 'c')
-  ->fields('c')
-  ->condition('stamp', $stamp)
-  ->execute();
+      ->fields('c')
+      ->condition('stamp', $stamp)
+      ->execute();
   $data = $list->fetchObject();
   $return_info = (isset($data->stamp) ? $data->stamp : "");
   return $return_info;
@@ -70,7 +71,7 @@ function islandora_workflow_rest_get_all_stamps($limit = 10) {
 
 /**
  * Set a new Content Model log entry.
- * 
+ *
  * @param string $type
  *   The type of edit (EX: add, delete...).
  * @param string $user
@@ -84,16 +85,16 @@ function islandora_workflow_rest_get_all_stamps($limit = 10) {
  */
 function islandora_workflow_rest_set_ds_log($type, $user, $dsid, $delay, $pid) {
   db_insert('islandora_workflow_rest_ds_logs')
-  ->fields(
-    array(
-      'type' => $type,
-      'usr' => $user,
-      'dsid' => $dsid,
-      'delay' => $delay,
-      'pid' => $pid,
-    )
-  )
-  ->execute();
+      ->fields(
+          array(
+            'type' => $type,
+            'usr' => $user,
+            'dsid' => $dsid,
+            'delay' => $delay,
+            'pid' => $pid,
+          )
+      )
+      ->execute();
 }
 
 /**
@@ -108,10 +109,10 @@ function islandora_workflow_rest_set_ds_log($type, $user, $dsid, $delay, $pid) {
  */
 function islandora_workflow_rest_remove_ds_log($pid, $dsid = "", $user = "") {
   db_delete('islandora_workflow_rest_ds_logs')
-  ->condition('pid', $pid)
-  ->condition('dsid', $dsid)
-  ->condition('usr', $user)
-  ->execute();
+      ->condition('pid', $pid)
+      ->condition('dsid', $dsid)
+      ->condition('usr', $user)
+      ->execute();
 }
 
 /**
@@ -125,9 +126,9 @@ function islandora_workflow_rest_remove_ds_log($pid, $dsid = "", $user = "") {
  */
 function islandora_workflow_rest_get_ds_logs_by_pid($pid) {
   $list = db_select('islandora_workflow_rest_ds_logs', 'c')
-  ->fields('c')
-  ->condition('pid', $pid)
-  ->execute();
+      ->fields('c')
+      ->condition('pid', $pid)
+      ->execute();
   return $list;
 }
 
@@ -164,15 +165,15 @@ function islandora_workflow_rest_get_all_ds_logs($limit = 10) {
  */
 function islandora_workflow_rest_set_ds_log_admin($dsid, $delay, $pid, $label) {
   db_insert('islandora_workflow_rest_ds_log_admin')
-  ->fields(
-    array(
-      'dsid' => $dsid,
-      'delay' => $delay,
-      'pid' => $pid,
-      'label' => $label,
-    )
-  )
-  ->execute();
+      ->fields(
+          array(
+            'dsid' => $dsid,
+            'delay' => $delay,
+            'pid' => $pid,
+            'label' => $label,
+          )
+      )
+      ->execute();
 }
 
 /**
@@ -187,9 +188,9 @@ function islandora_workflow_rest_set_ds_log_admin($dsid, $delay, $pid, $label) {
  */
 function islandora_workflow_rest_update_ds_log_admin($pid, $dsid = "", $delay = "") {
   db_update('islandora_workflow_rest_ds_log_admin')
-  ->fields(array('dsid' => $dsid, 'delay' => $delay))
-  ->condition('pid', $pid)
-  ->execute();
+      ->fields(array('dsid' => $dsid, 'delay' => $delay))
+      ->condition('pid', $pid)
+      ->execute();
 }
 
 /**
@@ -203,9 +204,9 @@ function islandora_workflow_rest_update_ds_log_admin($pid, $dsid = "", $delay = 
  */
 function islandora_workflow_rest_get_ds_log_admin_by_pid($pid) {
   $list = db_select('islandora_workflow_rest_ds_log_admin', 'c')
-  ->fields('c')
-  ->condition('pid', $pid)
-  ->execute();
+      ->fields('c')
+      ->condition('pid', $pid)
+      ->execute();
   return $list;
 }
 
@@ -217,8 +218,8 @@ function islandora_workflow_rest_get_ds_log_admin_by_pid($pid) {
  */
 function islandora_workflow_rest_delete_ds_logs_admin($pid) {
   db_delete('islandora_workflow_rest_ds_log_admin')
-  ->condition('pid', $pid)
-  ->execute();
+      ->condition('pid', $pid)
+      ->execute();
 }
 
 /**
@@ -354,8 +355,13 @@ function islandora_workflow_rest_pretty_print_ds($content) {
 function islandora_workflow_rest_load_users_from_csv($string) {
   $accounts = array();
   $pieces = explode(",", $string);
-  foreach ($pieces as $key => $value) {
-    $accounts[] = user_load_by_name($value);
+  try {
+    foreach ($pieces as $key => $value) {
+      $accounts[] = user_load_by_name($value);
+    }
+  }
+  catch (Exception $e) {
+    throw new Exception('Supplied account does not exist on this system');
   }
   return $accounts;
 }
@@ -365,15 +371,18 @@ function islandora_workflow_rest_load_users_from_csv($string) {
  *
  * @param array $workflow_item
  *   The workflow item as array to transform.
+ * @param string $switch
+ *   'current' or 'previous', indicating step.
  *
  * @return string
  *   The string entry for notification emails.
  */
-function islandora_workflow_rest_prepare_workflow_string($workflow_item) {
+function islandora_workflow_rest_prepare_workflow_string($workflow_item, $switch) {
+  $concat = ($switch == "current" ? "Current " : "Previous ");
   // Check if there IS a workflow entry.
   $text = "";
   if (isset($workflow_item['response'])) {
-    $text = "Workflow Entry (" . $workflow_item['response']['workflow']['attributes']['workflowID'] . "):\n";
+    $text = "$concat Workflow Entry (" . $workflow_item['response']['workflow']['attributes']['workflowID'] . "):\n";
     $text .= "--Stamp: " . $workflow_item['response']['workflow']['activity']['attributes']['category'] . "\n";
     $text .= "--Category: " . $workflow_item['response']['workflow']['activity']['attributes']['stamp'] . "\n";
     $text .= "--Status: " . $workflow_item['response']['workflow']['activity']['attributes']['status'] . "\n";
@@ -391,13 +400,7 @@ function islandora_workflow_rest_notify($params) {
   foreach ($params['accounts'] as $account) {
     $params['mail_account'] = $account;
     drupal_mail(
-      'islandora_workflow_rest',
-      'notice',
-      $account->mail,
-      user_preferred_language($account),
-      $params,
-      "donotreplay@site.com",
-      TRUE
+        'islandora_workflow_rest', 'notice', $account->mail, user_preferred_language($account), $params, "donotreplay@site.com", TRUE
     );
   }
 }
@@ -440,29 +443,32 @@ function islandora_workflow_rest_admin_cm_table_form() {
     $options[$content_model->pid]['delay'] = array('data' => $logging_delay);
     $item_checked[$content_model->pid] = 1;
   }
+  $set_keys = array_keys($options);
+  foreach ($options as $ckey => $coption) {
+    unset($content_models[$ckey]);
+  }
+
   foreach ($content_models as $key => $value) {
-    if (!isset($options[$key])) {
-      // Add any additional content models as available.
-      $monitor_datastream = array(
-        '#type' => 'textfield',
-        '#value' => 'TN',
-        '#title' => 'Datastream ID',
-        '#title_display' => 'invisible',
-        '#name' => $key . '[dsid_entry]',
-      );
-      $logging_delay = array(
-        '#type' => 'textfield',
-        '#value' => '30',
-        '#title' => 'Logging Delay',
-        '#title_display' => 'invisible',
-        '#name' => $key . '[delay_entry]',
-      );
-      $options[$key]['pid'] = $key;
-      $options[$key]['label'] = $value['label'];
-      $options[$key]['dsid'] = array('data' => $monitor_datastream);
-      $options[$key]['delay'] = array('data' => $logging_delay);
-      $item_checked[$key] = 0;
-    }
+    // Add any additional content models as available.
+    $monitor_datastream = array(
+      '#type' => 'textfield',
+      '#value' => 'TN',
+      '#title' => 'Datastream ID',
+      '#title_display' => 'invisible',
+      '#name' => $key . '[dsid_entry]',
+    );
+    $logging_delay = array(
+      '#type' => 'textfield',
+      '#value' => '30',
+      '#title' => 'Logging Delay',
+      '#title_display' => 'invisible',
+      '#name' => $key . '[delay_entry]',
+    );
+    $options[$key]['pid'] = $key;
+    $options[$key]['label'] = $value['label'];
+    $options[$key]['dsid'] = array('data' => $monitor_datastream);
+    $options[$key]['delay'] = array('data' => $logging_delay);
+    $item_checked[$key] = 0;
   }
   $header = array(
     'pid' => t('PID'),
@@ -479,4 +485,80 @@ function islandora_workflow_rest_admin_cm_table_form() {
     '#empty' => t("There are no content models??"),
   );
   return $form;
+}
+
+/**
+ * Log datastream modification event.
+ *
+ * @global user $user
+ *
+ * @param string $pid
+ *   PID of object being modified
+ * @param string $action
+ *   CRUD identifier
+ * @param string $dsid
+ *   DSID of datastrream being modified
+ * @param string $delay
+ *   Event will not be logged if change has been logged within delay time
+ */
+function islandora_workflow_log_event($pid, $action, $dsid, $delay, $timestamp) {
+  global $user;
+  $threshold = strtotime($timestamp) - intval($delay);
+  $user_id = $user->uid;
+  $query = "select * from {islandora_workflow_rest_ds_logs}
+             where pid = '$pid'
+             and type = '$action'
+             and usr = '$user_id'
+             and dsid = '$dsid'
+             and state = 'new'
+             and timestamp > $threshold";
+  $result = db_query($query)->fetchAssoc();
+  if (!$result) {
+    db_insert('islandora_workflow_rest_ds_logs')
+        ->fields(array(
+          'pid' => $pid,
+          'type' => $action,
+          'usr' => $user->uid,
+          'dsid' => $dsid,
+          'delay' => $delay,
+          'timestamp' => strtotime($timestamp),
+          'state' => 'new',
+        ))
+        ->execute();
+  }
+}
+
+/**
+ * Perform update function from dtastream add and alter hooks.
+ *
+ * @param AbstractObject $object
+ *   Object representing Fedora parent object
+ * @param AbstractDatastream $datastream
+ *   Object representing fedora datastream
+ * @param string $action
+ *   CRUD action
+ */
+function islandora_workflow_add_or_modify(AbstractObject $object, AbstractDatastream $datastream, $action) {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+  $tracked = FALSE;
+  $delay = 0;
+  $tuque = new IslandoraTuque();
+  $tuque->cache->delete($object->id);
+  $object = islandora_object_load($object->id);
+  $datastream = $object[$datastream->id];
+  foreach ($object->models as $model) {
+    $result = islandora_workflow_rest_get_ds_log_admin_by_pid($model);
+    while ($record = $result->fetchAssoc()) {
+      $tracked_dsids = array_map('trim', explode(',', $record['dsid']));
+      if (in_array($datastream->id, $tracked_dsids)) {
+        $delay = $record['delay'];
+        $tracked = TRUE;
+        $fedora_timestamp = $datastream->createdDate;
+        break;
+      }
+    }
+  }
+  if ($tracked) {
+    islandora_workflow_log_event($object->id, $action, $datastream->id, $delay, $fedora_timestamp);
+  }
 }
