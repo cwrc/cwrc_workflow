@@ -78,6 +78,10 @@ function islandora_workflow_rest_admin($form, &$form_state) {
     '#autocomplete_path' => 'islandora_workflow_rest/autocomplete_luke',
     '#default_value' => variable_get('workflow_solr_field', ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD),
   );
+  $form['manage_workflow']['workflow_query_fs']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update SOLR Field'),
+  );
   $form['manage_workflow']['workflow_stamp_fs']['workflow_stamp_field'] = array(
     '#type' => 'textfield',
     '#title' => t('Add additional stamps'),
@@ -182,8 +186,8 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
       variable_set('islandora_workflow_rest_server_identifier', $form_state['values']['workflow_si_field']);
       break;
 
-  }
-  if (ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD != $form_state['input']['workflow_solr_field']) {
-    variable_set('workflow_solr_field', $form_state['input']['workflow_solr_field']);
+    case "Update SOLR Field":
+      variable_set('workflow_solr_field', $form_state['values']['workflow_solr_field']);
+      break;
   }
 }
