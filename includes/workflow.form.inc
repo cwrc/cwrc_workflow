@@ -335,7 +335,6 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
       form_set_error('Assign Notification Data', 'All Assign Notification fields must be complete');
     }
   }
-  $vstamp = TRUE;
   // Be sure the default "Select" in combo boxes has been set to something else.
   if ((strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
       strtoupper($form_state['values']['wf_act_stamp']) == "SELECT" ||
