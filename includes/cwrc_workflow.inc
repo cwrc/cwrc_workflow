@@ -259,9 +259,8 @@ XML;
     $module_path = drupal_get_path('module', 'islandora_workflow_rest');
 
     $this->doc = $dom_doc;
-    $this->schema = "$module_path/data/workflow.rng";
-    // TODO: the current scheam does not vaidate, get the latest.
-    // $this->validateSchema() call here.
+    $this->schema = "http://cwrc.ca/schema/workflow.rng";
+    $this->validateSchema();
     // Setup xpath for querying on this object.
     $this->xpath = new DOMXPath($this->doc);
     $this->xpath->registerNamespace("php", "http://php.net/xpath");
@@ -273,9 +272,11 @@ XML;
    * @throws InvalidArgumentException
    */
   protected function validateSchema() {
-    // TODO: the current scheam does not vaidate, get the latest.
     try {
-      $this->doc->relaxNGValidate($this->schema);
+      $valid = $this->doc->relaxNGValidate($this->schema);
+      if (!$valid) {
+        drupal_set_message(t("This WORKFLOW datastream is not valid vs @schema", array('@schema' => $this->schema)), 'error');
+      }
     }
     catch (Exception $e) {
       throw new InvalidArgumentException($e);

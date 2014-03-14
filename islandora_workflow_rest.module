@@ -124,11 +124,8 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   $strongarm = FALSE;
   $pm_message = "";
   if (module_exists('privatemsg')) {
-    $pm_message = "Private message notification sent and";
+    $pm_message = "Private message notification sent";
     $level = _pm_email_notify_user_level($data['user']->uid);
-    if ($level == PM_EMAIL_NOTIFY_LEVEL_DISABLED) {
-      $strongarm = TRUE;
-    }
     // Utilize the Privatemsg module notification system.
     // Send a message to the user with privatemsg_new_thread.
     privatemsg_new_thread(
@@ -140,16 +137,24 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
       )
     );
   }
-  else {
+  if ($params['force_email']) {
     $strongarm = TRUE;
+    $st_message = "Email Delievery to $formated_name forced.";
+    drupal_set_message(
+      t("@pmsg",
+      array(
+        '@pmsg' => $st_message,
+      )),
+      'status'
+    );
   }
   $message['send'] = $strongarm;
   drupal_set_message(
-    t("@pmsg Email sent to @name @force",
+    t("@pmsg @email",
     array(
       '@name' => $formated_name,
       '@pmsg' => $pm_message,
-      '@force' => ($strongarm ? "(forced email delivery)" : ""),
+      '@email' => ($strongarm ? "and Email sent to $formated_name" : ""),
     )),
     'status'
   );
