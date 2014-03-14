@@ -260,7 +260,6 @@ XML;
 
     $this->doc = $dom_doc;
     $this->schema = "http://cwrc.ca/schema/workflow.rng";
-    $this->validateSchema();
     // Setup xpath for querying on this object.
     $this->xpath = new DOMXPath($this->doc);
     $this->xpath->registerNamespace("php", "http://php.net/xpath");
