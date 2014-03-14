@@ -335,16 +335,25 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
       form_set_error('Assign Notification Data', 'All Assign Notification fields must be complete');
     }
   }
+  $vstamp = TRUE;
   // Be sure the default "Select" in combo boxes has been set to something else.
-  if ($form_state['values']['wf_act_note'] != "" &&
-      (strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
+  if ((strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
       strtoupper($form_state['values']['wf_act_stamp']) == "SELECT" ||
       strtoupper($form_state['values']['wf_act_status']) == "SELECT")) {
     form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status');
   }
-  if ($form_state['values']['assign_category'] == "SELECT" &&
+  else {
+    if ($form_state['values']['wf_act_note'] == "") {
+      form_set_error('Update Activity note', 'Please add an Activity note with your submission.');
+    }
+  }
+  if ($form_state['values']['assign_category'] != 0 &&
+      $form_state['values']['assign_note'] == "") {
+    form_set_error('Update Assign note', 'Please add an Assign note with your submission.');
+  }
+  if ($form_state['values']['assign_category'] == 0 &&
       $form_state['values']['assign_note'] != "") {
-    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status');
+    form_set_error('Update Assign category', 'Please add a valid assign Category.');
   }
 }
 
