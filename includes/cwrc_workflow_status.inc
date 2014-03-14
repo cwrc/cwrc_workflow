@@ -38,14 +38,15 @@ function cwrc_workflow_management_form($form, &$form_state) {
     $version_number = NULL;
     $revision_link = "";
     $datastream = $object[$result['dsid']];
-    foreach ($datastream as $version_number => $version) {
-      $date_from_trail = strtotime((string) $version->createdDate);
-      if ($date_to_find == $date_from_trail) {
-        $revision_text = $version->createdDate;
-        $revision_link = l($revision_text, 'islandora/object/' . $result['pid'] . '/datastream/' . $result['dsid'] . "/version/$version_number/view");
+    if ($datastream) {
+      foreach ($datastream as $version_number => $version) {
+        $date_from_trail = strtotime((string) $version->createdDate);
+        if ($date_to_find == $date_from_trail) {
+          $revision_text = $version->createdDate;
+          $revision_link = l($revision_text, 'islandora/object/' . $result['pid'] . '/datastream/' . $result['dsid'] . "/version/$version_number/view");
+        }
       }
     }
-
     $last_workflow_step = NULL;
     if ($object['WORKFLOW']) {
       $workflow = CWRCWorkflowAPI::fromDatastream($object['WORKFLOW']);
