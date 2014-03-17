@@ -155,9 +155,9 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   if ($message['send']) {
     drupal_set_message(
       t("@email",
-      array(
-        '@email' => "Email force sent to $formated_name",
-      )
+        array(
+          '@email' => "Email force sent to $formated_name",
+        )
       ),
     'status'
     );

@@ -418,7 +418,7 @@ function islandora_workflow_rest_admin_cm_table_form() {
   $form = array();
   $content_models = islandora_get_content_models();
 
-  $data = islandora_workflow_rest_get_all_ds_logs_admin(10);
+  $data = islandora_workflow_rest_get_all_ds_logs_admin(1000);
   $options = array();
   $item_checked = array();
   // All stored content models.
@@ -444,10 +444,9 @@ function islandora_workflow_rest_admin_cm_table_form() {
     $item_checked[$content_model->pid] = 1;
   }
   $set_keys = array_keys($options);
-  foreach ($options as $ckey => $coption) {
+  foreach ($options as $ckey => $value) {
     unset($content_models[$ckey]);
   }
-
   foreach ($content_models as $key => $value) {
     // Add any additional content models as available.
     $monitor_datastream = array(
