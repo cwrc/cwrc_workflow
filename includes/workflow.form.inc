@@ -341,15 +341,6 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
       strtoupper($form_state['values']['wf_act_status']) == "SELECT")) {
     form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status');
   }
-  else {
-    if ($form_state['values']['wf_act_note'] == "") {
-      form_set_error('Update Activity note', 'Please add an Activity note with your submission.');
-    }
-  }
-  if ($form_state['values']['assign_category'] != 0 &&
-      $form_state['values']['assign_note'] == "") {
-    form_set_error('Update Assign note', 'Please add an Assign note with your submission.');
-  }
   if ($form_state['values']['assign_category'] == 0 &&
       $form_state['values']['assign_note'] != "") {
     form_set_error('Update Assign category', 'Please add a valid assign Category.');
@@ -418,7 +409,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
 
   // At this point, the new workflow has been added
   // to the WORKFLOW Datastream.
-  drupal_set_message(t("Workflow entry successfully entered."), "status");
+  drupal_set_message(t("Workflow entry successfully submitted."), "status");
 
   // Get the current workflow step.
   $this_workflow = $workflow->entryToArray();
