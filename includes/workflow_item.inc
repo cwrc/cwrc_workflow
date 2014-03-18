@@ -39,18 +39,18 @@ class WorkflowItem {
             $stamp = islandora_workflow_rest_get_stamp($value);
             if ($stamp == "") {
               // Stamp is not a pre approved stamp, throw exception.
-              throw new InvalidArgumentException("$stamp is not a valid stamp attribute, supplied for $name");
+              throw new Exception("$stamp is not a valid stamp attribute, supplied for $name");
             }
           }
           if (!WorkflowConst::isValidName($key)) {
-            throw new InvalidArgumentException("$key is not a valid attribute in any WorkflowItem node. value:  $value");
+            throw new Exception("$key is not a valid attribute in any WorkflowItem node. value:  $value");
           }
         }
       }
     }
     // Lets make sure this is a valid WorkflowItem.
     if (!WorkflowConst::isValidName($name)) {
-      throw new InvalidArgumentException("$name is not a valid WorkflowNode");
+      throw new Exception("$name is not a valid WorkflowNode");
     }
     $this->validate();
   }
