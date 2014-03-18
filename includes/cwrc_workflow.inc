@@ -39,6 +39,7 @@ class CWRCWorkflowAPI {
   public static function fromTemplate() {
     $xml = <<<XML
 <?xml version="1.0" encoding="UTF-8" ?>
+<?xml-model href="http://cwrc.ca/schema/workflow.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
 <cwrc></cwrc>
 XML;
     $set_doc = new DOMDocument();
@@ -57,7 +58,7 @@ XML;
    */
   public static function fromDatastream(AbstractDatastream $datastream) {
     $set_doc = new DOMDocument();
-    $set_doc->loadXML($datastream->content);
+    @$set_doc->loadXML($datastream->content);
     return new CWRCWorkflowAPI($set_doc);
   }
 
@@ -134,10 +135,10 @@ XML;
         $ds->label = 'WORKFLOW DS';
         $ds->mimetype = 'text/xml';
         $ds->content = $work->toString();
-        $object->ingestDatastream($ds);
+        @$object->ingestDatastream($ds);
       }
       else {
-        $object['WORKFLOW']->content = $work->toString();
+        @$object['WORKFLOW']->content = $work->toString();
       }
     }
     catch (Exception $e) {

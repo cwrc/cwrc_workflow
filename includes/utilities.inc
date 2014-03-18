@@ -338,8 +338,8 @@ function islandora_workflow_rest_autocomplete_luke($string = '') {
 function islandora_workflow_rest_pretty_print_ds($content) {
   module_load_include('inc', 'php_lib', 'DOMHelpers');
   $doc = new DOMDocument();
-  $doc->loadXML($content);
-  $return = dom_document_pretty_print($doc, TRUE);
+  @$doc->loadXML($content);
+  $return = @dom_document_pretty_print($doc, TRUE);
   return $return;
 }
 
