@@ -65,7 +65,7 @@ class CWRCWorkflowAPIUnitTestCase extends IslandoraWebTestCase {
       $content = $this->sampleIslandoraObject['WORKFLOW'];
       $this->pass('WORKFLOW datastream Created from template correctly.');
     }
-    catch (InvalidArgumentException $e) {
+    catch (Exception $e) {
       $this->fail('WORKFLOW datastream not created from template. Exception: ' . $e);
     }
     $workflow = NULL;
@@ -74,7 +74,7 @@ class CWRCWorkflowAPIUnitTestCase extends IslandoraWebTestCase {
       $workflow = CWRCWorkflowAPI::fromDatastream($this->sampleIslandoraObject['WORKFLOW']);
       $this->pass('CWRCWorkflowAPI Created from datastream correctly.');
     }
-    catch (InvalidArgumentException $e) {
+    catch (Exception $e) {
       $this->fail('CWRCWorkflowAPI not created from datastream. Exception: ' . $e);
     }
 
@@ -92,7 +92,7 @@ class CWRCWorkflowAPIUnitTestCase extends IslandoraWebTestCase {
       );
       $this->fail('activity workflowItem created with bad data.');
     }
-    catch (InvalidArgumentException $e) {
+    catch (Exception $e) {
       $this->pass('activity element not created with an invalid node name: ' . $e);
     }
 
@@ -110,7 +110,7 @@ class CWRCWorkflowAPIUnitTestCase extends IslandoraWebTestCase {
       );
       $this->fail('assigned workflowItem created with bad node name data.');
     }
-    catch (InvalidArgumentException $e) {
+    catch (Exception $e) {
       $this->pass('activity element not created with an invalid node name: ' . $e);
     }
 
@@ -123,7 +123,7 @@ class CWRCWorkflowAPIUnitTestCase extends IslandoraWebTestCase {
       );
       $this->pass('entry workflowItem created without optional array params');
     }
-    catch (InvalidArgumentException $e) {
+    catch (Exception $e) {
       $this->fail('entry workflow element not created without optional parameter array: ' . $e);
     }
 
