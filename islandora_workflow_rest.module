@@ -195,7 +195,7 @@ function islandora_workflow_rest_test_workflow_step() {
     // Just a simple true or false response.
     if (isset($params['simple']) && strtoupper($params['simple']) == "TRUE") {
       foreach ($response["response"] as $key => $value) {
-        if (count($response["response"]["status"]) > 0) {
+        if (isset($response["response"][$key]) && count($response["response"][$key]) > 0) {
           $response["response"][$key] = "TRUE";
         }
         else {
