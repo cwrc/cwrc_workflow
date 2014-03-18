@@ -169,7 +169,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   $assigned_categorys['SELECT'] = "Select";
   ksort($assigned_categorys);
   $pid_namespace = explode(":", $form['islandora_object']['#value']);
- 
+
   $stamps = array();
   $stamps["select"] = "Select";
   $results = islandora_workflow_rest_get_all_stamps(1000);
@@ -335,11 +335,11 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
   if ((strtoupper($form_state['values']['wf_ass_act_category']) == "SELECT" ||
       strtoupper($form_state['values']['wf_act_stamp']) == "SELECT" ||
       strtoupper($form_state['values']['wf_act_status']) == "SELECT")) {
-    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status a');
+    form_set_error('Update selection box', 'Select a valid field for Category, Stamp and/or Status');
   }
   if ($form_state['values']['assign_category'] == "SELECT" &&
       $form_state['values']['assign_note'] != "") {
-    form_set_error('Update Assign category', 'Please add a valid assign Category.b');
+    form_set_error('Update Assign category', 'Please add a valid assign Category.');
   }
 }
 
