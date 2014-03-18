@@ -118,17 +118,14 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   user_mail_tokens($variables, $data, $options);
   $langcode = $message['language']->language;
   $message['subject'] = t('Notification from @site', $variables, array('langcode' => $langcode));
-  $message['body'][] = t("Dear @username\n\n@message\n\n@link\n\n", $variables, array('langcode' => $langcode)
-  );
+  $message['body'][] = t("Dear @username\n\n@message\n\n@link\n\n", $variables, array('langcode' => $langcode));
 
-  $strongarm = FALSE;
   $pm_message = "";
   if (module_exists('privatemsg')) {
     $pm_message = "Private message notification sent";
-    $level = _pm_email_notify_user_level($data['user']->uid);
     // Utilize the Privatemsg module notification system.
     // Send a message to the user with privatemsg_new_thread.
-    privatemsg_new_thread(
+    $success = privatemsg_new_thread(
       array($params['mail_account']),
       t('Notification from @site', $variables, array('langcode' => $message['language']->language)),
       t("Dear @username\n\n@message\n\n@link\n\n",
@@ -136,28 +133,35 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
         array('langcode' => $langcode)
       )
     );
+    if (!$success['success']) {
+      $pm_message = "";
+      foreach ($success['messages']['error'] as $error_message) {
+        $pm_message .= $error_message . " ";
+      }
+    }
+    else {
+      $pm_message .= " and email notification set to $formated_name";
+    }
   }
-  if ($params['force_email']) {
-    $strongarm = TRUE;
-    $st_message = "Email Delievery to $formated_name forced.";
-    drupal_set_message(
-      t("@pmsg",
+  $message['send'] = $params['force_email'];
+  drupal_set_message(
+    t("@pmsg",
       array(
-        '@pmsg' => $st_message,
-      )),
-      'status'
+        '@pmsg' => ($pm_message == "" ? "Enable Private Message module to receive message notifications." : $pm_message),
+      )
+    ),
+  'status'
+  );
+  if ($message['send']) {
+    drupal_set_message(
+      t("@email",
+        array(
+          '@email' => "Email force sent to $formated_name",
+        )
+      ),
+    'status'
     );
   }
-  $message['send'] = $strongarm;
-  drupal_set_message(
-    t("@pmsg @email",
-    array(
-      '@name' => $formated_name,
-      '@pmsg' => $pm_message,
-      '@email' => ($strongarm ? "and Email sent to $formated_name" : ""),
-    )),
-    'status'
-  );
 }
 
 /**
@@ -191,9 +195,15 @@ function islandora_workflow_rest_test_workflow_step() {
     // Just a simple true or false response.
     if (isset($params['simple']) && strtoupper($params['simple']) == "TRUE") {
       foreach ($response["response"] as $key => $value) {
-        $response["response"][$key] = "TRUE";
+        if (count($response["response"]["status"]) > 0) {
+          $response["response"][$key] = "TRUE";
+        }
+        else {
+          $response["response"][$key] = "FALSE";
+        }
       }
     }
+    unset($response["response"]["q"]);
     return drupal_json_output($response);
   }
   catch (Exception $e) {
@@ -335,11 +345,11 @@ function islandora_workflow_rest_add_workflow_step() {
         isset($assigned->typeAttributes[WorkflowConst::SUBJECT]) &&
         isset($assigned->typeAttributes[WorkflowConst::RECIPIENT])) {
       // Email Assigned notification.
-      $params['body'] = $assigned_params->typeAttributes[WorkflowConst::BODY] . "\n\n" .
+      $params['body'] = $assigned->typeAttributes[WorkflowConst::BODY] . "\n\n" .
           $this_wf_string . "\n\n" . $last_wf_string;
       $params['link'] = url("islandora/object/$islandora_object->id/workflow");
-      $params['subject'] = $assigned_params->typeAttributes[WorkflowConst::SUBJECT];
-      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($assigned_params->typeAttributes[WorkflowConst::RECIPIENT]);
+      $params['subject'] = $assigned->typeAttributes[WorkflowConst::SUBJECT];
+      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($assigned->typeAttributes[WorkflowConst::RECIPIENT]);
       $params['force_email'] = 1;
       islandora_workflow_rest_notify($params);
     }

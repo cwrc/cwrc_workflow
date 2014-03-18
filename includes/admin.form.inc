@@ -140,13 +140,17 @@ function islandora_workflow_rest_admin($form, &$form_state) {
  */
 function islandora_workflow_rest_admin_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+  $drupal_message = "";
   // Check the form triggering_element to perform the correct action.
   switch ($form_state['triggering_element']['#value']) {
     case "Add":
       if ($form_state['input']['workflow_stamp_field'] != "") {
         $stamp = islandora_workflow_rest_get_stamp($form_state['input']['workflow_stamp_field']);
         if (!isset($stamp) || $stamp == "") {
-          islandora_workflow_rest_set_stamp($form_state['input']['workflow_stamp_field'], $form_state['input']['workflow_stamp_desc']);
+          $stamp_field = $form_state['input']['workflow_stamp_field'];
+          $stamp_desc = $form_state['input']['workflow_stamp_desc'];
+          islandora_workflow_rest_set_stamp($stamp_field, $stamp_desc);
+          $drupal_message = t("Stamp @stamp has been added.", array('@stamp' => $stamp_field));
         }
       }
       break;
@@ -155,6 +159,14 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
       foreach ($form_state['values']['Stamps'] as $list_identifier => $is_checked) {
         if ($is_checked) {
           islandora_workflow_rest_remove_stamp($list_identifier);
+          drupal_set_message(
+            t("@msg",
+              array(
+                '@msg' => t("Stamp @lid has been removed.", array('@lid' => $list_identifier)),
+              )
+            ),
+          'status'
+          );
         }
       }
       break;
@@ -168,26 +180,51 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
         islandora_workflow_rest_delete_ds_logs_admin($list_identifier);
         // Update db table to match.
         if ($entry_is_checked) {
+          $dsid = $form_state['input'][$list_identifier]['dsid_entry'];
           islandora_workflow_rest_set_ds_log_admin(
             $form_state['input'][$list_identifier]['dsid_entry'],
             $form_state['input'][$list_identifier]['delay_entry'],
             $list_identifier,
             $content_models[$list_identifier]['label']
           );
+          drupal_set_message(
+            t("@msg",
+              array(
+                '@msg' => t("Content model @lid is monitoring datastream @dsid.", array('@lid' => $list_identifier, '@dsid' => $dsid)),
+              )
+            ),
+          'status'
+          );
         }
       }
       break;
 
     case "Set":
+      $drupal_message = t("Namespace requirements disabled.");
+      if ($form_state['values']['manage_namespace']) {
+        $drupal_message = t("Namespace requirements enabled.");
+      }
       variable_set('islandora_workflow_rest_enable_namespace', $form_state['values']['manage_namespace']);
       break;
 
     case "Update Server Identifier":
-      variable_set('islandora_workflow_rest_server_identifier', $form_state['values']['workflow_si_field']);
+      $server_id = $form_state['values']['workflow_si_field'];
+      variable_set('islandora_workflow_rest_server_identifier', $server_id);
+      $drupal_message = t("Server Identifier is now @server_id.", array('@server_id' => $server_id));
       break;
 
     case "Update SOLR Field":
-      variable_set('workflow_solr_field', $form_state['values']['workflow_solr_field']);
+      $solr_field = $form_state['values']['workflow_solr_field'];
+      variable_set('workflow_solr_field', $solr_field);
+      $drupal_message = t("Solr Field is now @solr_field", array('@solr_field' => $solr_field));
       break;
   }
+  drupal_set_message(
+    t("@msg",
+      array(
+        '@msg' => $drupal_message,
+      )
+    ),
+    'status'
+  );
 }
