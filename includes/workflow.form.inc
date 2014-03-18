@@ -436,5 +436,6 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
         ->fields(array('state' => 'tagged'))
         ->condition('lid', $lid)
         ->execute();
+    drupal_goto('cwrc_workflow');
   }
 }
