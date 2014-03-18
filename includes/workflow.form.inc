@@ -209,15 +209,14 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   // Basic Activity fields.
   $wf_ass_act_category_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['category']) ?
     $last_workflow['response']['workflow']['activity']['attributes']['category'] : "SELECT");
-  $default_index = array_search($wf_ass_act_category_default, $assigned_categorys);
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_ass_act_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
     '#options' => $assigned_categorys,
-    '#default_value' => $wf_ass_act_category_default,//,($default_index >= 0 ? $default_index : 0),
+    '#default_value' => $wf_ass_act_category_default,
   );
   $wf_act_stamp_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['stamp']) ?
-          $last_workflow['response']['workflow']['activity']['attributes']['stamp'] : "select");
+    $last_workflow['response']['workflow']['activity']['attributes']['stamp'] : "select");
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['wf_act_stamp'] = array(
     '#type' => 'select',
     '#title' => t('Stamp'),
