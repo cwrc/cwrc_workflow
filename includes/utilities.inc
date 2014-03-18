@@ -380,7 +380,6 @@ function islandora_workflow_rest_load_users_from_csv($string) {
 function islandora_workflow_rest_prepare_workflow_string($workflow_item, $switch) {
   $concat = ($switch == "current" ? "Current " : "Previous ");
   // Check if there IS a workflow entry.
-  dsm($workflow_item, "workflow item");
   $text = "";
   if (isset($workflow_item['response'])) {
     $text = "$concat Workflow Entry (" . $workflow_item['response']['workflow']['attributes']['workflowID'] . "):\n";
