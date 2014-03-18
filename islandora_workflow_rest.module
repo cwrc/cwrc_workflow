@@ -339,7 +339,6 @@ function islandora_workflow_rest_add_workflow_step() {
       $params['subject'] = $activity->typeAttributes[WorkflowConst::SUBJECT];
       $params['accounts'] = islandora_workflow_rest_load_users_from_csv($activity->typeAttributes[WorkflowConst::RECIPIENT]);
       $params['force_email'] = 1;
-      dsm($params, "activity param email stuff");
       islandora_workflow_rest_notify($params);
     }
     if (isset($assigned->typeAttributes[WorkflowConst::BODY]) &&
@@ -352,7 +351,6 @@ function islandora_workflow_rest_add_workflow_step() {
       $params['subject'] = $assigned->typeAttributes[WorkflowConst::SUBJECT];
       $params['accounts'] = islandora_workflow_rest_load_users_from_csv($assigned->typeAttributes[WorkflowConst::RECIPIENT]);
       $params['force_email'] = 1;
-      dsm($params, "assigned param email stuff");
       islandora_workflow_rest_notify($params);
     }
     return drupal_json_output($workflow->entryToArray());
