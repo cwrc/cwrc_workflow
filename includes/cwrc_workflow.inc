@@ -43,7 +43,7 @@ class CWRCWorkflowAPI {
 <cwrc></cwrc>
 XML;
     $set_doc = new DOMDocument();
-    $set_doc->loadXML($xml);
+    @$set_doc->loadXML($xml);
     return new CWRCWorkflowAPI($set_doc);
   }
 
