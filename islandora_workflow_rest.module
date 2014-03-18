@@ -195,9 +195,15 @@ function islandora_workflow_rest_test_workflow_step() {
     // Just a simple true or false response.
     if (isset($params['simple']) && strtoupper($params['simple']) == "TRUE") {
       foreach ($response["response"] as $key => $value) {
-        $response["response"][$key] = "TRUE";
+        if (count($response["response"]["status"]) > 0) {
+          $response["response"][$key] = "TRUE";
+        }
+        else {
+          $response["response"][$key] = "FALSE";
+        }
       }
     }
+    unset($response["response"]["q"]);
     return drupal_json_output($response);
   }
   catch (Exception $e) {
@@ -333,18 +339,20 @@ function islandora_workflow_rest_add_workflow_step() {
       $params['subject'] = $activity->typeAttributes[WorkflowConst::SUBJECT];
       $params['accounts'] = islandora_workflow_rest_load_users_from_csv($activity->typeAttributes[WorkflowConst::RECIPIENT]);
       $params['force_email'] = 1;
+      dsm($params, "activity param email stuff");
       islandora_workflow_rest_notify($params);
     }
     if (isset($assigned->typeAttributes[WorkflowConst::BODY]) &&
         isset($assigned->typeAttributes[WorkflowConst::SUBJECT]) &&
         isset($assigned->typeAttributes[WorkflowConst::RECIPIENT])) {
       // Email Assigned notification.
-      $params['body'] = $assigned_params->typeAttributes[WorkflowConst::BODY] . "\n\n" .
+      $params['body'] = $assigned->typeAttributes[WorkflowConst::BODY] . "\n\n" .
           $this_wf_string . "\n\n" . $last_wf_string;
       $params['link'] = url("islandora/object/$islandora_object->id/workflow");
-      $params['subject'] = $assigned_params->typeAttributes[WorkflowConst::SUBJECT];
-      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($assigned_params->typeAttributes[WorkflowConst::RECIPIENT]);
+      $params['subject'] = $assigned->typeAttributes[WorkflowConst::SUBJECT];
+      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($assigned->typeAttributes[WorkflowConst::RECIPIENT]);
       $params['force_email'] = 1;
+      dsm($params, "assigned param email stuff");
       islandora_workflow_rest_notify($params);
     }
     return drupal_json_output($workflow->entryToArray());

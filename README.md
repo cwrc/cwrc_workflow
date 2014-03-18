@@ -374,8 +374,6 @@ GET
             }
          }
       ],
-      "q":[
-      ]
    }
 }
 ```
@@ -384,8 +382,7 @@ GET
 ```JSON
 {
   "response": {
-    "stamp": "TRUE",
-    "q": "TRUE"
+    "stamp": "TRUE"
   }
 }
 ```
