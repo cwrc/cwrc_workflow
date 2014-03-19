@@ -267,11 +267,13 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     '#title' => t('Message'),
     '#type' => 'textarea',
   );
+  $wf_ass_category_default = (isset($last_workflow['response']['workflow']['assigned']['attributes']['category']) ?
+    $last_workflow['response']['workflow']['assigned']['attributes']['category'] : "SELECT");
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
     '#options' => $assigned_categorys,
-    '#default_value' => "SELECT",
+    '#default_value' => $wf_ass_category_default,
   );
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_note'] = array(
     '#title' => t('Note'),
