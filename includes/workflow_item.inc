@@ -68,9 +68,9 @@ class WorkflowItem {
     $this->validate();
     if ($name == WorkflowConst::ACTIVITY) {
       // An Activity requires: Category/Stamp/Status.
-      if(!isset($this->typeAttributes[WorkflowConst::STAMP]) ||
-         !isset($this->typeAttributes[WorkflowConst::CATEGORY]) ||
-         !isset($this->typeAttributes[WorkflowConst::STATUS])) {
+      if (!isset($this->typeAttributes[WorkflowConst::STAMP]) ||
+          !isset($this->typeAttributes[WorkflowConst::CATEGORY]) ||
+          !isset($this->typeAttributes[WorkflowConst::STATUS])) {
         throw new Exception("Category, Stamp and Status are required fields.");
       }
     }
