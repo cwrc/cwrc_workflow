@@ -84,10 +84,10 @@ abstract class WorkflowConst extends BasicEnum {
   const CONTENT_CONTRIBUTION = "content_contribution";
   const CHECKED = "checked";
   const MACHINE_PROCESSED = "machine_processed";
-  const USER_TAGGED = "user_tagged";
+  const USER_TAGGED = "user-tagged";
   const RIGHTS_ASSIGNED = "rights_assigned";
   const PUBLISHED = "published";
-  const PEER_REVIEWED_EVALUATED = "peer_reviewed_evaluated";
+  const PEER_REVIEWED_EVALUATED = "peer-reviewed/evaluated";
   const WITHDRAWN = "withdrawn";
   const DELETED = "deleted";
 
