@@ -435,7 +435,7 @@ function islandora_workflow_rest_admin_cm_table_form() {
       '#type' => 'textfield',
       '#value' => $content_model->delay,
       '#title' => 'Logging Delay',
-      '#description' => 'Datastream loging delay in seconds.',
+      '#description' => 'Datastream logging delay in seconds.',
       '#title_display' => 'invisible',
       '#name' => $content_model->pid . '[delay_entry]',
     );
@@ -463,7 +463,7 @@ function islandora_workflow_rest_admin_cm_table_form() {
       '#type' => 'textfield',
       '#value' => '30',
       '#title' => 'Logging Delay',
-      '#description' => 'Datastream loging delay in seconds.',
+      '#description' => 'Datastream logging delay in seconds.',
       '#title_display' => 'invisible',
       '#name' => $key . '[delay_entry]',
     );
