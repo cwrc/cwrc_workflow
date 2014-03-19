@@ -7,13 +7,9 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
     drupal_get_path('module', 'islandora_workflow_rest') .
     '/css/islandora_workflow_rest_report_css.css'
   );
-//   $something = islandora_solr_advanced_search_form($form, $form_state);
-//   $shit = drupal_render($something);
-//  // $stuff = drupal_get_form('islandora_solr_advanced_search_form');
-//   dsm($form['workflow_reports_fs']['skskkdndnd'], "stuff");
-//   $form['contact_information'] = array(
-//     '#markup' => $shit,
-//   );
+  $solr_search = islandora_solr_advanced_search_form($form, $form_state);
+  $solr_rendered = drupal_render($solr_search);
+
   // Define fieldsets.
   $form['workflow_reports_fs'] = array(
       '#type' => 'fieldset',
@@ -33,7 +29,9 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
       '#collapsible' => FALSE,
       '#collapsed' => FALSE,
   );
-
+  $form['workflow_reports_fs']['workflow_solr_fs']['solr_report'] = array(
+    '#markup' => $solr_rendered,
+  );
   // Construct our table of reports.
   $options = array();
   $item_checked = array();
@@ -57,13 +55,13 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
       '#type' => 'textfield',
       '#title' => t('Report Name'),
       '#default_value' => "",
-      '#required' => TRUE,
+      '#required' => FALSE,
   );
   $form['workflow_reports_fs']['report_project'] = array(
       '#type' => 'textfield',
       '#title' => t('Report Project'),
       '#default_value' => "",
-      '#required' => TRUE,
+      '#required' => FALSE,
   );
   $form['workflow_reports_fs']['report_type'] = array(
       '#type' => 'select',
