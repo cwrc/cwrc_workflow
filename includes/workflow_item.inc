@@ -42,6 +42,19 @@ class WorkflowItem {
               throw new Exception("$stamp is not a valid stamp attribute, supplied for $name");
             }
           }
+          if ($key == WorkflowConst::CATEGORY) {
+            // Confirm value is a valid category.
+            $lower = strtolower($value);
+            if (!WorkflowConst::isValidValue($lower)) {
+              throw new Exception("$value is not a valid Category value.");
+            }
+          }
+          if ($key == WorkflowConst::STATUS) {
+            // Confirm $value is a valid category entry.
+            if (!WorkflowConst::isValidValue($value)) {
+              throw new Exception("$value is not a valid Status value.");
+            }
+          }
           if (!WorkflowConst::isValidName($key)) {
             throw new Exception("$key is not a valid attribute in any WorkflowItem node. value:  $value");
           }
@@ -53,6 +66,20 @@ class WorkflowItem {
       throw new Exception("$name is not a valid WorkflowNode");
     }
     $this->validate();
+    if ($name == WorkflowConst::ACTIVITY) {
+      // An Activity requires: Category/Stamp/Status.
+      $keys = array_keys($this->typeAttributes);
+      if (count($keys) < 3 ) {
+        throw new Exception("Category, Stamp and Status are required fields.");
+      }
+    }
+    if ($name == WorkflowConst::ASSIGNED) {
+      // An Assigned requires (if set at all): Category.
+      $keys = array_keys($this->typeAttributes);
+      if (count($keys) > 0 && (!in_array(WorkflowConst::CATEGORY, $keys))) {
+        throw new Exception("Assigned entries require atleast a Category entry");
+      }
+    }
   }
 
   /**

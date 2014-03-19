@@ -121,7 +121,9 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   $message['body'][] = t("Dear @username\n\n@message\n\n@link\n\n", $variables, array('langcode' => $langcode));
 
   $pm_message = "";
-  if (module_exists('privatemsg')) {
+  $success;
+  $private_msg_available = module_exists('privatemsg');
+  if ($private_msg_available) {
     $pm_message = "Private message notification sent";
     // Utilize the Privatemsg module notification system.
     // Send a message to the user with privatemsg_new_thread.
@@ -152,7 +154,8 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
     ),
   'status'
   );
-  if ($message['send']) {
+  
+  if ($message['send'] && (!$success['success'])) {
     drupal_set_message(
       t("@email",
         array(
