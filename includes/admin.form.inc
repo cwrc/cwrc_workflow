@@ -174,12 +174,14 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
     case "Update":
       module_load_include('inc', 'islandora_basic_collection', 'includes/utilities');
       $content_models = islandora_get_content_models();
+      $notify = FALSE;
       foreach ($form_state['values']['content_model_table'] as $list_identifier => $is_checked) {
         $entry_is_checked = ($is_checked ? 1 : 0);
         // Remove all entries, update to match the form exactally.
         islandora_workflow_rest_delete_ds_logs_admin($list_identifier);
         // Update db table to match.
         if ($entry_is_checked) {
+          $notify = TRUE;
           $dsid = $form_state['input'][$list_identifier]['dsid_entry'];
           islandora_workflow_rest_set_ds_log_admin(
             $form_state['input'][$list_identifier]['dsid_entry'],
@@ -196,6 +198,16 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
           'status'
           );
         }
+      }
+      if ($notify == FALSE) {
+        drupal_set_message(
+          t("@msg",
+            array(
+              '@msg' => t("No rows affected. Select all content models to monitor, and click update."),
+            )
+          ),
+          'status'
+        );
       }
       break;
 

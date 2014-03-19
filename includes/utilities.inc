@@ -427,6 +427,7 @@ function islandora_workflow_rest_admin_cm_table_form() {
       '#type' => 'textfield',
       '#value' => $content_model->dsid,
       '#title' => 'Datastream ID',
+      '#description' => 'Comma separated datastream values.',
       '#title_display' => 'invisible',
       '#name' => $content_model->pid . '[dsid_entry]',
     );
@@ -434,6 +435,7 @@ function islandora_workflow_rest_admin_cm_table_form() {
       '#type' => 'textfield',
       '#value' => $content_model->delay,
       '#title' => 'Logging Delay',
+      '#description' => 'Datastream logging delay in seconds.',
       '#title_display' => 'invisible',
       '#name' => $content_model->pid . '[delay_entry]',
     );
@@ -453,6 +455,7 @@ function islandora_workflow_rest_admin_cm_table_form() {
       '#type' => 'textfield',
       '#value' => 'TN',
       '#title' => 'Datastream ID',
+      '#description' => 'Comma separated datastream values.',
       '#title_display' => 'invisible',
       '#name' => $key . '[dsid_entry]',
     );
@@ -460,6 +463,7 @@ function islandora_workflow_rest_admin_cm_table_form() {
       '#type' => 'textfield',
       '#value' => '30',
       '#title' => 'Logging Delay',
+      '#description' => 'Datastream logging delay in seconds.',
       '#title_display' => 'invisible',
       '#name' => $key . '[delay_entry]',
     );
@@ -470,8 +474,8 @@ function islandora_workflow_rest_admin_cm_table_form() {
     $item_checked[$key] = 0;
   }
   $header = array(
-    'pid' => t('PID'),
     'label' => t('Label'),
+    'pid' => t('PID'),
     'dsid' => t('Datastream ID'),
     'delay' => t('Logging Delay'),
   );
