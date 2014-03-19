@@ -124,6 +124,52 @@ function islandora_workflow_rest_schema() {
     ),
     'primary key' => array('lid'),
   );
+  
+  
+  $schema['islandora_workflow_rest_reports'] = array(
+  		'description' => 'Table that stores report queries.',
+  		'fields' => array(
+  				'lid' => array(
+  						'type' => 'serial',
+  						'unsigned' => TRUE,
+  						'not null' => TRUE,
+  						'description' => 'The UID for the report.',
+  				),
+  				'name' => array(
+  						'type' => 'varchar',
+  						'length' => 255,
+  						'not null' => FALSE,
+  						'description' => 'The name of the report.',
+  				),
+  				'project' => array(
+  						'type' => 'varchar',
+  						'length' => 255,
+  						'not null' => FALSE,
+  						'description' => 'The name of the project this report belongs to.',
+  				),
+  				'createdby' => array(
+  						'type' => 'varchar',
+  						'length' => 255,
+  						'not null' => FALSE,
+  						'description' => 'The user the report was created by.',
+  				),
+  				'editroles' => array(
+  						'type' => 'varchar',
+  						'length' => 255,
+  						'not null' => FALSE,
+  						'description' => 'The roles allowed to edit the report.',
+  				),
+  				'viewroles' => array(
+  						'type' => 'varchar',
+  						'length' => 255,
+  						'not null' => FALSE,
+  						'description' => 'The rols allowed to view the report.',
+  				),
+  		),
+  		'primary key' => array('lid'),
+  );
+  
+  
   return $schema;
 }
 
