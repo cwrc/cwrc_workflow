@@ -285,7 +285,7 @@ function islandora_workflow_rest_add_workflow_step() {
     $activity_params = (isset($params['activity']) ? json_decode($params['activity'], TRUE) : array());
     $tool_id = (isset($params['toolID']) ? array("toolID" => json_decode($params['toolID'])) : array());
     $assigned_params = (isset($params['assigned']) ? json_decode($params['assigned'], TRUE) : array());
-
+dsm($activity_params, "act prarams");
     $assigned_accounts = array();
     $activity_accounts = array();
     if (isset($activity_params['recipient'])) {
