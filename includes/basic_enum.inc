@@ -67,7 +67,7 @@ abstract class BasicEnum {
    *   The constant value.
    */
   public static function getConstantValue($value) {
-    $values = array_values(self::getConstants());
+    $values = self::getConstants();
     return $values[strtoupper($value)];
   }
 }
@@ -87,7 +87,7 @@ abstract class WorkflowConst extends BasicEnum {
   const USER_TAGGED = "user-tagged";
   const RIGHTS_ASSIGNED = "rights_assigned";
   const PUBLISHED = "published";
-  const PEER_REVIEWED_EVALUATED = "peer_reviewed_evaluated";
+  const PEER_REVIEWED_EVALUATED = "peer-reviewed/evaluated";
   const WITHDRAWN = "withdrawn";
   const DELETED = "deleted";
 

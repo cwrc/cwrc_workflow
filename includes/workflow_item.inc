@@ -45,6 +45,7 @@ class WorkflowItem {
           if ($key == WorkflowConst::CATEGORY) {
             // Confirm value is a valid category.
             $lower = strtolower($value);
+
             if (!WorkflowConst::isValidValue($lower)) {
               throw new Exception("$value is not a valid Category value.");
             }
