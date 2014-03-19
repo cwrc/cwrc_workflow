@@ -135,9 +135,9 @@ class CWRCWorkflowAPIUnitTestCase extends IslandoraWebTestCase {
         ),
         new WorkflowItem(WorkflowConst::ACTIVITY,
           array(
-            'category' => 'sample_category',
+            'category' => 'machine_processed',
             'stamp' => 'niso:AO',
-            'status' => 'sample_status',
+            'status' => 'ipr',
           ),
         "This is the text body of the note element"
         ),
