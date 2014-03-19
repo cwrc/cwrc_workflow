@@ -316,7 +316,6 @@ function islandora_workflow_rest_add_workflow_step() {
     );
     $entry = new WorkflowItem(WorkflowConst::WORKFLOW, $tool_id
     );
-    dsm($assigned, "assigned");
     // Get the last workflow step, if exists.
     $last_workflow = $workflow->entryToArray();
     if ($last_workflow) {
