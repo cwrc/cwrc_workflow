@@ -427,7 +427,7 @@ function islandora_workflow_rest_admin_cm_table_form() {
       '#type' => 'textfield',
       '#value' => $content_model->dsid,
       '#title' => 'Datastream ID',
-      '#description' => 'Comma seperated datastream values.',
+      '#description' => 'Comma separated datastream values.',
       '#title_display' => 'invisible',
       '#name' => $content_model->pid . '[dsid_entry]',
     );
@@ -455,7 +455,7 @@ function islandora_workflow_rest_admin_cm_table_form() {
       '#type' => 'textfield',
       '#value' => 'TN',
       '#title' => 'Datastream ID',
-      '#description' => 'Comma seperated datastream values.',
+      '#description' => 'Comma separated datastream values.',
       '#title_display' => 'invisible',
       '#name' => $key . '[dsid_entry]',
     );
