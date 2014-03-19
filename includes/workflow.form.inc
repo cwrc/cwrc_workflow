@@ -27,7 +27,7 @@ function islandora_workflow_rest_user_autocomplete($string) {
   }
   // This may seem crazy, but adds support for csv autocomplete.
   if (count($pieces) > 1) {
-    $key_string;
+    $key_string = "";
     foreach ($pieces as $piece) {
       if ($piece != $pieces[count($pieces) - 1]) {
         $key_string .= $piece . ",";
@@ -361,7 +361,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $activity_params = array();
 
   // Activity parameters.
-  $activity_params['category'] = $form_state['values']['wf_ass_act_category'];
+  $activity_params['category'] = AssignedCategory::getConstantValue($form_state['values']['wf_ass_act_category']);
   $activity_params['stamp'] = $form_state['values']['wf_act_stamp'];
   $activity_params['status'] = $form_state['values']['wf_act_status'];
   $activity_params['note'] = $form_state['values']['wf_act_note'];
@@ -371,7 +371,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $activity_params['body'] = $form_state['values']['wf_act_message'];
 
   // Assign parameters.
-  $assigned_params['category'] = $form_state['values']['assign_category'];
+  $assigned_params['category'] = AssignedCategory::getConstantValue($form_state['values']['assign_category']);
   $assigned_params['note'] = $form_state['values']['assign_note'];
   // Assign Notification.
   $assigned_params['recipient'] = $form_state['values']['user'];

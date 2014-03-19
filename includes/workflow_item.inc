@@ -39,12 +39,13 @@ class WorkflowItem {
             $stamp = islandora_workflow_rest_get_stamp($value);
             if ($stamp == "") {
               // Stamp is not a pre approved stamp, throw exception.
-              throw new Exception("$stamp is not a valid stamp attribute, supplied for $name");
+              throw new Exception("$value is not a valid stamp attribute, supplied for $name");
             }
           }
           if ($key == WorkflowConst::CATEGORY) {
             // Confirm value is a valid category.
             $lower = strtolower($value);
+
             if (!WorkflowConst::isValidValue($lower)) {
               throw new Exception("$value is not a valid Category value.");
             }
@@ -68,8 +69,9 @@ class WorkflowItem {
     $this->validate();
     if ($name == WorkflowConst::ACTIVITY) {
       // An Activity requires: Category/Stamp/Status.
-      $keys = array_keys($this->typeAttributes);
-      if (count($keys) < 3 ) {
+      if (!isset($this->typeAttributes[WorkflowConst::STAMP]) ||
+          !isset($this->typeAttributes[WorkflowConst::CATEGORY]) ||
+          !isset($this->typeAttributes[WorkflowConst::STATUS])) {
         throw new Exception("Category, Stamp and Status are required fields.");
       }
     }

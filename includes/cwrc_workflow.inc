@@ -392,11 +392,11 @@ XML;
     $assigned->setAttribute("category", $child->typeAttributes['category']);
 
     if (isset($child->typeAttributes[WorkflowConst::NOTE])) {
-        $note = $this->doc->createElement(WorkflowConst::NOTE);
-        $note_body = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::NOTE]);
-        $note->innerHTML = $child->typeAttributes[WorkflowConst::NOTE];
-        $note->appendChild($note_body);
-        $assigned->appendChild($note);
+      $note = $this->doc->createElement(WorkflowConst::NOTE);
+      $note_body = $this->doc->createTextNode($child->typeAttributes[WorkflowConst::NOTE]);
+      $note->innerHTML = $child->typeAttributes[WorkflowConst::NOTE];
+      $note->appendChild($note_body);
+      $assigned->appendChild($note);
     }
 
     $parent->appendChild($assigned);
