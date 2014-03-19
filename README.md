@@ -15,10 +15,11 @@ CONTENTS OF THIS FILE
  * [Installation](#installation)
  * [Configuration](#configuration)
  * [Documentation](#documentation)
-   * [Describe Existing Workflow Datastream](#describe-an-existing-workflow-datastream)
+   * [Describe Existing Workflow Datastream](#describe-existing-workflow-datastream)
    * [Get Last Workflow Entry](#get-last-workflow-entry)
    * [Add Workflow Entry](#add-workflow-entry)
    * [Test object for a given stamp category or status](#test-object-for-a-given-stamp-category-or-status)
+   * [List all PIDs with a given stamp/category and status within an optional collection] (#list-all-pids-with-a-given-stampcategory-and-status-within-an-optional-collection)
  * [Todo](#todo)
 
 SUMMARY
@@ -53,7 +54,7 @@ CONFIGURATION
 
 For each of the REST end-points defined below in the documentation section there
 exists a corresponding Drupal Endpoint. Making __GET__ requests to these endpoints
-produces a json object representative of the requested task.
+produces a JSON object representative of the requested task.
 
 
 ### Documentation Key
@@ -110,15 +111,15 @@ GET
 Accept: application/json
 
 #### Get Parameters
-| Name          | Description                                                  |
-| ------------- | ------------------------------------------------------------ |
-| PID           | Persistent identifier of the object
+| Name          | Description                            | Optional            |
+| ------------- | -------------------------------------- | ------------------- |
+| PID           | Persistent identifier of the object    | Required
 
 #### Response: 200 OK
 ##### Content-Type: application/json
 | Name          | Description                                                  |
 | ------------- | ------------------------------------------------------------ |
-| workflow           | A Workflow array as json, with each entry representing a workflow item.
+| workflow      | A Workflow array, with each entry representing a workflow item.
 
 #### Example Response
 ```JSON
@@ -173,9 +174,9 @@ GET
 Accept: application/json
 
 #### GET
-| Name          | Description                                                  |
-| ------------- | ------------------------------------------------------------ |
-| pid           | The fedora identifier to find the last workflow enry for.
+| Name          | Description                                                | Optional    |
+| ------------- | ---------------------------------------------------------- | ------------|
+| PID           | The fedora identifier to find the last workflow entry for. | Required
 
 #### Response: 200 OK
 ##### Content-Type: application/json
@@ -232,22 +233,42 @@ Accept: application/json
 Content-Type: application/json
 
 #### Get Variables
-| Name          | Description                                                  |
-| ------------- | ------------------------------------------------------------ |
-| PID           | Persistent identifier of the object, if not given the namespace will be used to create a new one (required).
-| toolID           | The tool identifier to add to the workflow (optional).
-| activity           | Json object in key value pairs, E.X. {"category":"content_contribution","stamp":"nis:AO","status":"foo_bar","note":"Note text"} *(optional).
-| assigned           | Json object in key value pairs, E.X. {"category":"content_contribution","recipient":"user","subject":"foo_bar","body":"The body text"} *(optional).
+| Name          | Description                                         | Optional  |
+| ------------- | --------------------------------------------------- | --------- |
+| PID           | Persistent identifier of the object.                | Required
+| toolID        | The tool identifier to add to the workflow          | Optional
+| activity      | JSON with keys _category_, _stamp_, _status_        | Required
+| assigned      | JSON with keys _category_                           | Optional
 
-#### Note *
-A notification email will only be sent if 'recipient', 'subject', and 'body' are ALL set in the activity/assigned json GET Request.
-EX: {"category":"sample remote","stamp":"niso:AO","status":"foo_bar","note":"sample text note","recipient":"me_guy","subject":"this is my subject","body":"this is my body text"}
+Both *activity* and *assigned*, have the optional keys _note_, _recipient_,
+_subject_, and _body_. A notification email will only be sent if _recipient_,
+_subject_, and _body_ are all set.
+
+### *activity* Example
+```JSON
+{
+    "category":"content_contribution",
+    "stamp":"nis:AO",
+    "status":"foo_bar",
+    "note":"Note text",
+}
+```
+
+### *assigned* Example
+```JSON
+{
+    "category":"content_contribution",
+    "recipient":"user",
+    "subject":"foo_bar",
+    "body":"The body text",
+}
+```
 
 #### Response: 200 OK
 ##### Content-Type: application/json
 | Name          | Description                                                  |
 | ------------- | ------------------------------------------------------------ |
-| response      | Json workflow item.
+| response      | JSON workflow item.
 
 #### Example Response
 ```JSON
@@ -296,19 +317,19 @@ islandora_workflow_rest/v1/has_entry/{params}
 GET
 
 ##### Get Variables
-| Name          | Description                                                  |
-| ------------- | ------------------------------------------------------------ |
-| pid           | Persistent identifier of the object.
-| stamp           | (optional) The stamp to check for.
-| category           | (optional) The category to check for.
-| status           | (optional) The status to check for.
-| simple           | (optional) Full workflow entries or boolean check. Default false.
+| Name          | Description                            | Optional    |
+| ------------- | -------------------------------------- | ----------- |
+| PID           | Persistent identifier of the object.   | Required
+| stamp         | The stamp to check for.                | Optional
+| category      | The category to check for.             | Optional
+| status        | The status to check for.               | Optional
+| simple        | Full workflow entries or simple check. | Optional (Default: false)
 
 #### Response: 200 OK
 ##### Content-Type: application/json
 | Name          | Description                                                  |
 | ------------- | ------------------------------------------------------------ |
-| response      | Json object array of workflow item(s).
+| response      | JSON object array of workflow item(s).
 
 #### Example Response (simple:false)
 ```JSON
@@ -399,11 +420,21 @@ GET
 Accept: application/json
 
 #### Get Variables
-| Name          | Description                                                  |
-| ------------- | ------------------------------------------------------------ |
-| collection_pid     | Limit workflow query to a collection by collection PID. (optional)
-| required     | Limit workflow query VIA required attribute fields, EX: required={"workflow_workflowID_ms":"islandora_root_wk_1"} (optional)
-| query     | SOLR query string, EX: 'PID:*'. collection_pid parameter and required paramater will still be applied to the query string if set. (optional)
+| Name           | Description                                                  | Optional    |
+| -------------- | ------------------------------------------------------------ | ----------- |
+| collection_pid | Limit workflow query to a collection by collection PID.      | Optional
+| required       | Limit workflow query VIA required attribute fields           | Optional
+| query          | SOLR query string EX: 'PID:*'.                               | Optional
+
+The *collection_pid* parameter and *required* parameter will be still be applied
+to the *query* string if present.
+
+### *required* Example
+```JSON
+{
+    "workflow_workflowID_ms":"islandora_root_wk_1"
+}
+```
 
 #### Response: 200 OK
 ##### Content-Type: application/json
@@ -411,7 +442,7 @@ A JSON **array** with each field containing the following values.
 
 | Name          | Description                                                  |
 | ------------- | ------------------------------------------------------------ |
-| pids     |  JSON Object array of pids matching the supplied query.
+| pids          |  JSON Object array of pids matching the supplied query.
 
 #### Example Response
 
