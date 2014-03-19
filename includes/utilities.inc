@@ -516,7 +516,14 @@ function islandora_workflow_log_event($pid, $action, $dsid, $delay, $timestamp) 
              and state = 'new'
              and timestamp > $threshold";
   $result = db_query($query)->fetchAssoc();
-  if (!$result) {
+  if ($result) {
+    $lid = $result['lid'];
+    db_update('islandora_workflow_rest_ds_logs')
+        ->fields(array('timestamp' => strtotime($timestamp)))
+        ->condition('lid', $lid)
+        ->execute();
+  }
+  else {
     db_insert('islandora_workflow_rest_ds_logs')
         ->fields(array(
           'pid' => $pid,

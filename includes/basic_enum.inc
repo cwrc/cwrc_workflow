@@ -67,7 +67,7 @@ abstract class BasicEnum {
    *   The constant value.
    */
   public static function getConstantValue($value) {
-    $values = array_values(self::getConstants());
+    $values = self::getConstants();
     return $values[strtoupper($value)];
   }
 }

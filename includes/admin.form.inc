@@ -33,7 +33,7 @@ function islandora_workflow_rest_admin($form, &$form_state) {
   );
   $form['manage_workflow']['workflow_cm_fs'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Configure Content Models'),
+    '#title' => t('Configure Event Logging'),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
