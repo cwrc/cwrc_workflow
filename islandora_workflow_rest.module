@@ -154,7 +154,7 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
     ),
   'status'
   );
-  
+
   if ($message['send'] && (!$success['success'])) {
     drupal_set_message(
       t("@email",

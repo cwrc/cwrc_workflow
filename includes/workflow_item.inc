@@ -69,7 +69,7 @@ class WorkflowItem {
     if ($name == WorkflowConst::ACTIVITY) {
       // An Activity requires: Category/Stamp/Status.
       $keys = array_keys($this->typeAttributes);
-      if (count($keys) < 3 ) {
+      if (count($keys) < 3) {
         throw new Exception("Category, Stamp and Status are required fields.");
       }
     }
