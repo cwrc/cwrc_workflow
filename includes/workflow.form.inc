@@ -443,7 +443,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
     $params['force_email'] = $form_state['values']['force_act_email'];
     islandora_workflow_rest_notify($params);
   }
-  if ($form_state['values']['user'] != "") {
+  if (!empty($form_state['values']['user']) && isset($assigned)) {
     // Email Assigned notification.
     $params['body'] = $form_state['values']['assign_message'] . "\n\n" .
         $this_wf_string . "\n\n" . $last_wf_string;
