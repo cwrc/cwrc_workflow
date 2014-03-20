@@ -329,7 +329,7 @@ XML;
    * @param WorkflowItem $assigned
    *   WorkflowItem object representing the assigned node.
    */
-  public function addWorkflowStep($pid, WorkflowItem $workflow, WorkflowItem $activity, WorkflowItem $assigned) {
+  public function addWorkflowStep($pid, WorkflowItem $workflow, WorkflowItem $activity, WorkflowItem $assigned = NULL) {
     $this->pid = $pid;
     $parent = $this->doc->documentElement;
     $element = $this->doc->createElement($workflow->workName);
