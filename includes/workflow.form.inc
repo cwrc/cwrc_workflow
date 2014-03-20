@@ -154,16 +154,10 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
  *   The returned form.
  */
 function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
-  $collapsed = TRUE;
-  if (isset($_GET['lid'])) {
-    $lid = $_GET['lid'];
-    $query = "select * from {islandora_workflow_rest_ds_logs} where lid = '$lid'";
-    db_query($query)->fetchAssoc();
-    $collapsed = FALSE;
-  }
   module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
 
+  $collapsed = isset($_GET['lid']) ? FALSE : TRUE;
   $assigned_categories = drupal_map_assoc(array_values(AssignedCategory::getAllConstants()));
   $assigned_categories[NULL] = "Select";
   ksort($assigned_categories);
@@ -172,7 +166,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   $stamps = array();
   $stamps[NULL] = "Select";
   $results = islandora_workflow_rest_get_all_stamps(1000);
-  while ($data = $results->fetchObject()) {
+  while (($data = $results->fetchObject()) == TRUE) {
     $exploded = explode(":", $data->stamp);
     $restriction = variable_get('islandora_workflow_rest_enable_namespace', 0);
     if ($restriction == 0) {
