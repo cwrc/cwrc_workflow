@@ -157,17 +157,16 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   $collapsed = TRUE;
   if (isset($_GET['lid'])) {
     $lid = $_GET['lid'];
-    $query = "select * from {islandora_workflow_rest_ds_logs}
-             where lid = '$lid'";
-    $results = db_query($query)->fetchAssoc();
+    $query = "select * from {islandora_workflow_rest_ds_logs} where lid = '$lid'";
+    db_query($query)->fetchAssoc();
     $collapsed = FALSE;
   }
   module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
 
-  $assigned_categorys = AssignedCategory::getAllConstants();
-  $assigned_categorys[NULL] = "Select";
-  ksort($assigned_categorys);
+  $assigned_categories = drupal_map_assoc(array_values(AssignedCategory::getAllConstants()));
+  $assigned_categories[NULL] = "Select";
+  ksort($assigned_categories);
   $pid_namespace = explode(":", $form['islandora_object']['#value']);
 
   $stamps = array();
@@ -185,6 +184,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
       }
     }
   }
+
   $status_arr = array(
     NULL => t('Select'),
     'c' => t('Complete'),
@@ -206,6 +206,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
+
   // Basic Activity fields.
   $wf_ass_act_category_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['category']) ?
     $last_workflow['response']['workflow']['activity']['attributes']['category'] : NULL);
@@ -213,7 +214,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     '#type' => 'select',
     '#title' => t('Category'),
     '#required' => TRUE,
-    '#options' => $assigned_categorys,
+    '#options' => $assigned_categories,
     '#default_value' => $wf_ass_act_category_default,
   );
   $wf_act_stamp_default = (isset($last_workflow['response']['workflow']['activity']['attributes']['stamp']) ?
@@ -285,7 +286,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['assign_category'] = array(
     '#type' => 'select',
     '#title' => t('Category'),
-    '#options' => $assigned_categorys,
+    '#options' => $assigned_categories,
     '#default_value' => $wf_ass_category_default,
     '#states' => array(
       'required' => array(
@@ -383,7 +384,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $activity_params = array();
 
   // Activity parameters.
-  $activity_params['category'] = AssignedCategory::getConstantValue($form_state['values']['wf_ass_act_category']);
+  $activity_params['category'] = $form_state['values']['wf_ass_act_category'];
   $activity_params['stamp'] = $form_state['values']['wf_act_stamp'];
   $activity_params['status'] = $form_state['values']['wf_act_status'];
   $activity_params['note'] = $form_state['values']['wf_act_note'];
@@ -396,7 +397,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $assigned = NULL;
   if (!empty($form_state['values']['assign_category'])) {
     // Assign parameters.
-    $assigned_params['category'] = AssignedCategory::getConstantValue($form_state['values']['assign_category']);
+    $assigned_params['category'] = $form_state['values']['assign_category'];
     $assigned_params['note'] = $form_state['values']['assign_note'];
     // Assign Notification.
     $assigned_params['recipient'] = $form_state['values']['user'];
