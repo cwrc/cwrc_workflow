@@ -1,0 +1,13 @@
+.report-checkboxes label.option {
+  width: 100% !important;
+}
+
+.form-item-edit-roles {
+  width: 48% !important;
+  float: left !important;
+}
+
+.form-item-view-roles {
+  width: 48% !important;
+  float: left !important;
+}
