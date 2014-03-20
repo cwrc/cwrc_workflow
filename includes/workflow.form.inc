@@ -284,7 +284,8 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
     '#default_value' => $wf_ass_category_default,
     '#states' => array(
       'required' => array(
-        ':input[name="assign_note"]' => array('filled' => TRUE),
+        array(':input[name="assign_note"]' => array('filled' => TRUE)),
+        array(':input[name="user"]' => array('filled' => TRUE)),
       ),
     ),
   );
@@ -360,9 +361,11 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
     if (empty($form_state['values']['assign_message'])) {
       form_set_error('assign_message', t('Message field is required when a User is given.'));
     }
+    if (empty($form_state['values']['assign_category'])) {
+      form_set_error('assign_category', t('Assign Category is required when a Notification User is given.'));
+    }
   }
-  if (empty($form_state['values']['assign_category']) &&
-      $form_state['values']['assign_note'] != "") {
+  if (empty($form_state['values']['assign_category']) && $form_state['values']['assign_note'] != "") {
     form_set_error('assign_category', t('Assign Category is required when a Assign Note is specified.'));
   }
 }
