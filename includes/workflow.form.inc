@@ -355,11 +355,8 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
     }
     // Load and validate Activity user.
     $activity_users = islandora_workflow_rest_load_users_from_csv($form_state['values']['act_user']);
-    // Make sure each user loaded.
-    foreach ($activity_users as $user) {
-      if (!$user) {
-        form_set_error('user', t('The supplied user in Activity notify does not exist.'));
-      }
+    if (in_array(FALSE, $activity_users)) {
+      form_set_error('act_user', t('The supplied user in Activity notify does not exist.'));
     }
   }
   if (!empty($form_state['values']['user'])) {
@@ -374,10 +371,8 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
     }
     // Load and validate Assign user.
     $assign_users = islandora_workflow_rest_load_users_from_csv($form_state['values']['user']);
-    foreach ($assign_users as $user) {
-      if (!$user) {
-        form_set_error('user', t('The supplied user in Assign notify does not exist.'));
-      }
+    if (in_array(FALSE, $assign_users)) {
+      form_set_error('user', t('The supplied user in Assign notify does not exist.'));
     }
   }
   if (empty($form_state['values']['assign_category']) && $form_state['values']['assign_note'] != "") {
