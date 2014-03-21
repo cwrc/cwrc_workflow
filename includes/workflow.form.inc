@@ -353,6 +353,11 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
     if (empty($form_state['values']['wf_act_message'])) {
       form_set_error('wf_act_message', t('Message field is required when a User is given.'));
     }
+    // Load and validate Activity user.
+    $activity_users = islandora_workflow_rest_load_users_from_csv($form_state['values']['act_user']);
+    if (in_array(FALSE, $activity_users)) {
+      form_set_error('act_user', t('The supplied user in Activity notify does not exist.'));
+    }
   }
   if (!empty($form_state['values']['user'])) {
     if (empty($form_state['values']['assign_subject'])) {
@@ -363,6 +368,11 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
     }
     if (empty($form_state['values']['assign_category'])) {
       form_set_error('assign_category', t('Assign Category is required when a Notification User is given.'));
+    }
+    // Load and validate Assign user.
+    $assign_users = islandora_workflow_rest_load_users_from_csv($form_state['values']['user']);
+    if (in_array(FALSE, $assign_users)) {
+      form_set_error('user', t('The supplied user in Assign notify does not exist.'));
     }
   }
   if (empty($form_state['values']['assign_category']) && $form_state['values']['assign_note'] != "") {
