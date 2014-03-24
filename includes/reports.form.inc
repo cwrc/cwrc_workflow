@@ -55,10 +55,10 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
   foreach ($result as $record) {
     $view_roles = unserialize($record->viewroles);
     $edit_roles = unserialize($record->editroles);
-    if (!count(array_intersect($view_roles, $user->roles))) {
+    if (!count(array_intersect($view_roles, $user->roles)) && !user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS)) {
       continue;
     }
-    $can_edit = count(array_intersect($edit_roles, $user->roles));
+    $can_edit = count(array_intersect($edit_roles, $user->roles)) || user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS);
     $lid = $record->lid;
     $edit_link = $can_edit ? l(t('Edit'), 'islandora_workflow_rest/reports', $options = array('query' => array('lid' => $lid))) : '';
     $report_name = $record->name;

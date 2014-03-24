@@ -6,7 +6,19 @@
  */
 
 define('ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD', 'workflow_userID_ms');
+define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS', 'access all saved reports');
 
+/**
+ * Implements hook_permission().
+ */
+function islandora_workflow_rest_permission() {
+  return array(
+    ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS => array(
+      'title' => t('View all Workflow Reports'),
+      'description' => t('View, edit or delete all reports configured in workflow reports.'),
+    ),
+  );
+}
 /**
  * Implements hook_menu().
  */
