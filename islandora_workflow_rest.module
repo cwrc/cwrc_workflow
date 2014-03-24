@@ -439,3 +439,34 @@ function islandora_workflow_rest_islandora_datastream_modified(AbstractObject $o
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
   islandora_workflow_add_or_modify($object, $datastream, 'modified');
 }
+
+/**
+ * Implements hook_menu_alter().
+ */
+function islandora_workflow_rest_menu_alter(&$items) {
+  $items['islandora/search']['access callback'] = 'islandora_workflow_rest_solr_access';
+}
+
+/**
+ * Denies access to roles not associated with report.
+ *
+ * @global user $user
+ *
+ * @return bool
+ *   Access
+ */
+function islandora_workflow_rest_solr_access() {
+  global $user;
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/report_utilities');
+  if (isset($_GET['workflow_report'])) {
+    $record = islandora_workflow_rest_get_record('lid', $_GET['workflow_report']);
+    $view_roles = unserialize($record['viewroles']);
+    if (count(array_intersect($view_roles, $user->roles)) || user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS)) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
+  }
+  return user_access('search islandora solr');
+}

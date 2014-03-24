@@ -62,7 +62,7 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
     $lid = $record->lid;
     $edit_link = $can_edit ? l(t('Edit'), 'islandora_workflow_rest/reports', array('query' => array('lid' => $lid))) : '';
     $report_name = $record->name;
-    $view_link = $can_edit ? l($report_name, "islandora/search/" . $record->query) : '';
+    $view_link = $can_edit ? l($report_name, "islandora/search/" . $record->query, array('query' => array('workflow_report' => $lid))) : '';
     $rows[] = array(
       array('data' => $view_link),
       array('data' => $record->project),
