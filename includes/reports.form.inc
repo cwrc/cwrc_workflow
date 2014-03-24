@@ -292,10 +292,11 @@ function islandora_workflow_rest_reports_form_validate($form, &$form_state) {
   if ($name == '') {
     form_set_error('report_name', t('Name cannot be blank.'));
   }
-
-  $record = islandora_workflow_rest_get_record('name', $name);
-  if ($record) {
-    form_set_error('report_name', t('This name is already in use.  Please select another.'));
+  if (!isset($form_state['values']['lid'])) {
+    $record = islandora_workflow_rest_get_record('name', $name);
+    if ($record) {
+      form_set_error('report_name', t('This name is already in use.  Please select another.'));
+    }
   }
 
   if ($form_state['values']['report_project'] == '') {
