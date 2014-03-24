@@ -5,7 +5,6 @@
  * The main module file for the Islanora workflow rest interface.
  */
 
-// Default constant.
 define('ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD', 'workflow_userID_ms');
 
 /**
@@ -32,16 +31,15 @@ function islandora_workflow_rest_menu() {
       'access callback' => TRUE,
       'file' => 'includes/workflow.form.inc',
     ),
-  		//
-  		'islandora_workflow_rest/reports' => array(
-  				'title' => 'Workflow Reports',
-  				'description' => 'Configure new and existing Workflow reports.',
-  				'page callback' => 'drupal_get_form',
-  				'access arguments' => array('administer site configuration'),
-  				'page arguments' => array('islandora_workflow_rest_reports_form'),
-  				'file' => 'includes/reports.form.inc',
-  				'type' => MENU_NORMAL_ITEM,
-  		),
+    'islandora_workflow_rest/reports' => array(
+      'title' => 'Workflow Reports',
+      'description' => 'Configure new and existing Workflow reports.',
+      'page callback' => 'drupal_get_form',
+      'access arguments' => array('administer site configuration'),
+      'page arguments' => array('islandora_workflow_rest_reports_form'),
+      'file' => 'includes/reports.form.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
     // Administer/add new workflow stamps.
     'admin/islandora/islandora_workflow_rest' => array(
       'title' => 'Workflow Rest',
@@ -106,27 +104,39 @@ function islandora_workflow_rest_menu() {
       'file' => 'includes/cwrc_workflow_status.inc',
       'type' => MENU_CALLBACK,
     ),
+    'islandora_workflow_rest/delete_report/%' => array(
+      'title' => 'Delete report',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('cwrc_workflow_delete_reports_form', 2),
+      'access arguments' => array('administer islandora solr'),
+      'file' => 'includes/reports.form.inc',
+      'type' => MENU_CALLBACK,
+    ),
   );
 }
 
+/**
+ * Impliments hook_theme().
+ */
 function islandora_workflow_rest_theme($existing, $type, $theme, $path) {
-	return array(
-			'islandora_workflow_rest_reports' => array(
-					'template' => 'theme/islandora-basic-image',
-					// We can add PIDs to the end of this pattern in our preprocess function
-					// and templates will be able to have have a pid appended to the
-					// template name to overide a template on a per object basis.
-					// An example template might be named:
-					// "islandora-basic-image--islandora-27.tpl.php".
-					'pattern' => 'islandora_basic_image__',
-					'variables' => array('islandora_object' => NULL),
-			),
-			'islandora_basic_image_print' => array(
-					'template' => 'theme/islandora-basic-image-print',
-					'variables' => array('islandora_content' => NULL),
-			),
-	);
+  return array(
+    'islandora_workflow_rest_reports' => array(
+      'template' => 'theme/islandora-basic-image',
+      // We can add PIDs to the end of this pattern in our preprocess function
+      // and templates will be able to have have a pid appended to the
+      // template name to overide a template on a per object basis.
+      // An example template might be named:
+      // "islandora-basic-image--islandora-27.tpl.php".
+      'pattern' => 'islandora_basic_image__',
+      'variables' => array('islandora_object' => NULL),
+    ),
+    'islandora_basic_image_print' => array(
+      'template' => 'theme/islandora-basic-image-print',
+      'variables' => array('islandora_content' => NULL),
+    ),
+  );
 }
+
 /**
  * Implements hook_mail().
  */
@@ -154,12 +164,8 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
     // Utilize the Privatemsg module notification system.
     // Send a message to the user with privatemsg_new_thread.
     $success = privatemsg_new_thread(
-      array($params['mail_account']),
-      t('Notification from @site', $variables, array('langcode' => $message['language']->language)),
-      t("Dear @username\n\n@message\n\n@link\n\n",
-        $variables,
-        array('langcode' => $langcode)
-      )
+        array($params['mail_account']), t('Notification from @site', $variables, array('langcode' => $message['language']->language)), t("Dear @username\n\n@message\n\n@link\n\n", $variables, array('langcode' => $langcode)
+        )
     );
     if (!$success['success']) {
       $pm_message = "";
@@ -173,21 +179,17 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   }
   $message['send'] = $params['force_email'];
   drupal_set_message(
-    t("@pmsg",
-      array(
-        '@pmsg' => ($pm_message == "" ? "Enable Private Message module to receive message notifications." : $pm_message),
-      )
-    ),
-  'status'
+      t("@pmsg", array(
+    '@pmsg' => ($pm_message == "" ? "Enable Private Message module to receive message notifications." : $pm_message),
+          )
+      ), 'status'
   );
   if ($message['send']) {
     drupal_set_message(
-      t("@email",
-        array(
-          '@email' => "Email force sent to $formated_name",
-        )
-      ),
-    'status'
+        t("@email", array(
+      '@email' => "Email force sent to $formated_name",
+            )
+        ), 'status'
     );
   }
 }
@@ -337,8 +339,7 @@ function islandora_workflow_rest_add_workflow_step() {
     else {
       $workflow = CWRCWorkflowAPI::fromDatastream($islandora_object['WORKFLOW']);
     }
-    $activity = new WorkflowItem(WorkflowConst::ACTIVITY,
-      $activity_params
+    $activity = new WorkflowItem(WorkflowConst::ACTIVITY, $activity_params
     );
     $assigned = new WorkflowItem(WorkflowConst::ASSIGNED, $assigned_params
     );
@@ -362,7 +363,7 @@ function islandora_workflow_rest_add_workflow_step() {
         isset($activity->typeAttributes[WorkflowConst::RECIPIENT])) {
       // Email activity notification.
       $params['body'] = $activity->typeAttributes[WorkflowConst::BODY] . "\n\n" .
-        $this_wf_string . "\n\n" . $last_wf_string;
+          $this_wf_string . "\n\n" . $last_wf_string;
       $params['link'] = url("islandora/object/$islandora_object->id/workflow");
       $params['subject'] = $activity->typeAttributes[WorkflowConst::SUBJECT];
       $params['accounts'] = islandora_workflow_rest_load_users_from_csv($activity->typeAttributes[WorkflowConst::RECIPIENT]);
