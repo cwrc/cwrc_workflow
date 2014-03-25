@@ -7,6 +7,7 @@
 
 define('ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD', 'workflow_userID_ms');
 define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS', 'access all saved reports');
+define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS', 'view saved reports');
 
 /**
  * Implements hook_permission().
@@ -17,8 +18,13 @@ function islandora_workflow_rest_permission() {
       'title' => t('View all Workflow Reports'),
       'description' => t('View, edit or delete all reports configured in workflow reports.'),
     ),
+    ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS => array(
+      'title' => t('View Workflow Reports'),
+      'description' => t('View, edit or delete reports configured in workflow reports.'),
+    ),
   );
 }
+
 /**
  * Implements hook_menu().
  */
@@ -47,7 +53,7 @@ function islandora_workflow_rest_menu() {
       'title' => 'Workflow Reports',
       'description' => 'Configure new and existing Workflow reports.',
       'page callback' => 'drupal_get_form',
-      'access arguments' => array('administer site configuration'),
+      'access arguments' => array(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS),
       'page arguments' => array('islandora_workflow_rest_reports_form'),
       'file' => 'includes/reports.form.inc',
       'type' => MENU_NORMAL_ITEM,

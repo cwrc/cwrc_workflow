@@ -285,7 +285,7 @@ function islandora_workflow_rest_reports_form_validate($form, &$form_state) {
       drupal_get_path('module', 'islandora_workflow_rest') .
       '/css/islandora_workflow_rest_report_css.css'
   );
-  if ($form_state['triggering_element']['#value'] == '+') {
+  if ($form_state['triggering_element']['#value'] == '+' || $form_state['triggering_element']['#value'] == '-') {
     return;
   }
   $name = $form_state['values']['report_name'];
@@ -303,10 +303,10 @@ function islandora_workflow_rest_reports_form_validate($form, &$form_state) {
     form_set_error('report_project', t('Project name cannot be blank.'));
   }
   if (count(array_filter($form_state['values']['edit_roles'])) == 0) {
-    form_set_error('edit_roles', t('Please choose at least on edit role.'));
+    form_set_error('edit_roles', t('Please choose at least one edit role.'));
   }
   if (count(array_filter($form_state['values']['view_roles'])) == 0) {
-    form_set_error('view_roles', t('Please choose at least on view role.'));
+    form_set_error('view_roles', t('Please choose at least one view role.'));
   }
 }
 
