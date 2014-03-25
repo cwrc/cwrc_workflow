@@ -62,7 +62,7 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
     $lid = $record->lid;
     $edit_link = $can_edit ? l(t('Edit'), 'islandora_workflow_rest/reports', array('query' => array('lid' => $lid))) : '';
     $report_name = $record->name;
-    $view_link = $can_edit ? l($report_name, "islandora/search/" . $record->query) : '';
+    $view_link = $can_edit ? l($report_name, "islandora/search/" . $record->query, array('query' => array('workflow_report' => $lid))) : '';
     $rows[] = array(
       array('data' => $view_link),
       array('data' => $record->project),
@@ -285,27 +285,28 @@ function islandora_workflow_rest_reports_form_validate($form, &$form_state) {
       drupal_get_path('module', 'islandora_workflow_rest') .
       '/css/islandora_workflow_rest_report_css.css'
   );
-  if ($form_state['triggering_element']['#value'] == '+') {
+  if ($form_state['triggering_element']['#value'] == '+' || $form_state['triggering_element']['#value'] == '-') {
     return;
   }
   $name = $form_state['values']['report_name'];
   if ($name == '') {
     form_set_error('report_name', t('Name cannot be blank.'));
   }
-
-  $record = islandora_workflow_rest_get_record('name', $name);
-  if ($record) {
-    form_set_error('report_name', t('This name is already in use.  Please select another.'));
+  if (!isset($form_state['values']['lid'])) {
+    $record = islandora_workflow_rest_get_record('name', $name);
+    if ($record) {
+      form_set_error('report_name', t('This name is already in use.  Please select another.'));
+    }
   }
 
   if ($form_state['values']['report_project'] == '') {
     form_set_error('report_project', t('Project name cannot be blank.'));
   }
   if (count(array_filter($form_state['values']['edit_roles'])) == 0) {
-    form_set_error('edit_roles', t('Please choose at least on edit role.'));
+    form_set_error('edit_roles', t('Please choose at least one edit role.'));
   }
   if (count(array_filter($form_state['values']['view_roles'])) == 0) {
-    form_set_error('view_roles', t('Please choose at least on view role.'));
+    form_set_error('view_roles', t('Please choose at least one view role.'));
   }
 }
 
