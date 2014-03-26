@@ -247,7 +247,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_activity_message']['act_user'] = array(
     '#type' => 'textfield',
     '#id' => 'email-auto-complete-act-user',
-    '#title' => t('User'),
+    '#title' => t('To'),
     '#default_value' => "",
     '#size' => 60,
     '#maxlength' => 128,
