@@ -243,7 +243,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_activity_message']['force_act_email'] = array(
     '#type' => 'checkbox',
     '#title' => t('Force mail notification.'),
-    '#description' => t("E-mail notification will be sent to users even if they have opted out of e-mail message delivery.")
+    '#description' => t("E-mail notification will be sent to users even if they have opted out of e-mail message delivery."),
   );
   $form['workflow_wfs_add_fs']['workflow_fs_activity']['workflow_fs_activity_message']['act_user'] = array(
     '#type' => 'textfield',
