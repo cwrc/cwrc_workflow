@@ -326,7 +326,7 @@ function islandora_workflow_rest_reports_form_submit($form, &$form_state) {
   $record = array();
   $record['name'] = $form_state['values']['report_name'];
   $record['project'] = $form_state['values']['report_project'];
-  $record['createdby'] = !user_is_anonymous() ? $user->name : "unknown";
+  $record['createdby'] = !user_is_anonymous() ? $user->name : t("unknown");
   $record['editroles'] = serialize(array_filter($form_state['values']['edit_roles']));
   $record['viewroles'] = serialize(array_filter($form_state['values']['view_roles']));
   $record['query'] = islandora_workflow_rest_build_query($form_state['values']['terms']);
