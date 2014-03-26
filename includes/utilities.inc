@@ -340,7 +340,8 @@ function islandora_workflow_rest_pretty_print_ds($content) {
   $doc = new DOMDocument();
   @$doc->loadXML($content);
   $return = @dom_document_pretty_print($doc, TRUE);
-  return $return;
+  return str_replace('&amp;#xD;', "", $return);
+
 }
 
 /**
