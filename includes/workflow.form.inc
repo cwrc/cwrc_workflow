@@ -312,7 +312,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
   $form['workflow_wfs_add_fs']['workflow_fs_assigned']['workflow_fs_assigned_message']['user'] = array(
     '#id' => 'email-auto-complete-ass-user',
     '#type' => 'textfield',
-    '#title' => t('User'),
+    '#title' => t('To'),
     '#default_value' => "",
     '#size' => 60,
     '#autocomplete_path' => 'islandora_workflow_rest/user/autocomplete',
