@@ -85,7 +85,7 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
   // Define fieldsets.
   $form['workflow_reports_fs'] = array(
     '#type' => 'fieldset',
-    '#title' => $heading,
+    '#title' => filter_xss($heading),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
