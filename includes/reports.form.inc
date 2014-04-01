@@ -26,10 +26,12 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
       '/css/islandora_workflow_rest_report_css.css'
   );
   $title = "<h1></h1>";
+  $heading = t('Create Workflow Report');
   $records = islandora_workflow_rest_get_all_records();
   if (isset($_GET['lid'])) {
     $chosen = $records[$_GET['lid']];
     $title = "<h1> " . t('Edit') . " " . $chosen['name'] . "</h1><a href = 'reports'>Create new report</a>";
+    $heading = t('Edit Workflow Report');
     $form['lid'] = array(
       '#type' => 'hidden',
       '#value' => $_GET['lid'],
@@ -83,7 +85,7 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
   // Define fieldsets.
   $form['workflow_reports_fs'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Create Workflow Reports'),
+    '#title' => $heading,
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
