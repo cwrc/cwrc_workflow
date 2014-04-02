@@ -62,7 +62,7 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
     $can_edit = count(array_intersect($edit_roles, $user->roles)) || user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS);
     $can_view = user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS);
     $lid = $record->lid;
-    $edit_link = $can_edit ? l(t('Edit'), 'islandora_workflow_rest/reports', array('query' => array('lid' => $lid))) : t('Edit');
+    $edit_link = $can_edit ? l(t('Edit'), 'islandora_workflow_rest/reports', array('query' => array('lid' => $lid))) : '';
     $report_name = $record->name;
     $view_link = $can_view ? l($report_name, "islandora/search/" . $record->query, array('query' => array('workflow_report' => $lid))) : $report_name;
     $rows[] = array(
@@ -70,7 +70,7 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
       array('data' => $record->project),
       array('data' => $record->createdby),
       array('data' => $edit_link),
-      array('data' => $can_edit ? l(t('Delete'), "islandora_workflow_rest/delete_report/$lid/$report_name") : t('Delete')),
+      array('data' => $can_edit ? l(t('Delete'), "islandora_workflow_rest/delete_report/$lid/$report_name") : ''),
     );
   }
   $markup = theme('table', array(
