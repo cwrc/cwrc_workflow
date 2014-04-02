@@ -397,7 +397,8 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $activity_params['status'] = $form_state['values']['wf_act_status'];
   $activity_params['note'] = $form_state['values']['wf_act_note'];
   // Activity Notification.
-  $activity_params['recipient'] = $form_state['values']['act_user'];
+  $activity_recipients = islandora_workflow_rest_transform_user_csv($form_state['values']['act_user']);
+  $activity_params['recipient'] = $activity_recipients;
   $activity_params['subject'] = $form_state['values']['wf_act_subject'];
   $activity_params['body'] = $form_state['values']['wf_act_message'];
 
@@ -408,7 +409,8 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
     $assigned_params['category'] = $form_state['values']['assign_category'];
     $assigned_params['note'] = $form_state['values']['assign_note'];
     // Assign Notification.
-    $assigned_params['recipient'] = $form_state['values']['user'];
+    $assigned_recipients = islandora_workflow_rest_transform_user_csv($form_state['values']['user']);
+    $assigned_params['recipient'] = $assigned_recipients;
     $assigned_params['subject'] = $form_state['values']['assign_subject'];
     $assigned_params['body'] = $form_state['values']['assign_message'];
     $assigned = new WorkflowItem(WorkflowConst::ASSIGNED, $assigned_params);

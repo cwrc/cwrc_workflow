@@ -433,6 +433,29 @@ function islandora_workflow_rest_load_by_real_name($value) {
 }
 
 /**
+ * Convert a Real Name CSV string to a drupal user CSV string.
+ *
+ * @param string $string
+ *   The Real Name CSV string to transform
+ *
+ * @return string
+ *   The drupal user name CSV string.
+ */
+function islandora_workflow_rest_transform_user_csv($string) {
+  $return = $string;
+  if (module_exists('realname')) {
+    // We need the drupal user name, not the real name entry.
+    $pieces = explode(",", $string);
+    $accounts;
+    $return = "";
+    foreach ($pieces as $key => $value) {
+      $user = islandora_workflow_rest_load_by_real_name($value);
+      $return .= $user->name . ",";
+    }
+  }
+  return rtrim($return, ",");
+}
+/**
  * Transform a workflow entry into email text.
  *
  * @param array $workflow_item

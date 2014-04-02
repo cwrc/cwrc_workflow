@@ -338,19 +338,25 @@ function islandora_workflow_rest_add_workflow_step() {
     $activity_accounts = array();
     if (isset($activity_params['recipient'])) {
       $activity_accounts = islandora_workflow_rest_load_users_from_csv($activity_params['recipient']);
+      $activity_recipients = "";
       foreach ($activity_accounts as $account) {
         if (!$account) {
           return drupal_json_output(array("Error" => "Supplied user is not in this system"));
         }
+        $activity_recipients .= $account->name . ",";
       }
+      $activity_params['recipient'] = rtrim($activity_recipients, ",");
     }
     if (isset($assigned_params['recipient'])) {
       $assigned_accounts = islandora_workflow_rest_load_users_from_csv($assigned_params['recipient']);
+      $assigned_recipients = "";
       foreach ($assigned_accounts as $account) {
         if (!$account) {
           return drupal_json_output(array("Error" => "Supplied user is not in this system"));
         }
+        $assigned_recipients .= $account->name . ",";
       }
+      $assigned_params['recipient'] = rtrim($assigned_recipients, ",");
     }
     $islandora_object = islandora_object_load($params['PID']);
     if (!$islandora_object['WORKFLOW']) {
