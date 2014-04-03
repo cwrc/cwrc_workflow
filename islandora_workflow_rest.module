@@ -8,6 +8,7 @@
 define('ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD', 'workflow_userID_ms');
 define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS', 'access all saved reports');
 define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS', 'view saved reports');
+define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_DELETE_REPORTS', 'delete workflow reports');
 
 /**
  * Implements hook_permission().
@@ -16,11 +17,15 @@ function islandora_workflow_rest_permission() {
   return array(
     ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS => array(
       'title' => t('View all Workflow Reports'),
-      'description' => t('View, edit or delete all reports configured in workflow reports.'),
+      'description' => t('View or edit all reports configured in workflow reports.'),
     ),
     ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS => array(
       'title' => t('View Workflow Reports'),
-      'description' => t('View, edit or delete reports configured in workflow reports.'),
+      'description' => t('View or edit all reports configured in workflow reports.'),
+    ),
+    ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_DELETE_REPORTS => array(
+      'title' => t('Delete Workflow Reports'),
+      'description' => t('Delete reports configured in workflow reports.'),
     ),
   );
 }
@@ -126,7 +131,8 @@ function islandora_workflow_rest_menu() {
       'title' => 'Delete report',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('cwrc_workflow_delete_reports_form', 2),
-      'access arguments' => array('administer islandora solr'),
+      'access callback' => 'islandora_workflow_rest_can_delete_report',
+      'access arguments' => array(2),
       'file' => 'includes/reports.form.inc',
       'type' => MENU_CALLBACK,
     ),
@@ -155,6 +161,26 @@ function islandora_workflow_rest_theme($existing, $type, $theme, $path) {
   );
 }
 
+/**
+ * Delete reports access callback.
+ *
+ * @param string $lid
+ *   The list id for the given report.
+ *
+ * @return bool
+ *   TRUE if access is granted, FALSE otherwise.
+ */
+function islandora_workflow_rest_can_delete_report($lid) {
+  global $user;
+  $record = islandora_workflow_rest_get_record('lid', $lid);
+  if (!$record) {
+    return FALSE;
+  }
+  $edit_roles = unserialize($record->editroles);
+  $can_edit = count(array_intersect($edit_roles, $user->roles)) ||
+    user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS);
+  return $can_edit;
+}
 /**
  * Implements hook_mail().
  */
