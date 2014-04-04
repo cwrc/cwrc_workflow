@@ -24,7 +24,7 @@ function islandora_workflow_rest_permission() {
       'description' => t('View, edit or delete reports configured in workflow reports.'),
     ),
     ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS => array(
-      'title' => t('Edit Workflow Datastreams'),
+      'title' => t('Workflow REST Datastream access'),
       'description' => t('View, edit, add or update workflow datastreams via REST interface.'),
     ),
   );
