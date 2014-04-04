@@ -142,7 +142,7 @@ function islandora_workflow_rest_menu() {
 /**
  * CRUD access callback for workflow datastreams.
  *
- * @return boolean
+ * @return bool
  *   TRUE if access is allowed, FALSE otherwise.
  */
 function islandora_workflow_rest_modify_worklfow_ds() {
