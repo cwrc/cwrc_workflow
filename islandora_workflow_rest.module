@@ -319,6 +319,7 @@ function islandora_workflow_rest_get_full_workflow() {
  */
 function islandora_workflow_rest_add_workflow_step() {
   try {
+    $use_realname = module_exists('realname');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
@@ -337,19 +338,25 @@ function islandora_workflow_rest_add_workflow_step() {
     $activity_accounts = array();
     if (isset($activity_params['recipient'])) {
       $activity_accounts = islandora_workflow_rest_load_users_from_csv($activity_params['recipient']);
+      $activity_recipients = "";
       foreach ($activity_accounts as $account) {
         if (!$account) {
           return drupal_json_output(array("Error" => "Supplied user is not in this system"));
         }
+        $activity_recipients .= $account->name . ",";
       }
+      $activity_params['recipient'] = rtrim($activity_recipients, ",");
     }
     if (isset($assigned_params['recipient'])) {
       $assigned_accounts = islandora_workflow_rest_load_users_from_csv($assigned_params['recipient']);
+      $assigned_recipients = "";
       foreach ($assigned_accounts as $account) {
         if (!$account) {
           return drupal_json_output(array("Error" => "Supplied user is not in this system"));
         }
+        $assigned_recipients .= $account->name . ",";
       }
+      $assigned_params['recipient'] = rtrim($assigned_recipients, ",");
     }
     $islandora_object = islandora_object_load($params['PID']);
     if (!$islandora_object['WORKFLOW']) {
@@ -384,7 +391,7 @@ function islandora_workflow_rest_add_workflow_step() {
           $this_wf_string . "\n\n" . $last_wf_string;
       $params['link'] = url("islandora/object/$islandora_object->id/workflow");
       $params['subject'] = $activity->typeAttributes[WorkflowConst::SUBJECT];
-      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($activity->typeAttributes[WorkflowConst::RECIPIENT]);
+      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($activity->typeAttributes[WorkflowConst::RECIPIENT], $use_realname);
       $params['force_email'] = 1;
       islandora_workflow_rest_notify($params);
     }
@@ -396,7 +403,7 @@ function islandora_workflow_rest_add_workflow_step() {
           $this_wf_string . "\n\n" . $last_wf_string;
       $params['link'] = url("islandora/object/$islandora_object->id/workflow");
       $params['subject'] = $assigned->typeAttributes[WorkflowConst::SUBJECT];
-      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($assigned->typeAttributes[WorkflowConst::RECIPIENT]);
+      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($assigned->typeAttributes[WorkflowConst::RECIPIENT], $use_realname);
       $params['force_email'] = 1;
       islandora_workflow_rest_notify($params);
     }
