@@ -8,6 +8,7 @@
 define('ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD', 'workflow_userID_ms');
 define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS', 'access all saved reports');
 define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS', 'view saved reports');
+define('ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS', 'modify workflow datastreams');
 
 /**
  * Implements hook_permission().
@@ -21,6 +22,10 @@ function islandora_workflow_rest_permission() {
     ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS => array(
       'title' => t('View Workflow Reports'),
       'description' => t('View, edit or delete reports configured in workflow reports.'),
+    ),
+    ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS => array(
+      'title' => t('Edit Workflow Datastreams'),
+      'description' => t('View, edit, add or update workflow datastreams.'),
     ),
   );
 }
@@ -72,36 +77,36 @@ function islandora_workflow_rest_menu() {
     'islandora_workflow_rest/v1/add_workflow' => array(
       'page callback' => 'islandora_workflow_rest_add_workflow_step',
       'page arguments' => array(3),
-      'access callback' => TRUE,
+      'access callback' => 'islandora_workflow_rest_modify_worklfow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Get last workflow item.
     'islandora_workflow_rest/v1/get_last_workflow' => array(
       'page callback' => 'islandora_workflow_rest_get_last_workflow_step',
-      'access callback' => TRUE,
+      'access callback' => 'islandora_workflow_rest_modify_worklfow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Get full workflow datastream.
     'islandora_workflow_rest/v1/get_full_workflow' => array(
       'page callback' => 'islandora_workflow_rest_get_full_workflow',
-      'access callback' => TRUE,
+      'access callback' => 'islandora_workflow_rest_modify_worklfow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Test for stamp/category on object WORKFLOW datastream.
     'islandora_workflow_rest/v1/has_entry' => array(
       'page callback' => 'islandora_workflow_rest_test_workflow_step',
-      'access callback' => TRUE,
+      'access callback' => 'islandora_workflow_rest_modify_worklfow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Find all pids with given stamp/category, within an optional collection.
     'islandora_workflow_rest/v1/workflow_query' => array(
       'page callback' => 'islandora_workflow_rest_find_workflows',
-      'access callback' => TRUE,
+      'access callback' => 'islandora_workflow_rest_modify_worklfow_ds',
       'type' => MENU_CALLBACK,
     ),
     'islandora_workflow_rest/user/autocomplete' => array(
       'page callback' => 'islandora_workflow_rest_user_autocomplete',
-      'access callback' => TRUE,
+      'access callback' => 'islandora_object_access_callback',
       'file' => 'includes/workflow.form.inc',
       'type' => MENU_CALLBACK,
     ),
@@ -132,6 +137,38 @@ function islandora_workflow_rest_menu() {
       'type' => MENU_CALLBACK,
     ),
   );
+}
+
+/**
+ * CRUD access callback for workflow datastreams.
+ *
+ * @return boolean
+ *   TRUE if access is allowed, FALSE otherwise.
+ */
+function islandora_workflow_rest_modify_worklfow_ds() {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+  $params = islandora_workflow_rest_get_request_parameters();
+  $object;
+
+  try {
+    $object = islandora_object_load($params['PID']);
+    if (!$object) {
+      echo drupal_json_output(array("Error" => "Supplied object is not available"));
+      exit();
+    }
+  }
+  catch (Exception $ex) {
+    echo drupal_json_output(array("Error" => $ex));
+    exit();
+  }
+  $info = islandora_object_access_callback(
+    ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS,
+    $object);
+  if (!$info) {
+    echo drupal_json_output(array("Error" => "Access Denied."));
+    exit();
+  }
+  return $info;
 }
 
 /**
@@ -439,7 +476,7 @@ function islandora_workflow_rest_find_workflows() {
     module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
 
     $params = islandora_workflow_rest_get_request_parameters();
-    $collection_pid = (isset($params['collection_pid']) ? $params['collection_pid'] : NULL);
+    $collection_pid = (isset($params['PID']) ? $params['collection_pid'] : NULL);
     $required = (isset($params['required']) ? json_decode($params['required'], TRUE) : array());
     $custom_query = (isset($params['query']) ? $params['query'] : NULL);
 
