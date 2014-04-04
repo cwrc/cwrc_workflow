@@ -106,7 +106,7 @@ function islandora_workflow_rest_menu() {
     ),
     'islandora_workflow_rest/user/autocomplete' => array(
       'page callback' => 'islandora_workflow_rest_user_autocomplete',
-      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array('search islandora solr'),
       'file' => 'includes/workflow.form.inc',
       'type' => MENU_CALLBACK,
     ),
