@@ -451,7 +451,7 @@ Accept: application/json
 #### Get Variables
 | Name           | Description                                                  | Optional    |
 | -------------- | ------------------------------------------------------------ | ----------- |
-| collection_pid | Limit workflow query to a collection by collection PID.      | Optional
+| PID | Limit workflow query to a collection by collection PID.      | Optional
 | required       | Limit workflow query VIA required attribute fields           | Optional
 | query          | SOLR query string EX: 'PID:*'.                               | Optional
 
