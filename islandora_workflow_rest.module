@@ -77,31 +77,31 @@ function islandora_workflow_rest_menu() {
     'islandora_workflow_rest/v1/add_workflow' => array(
       'page callback' => 'islandora_workflow_rest_add_workflow_step',
       'page arguments' => array(3),
-      'access callback' => 'islandora_workflow_rest_modify_worklfow_ds',
+      'access callback' => 'islandora_workflow_rest_modify_workflow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Get last workflow item.
     'islandora_workflow_rest/v1/get_last_workflow' => array(
       'page callback' => 'islandora_workflow_rest_get_last_workflow_step',
-      'access callback' => 'islandora_workflow_rest_modify_worklfow_ds',
+      'access callback' => 'islandora_workflow_rest_modify_workflow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Get full workflow datastream.
     'islandora_workflow_rest/v1/get_full_workflow' => array(
       'page callback' => 'islandora_workflow_rest_get_full_workflow',
-      'access callback' => 'islandora_workflow_rest_modify_worklfow_ds',
+      'access callback' => 'islandora_workflow_rest_modify_workflow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Test for stamp/category on object WORKFLOW datastream.
     'islandora_workflow_rest/v1/has_entry' => array(
       'page callback' => 'islandora_workflow_rest_test_workflow_step',
-      'access callback' => 'islandora_workflow_rest_modify_worklfow_ds',
+      'access callback' => 'islandora_workflow_rest_modify_workflow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Find all pids with given stamp/category, within an optional collection.
     'islandora_workflow_rest/v1/workflow_query' => array(
       'page callback' => 'islandora_workflow_rest_find_workflows',
-      'access callback' => 'islandora_workflow_rest_modify_worklfow_ds',
+      'access callback' => 'islandora_workflow_rest_modify_workflow_ds',
       'type' => MENU_CALLBACK,
     ),
     'islandora_workflow_rest/user/autocomplete' => array(
@@ -145,52 +145,21 @@ function islandora_workflow_rest_menu() {
  * @return bool
  *   TRUE if access is allowed, FALSE otherwise.
  */
-function islandora_workflow_rest_modify_worklfow_ds() {
+function islandora_workflow_rest_modify_workflow_ds() {
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
-  $params = islandora_workflow_rest_get_request_parameters();
-  $object;
 
-  try {
-    $object = islandora_object_load($params['PID']);
-    if (!$object) {
-      echo drupal_json_output(array("Error" => "Supplied object is not available"));
-      exit();
-    }
-  }
-  catch (Exception $ex) {
-    echo drupal_json_output(array("Error" => $ex));
-    exit();
-  }
+  $params = islandora_workflow_rest_get_request_parameters();
+  $object = islandora_object_load($params['PID']);
   $info = islandora_object_access_callback(
     ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS,
     $object);
+
   if (!$info) {
     echo drupal_json_output(array("Error" => "Access Denied."));
     exit();
   }
-  return $info;
-}
 
-/**
- * Impliments hook_theme().
- */
-function islandora_workflow_rest_theme($existing, $type, $theme, $path) {
-  return array(
-    'islandora_workflow_rest_reports' => array(
-      'template' => 'theme/islandora-basic-image',
-      // We can add PIDs to the end of this pattern in our preprocess function
-      // and templates will be able to have have a pid appended to the
-      // template name to overide a template on a per object basis.
-      // An example template might be named:
-      // "islandora-basic-image--islandora-27.tpl.php".
-      'pattern' => 'islandora_basic_image__',
-      'variables' => array('islandora_object' => NULL),
-    ),
-    'islandora_basic_image_print' => array(
-      'template' => 'theme/islandora-basic-image-print',
-      'variables' => array('islandora_content' => NULL),
-    ),
-  );
+  return $info;
 }
 
 /**
@@ -219,11 +188,11 @@ function islandora_workflow_rest_can_delete_report($lid) {
 function islandora_workflow_rest_mail($key, &$message, $params) {
   global $base_url;
 
-  $formated_name = format_username($params['mail_account']);
+  $formatted_name = format_username($params['mail_account']);
   $data['user'] = $params['mail_account'];
   $options['language'] = $message['language'];
   $variables = array(
-    "@username" => $formated_name,
+    "@username" => $formatted_name,
     "@site" => $base_url,
     "@message" => $params['body'],
     "@link" => $base_url . $params['link'],
@@ -252,7 +221,7 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
       }
     }
     else {
-      $pm_message .= " and email notification set to $formated_name";
+      $pm_message .= " and email notification set to $formatted_name";
     }
   }
   $message['send'] = $params['force_email'];
@@ -266,7 +235,7 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   if ($message['send'] && (!$success['success'])) {
     drupal_set_message(
         t("@email", array(
-      '@email' => "Email force sent to $formated_name",
+      '@email' => "Email force sent to $formatted_name",
             )
         ), 'status'
     );
