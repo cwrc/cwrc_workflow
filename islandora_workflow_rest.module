@@ -172,12 +172,13 @@ function islandora_workflow_rest_modify_workflow_ds() {
  *   TRUE if access is granted, FALSE otherwise.
  */
 function islandora_workflow_rest_can_delete_report($lid) {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/report_utilities');
   global $user;
   $record = islandora_workflow_rest_get_record('lid', $lid);
   if (!$record) {
     return FALSE;
   }
-  $edit_roles = unserialize($record->editroles);
+  $edit_roles = unserialize($record['editroles']);
   $can_edit = count(array_intersect($edit_roles, $user->roles)) ||
     user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS);
   return $can_edit;
