@@ -25,21 +25,38 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
       drupal_get_path('module', 'islandora_workflow_rest') .
       '/css/islandora_workflow_rest_report_css.css'
   );
-  $title = "<h1>Create new report</h1>";
+  $title = "<h1></h1>";
+  $heading = t('Create Workflow Report');
   $records = islandora_workflow_rest_get_all_records();
   if (isset($_GET['lid'])) {
-    $chosen = $records[$_GET['lid']];
-    $title = "<h1> " . t('Edit') . " " . $chosen['name'] . "</h1><a href = 'reports'>Create new report</a>";
     $form['lid'] = array(
       '#type' => 'hidden',
       '#value' => $_GET['lid'],
     );
+    $form['action'] = array(
+      '#type' => 'hidden',
+      '#value' => $_GET['action'],
+    );
+    $chosen = $records[$_GET['lid']];
+    $action = $_GET['action'];
+    if ($action == 'edit') {
+      $heading = t('Edit Workflow Report');
+      $activity = t('Edit');
+    }
+    else {
+      $heading = t('Clone Workflow Report');
+      $activity = t('Clone');
+      $chosen['name'] .= ' - ' . t("Cloned");
+    }
+
+    $title = "<h1> " . $activity . " " . $chosen['name'] . "</h1><a href = 'reports'>Create new report</a>";
   }
 
   $header = array(
     array('data' => t('Name'), 'field' => 'name'),
     array('data' => t('Project'), 'field' => 'project', 'sort' => 'asc'),
     array('data' => t('Created by'), 'field' => 'createdby'),
+    array("data" => ' '),
     array("data" => ' '),
     array("data" => ' '),
   );
@@ -51,7 +68,6 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
   $result = $pager->execute();
 
   $rows = array();
-
   foreach ($result as $record) {
     $view_roles = unserialize($record->viewroles);
     $edit_roles = unserialize($record->editroles);
@@ -59,16 +75,19 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
       continue;
     }
     $can_edit = count(array_intersect($edit_roles, $user->roles)) || user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS);
+    $can_view = user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS);
     $lid = $record->lid;
-    $edit_link = $can_edit ? l(t('Edit'), 'islandora_workflow_rest/reports', array('query' => array('lid' => $lid))) : '';
+    $edit_link = $can_edit ? l(t('Edit'), 'islandora_workflow_rest/reports', array('query' => array('lid' => $lid, 'action' => 'edit'))) : '';
+    $clone_link = $can_edit ? l(t('Clone'), 'islandora_workflow_rest/reports', array('query' => array('lid' => $lid, 'action' => 'clone'))) : '';
     $report_name = $record->name;
-    $view_link = $can_edit ? l($report_name, "islandora/search/" . $record->query, array('query' => array('workflow_report' => $lid))) : '';
+    $view_link = $can_view ? l($report_name, "islandora/search/" . $record->query, array('query' => array('workflow_report' => $lid))) : $report_name;
     $rows[] = array(
       array('data' => $view_link),
       array('data' => $record->project),
       array('data' => $record->createdby),
       array('data' => $edit_link),
-      array('data' => l(t('Delete'), "islandora_workflow_rest/delete_report/$lid/$report_name")),
+      array('data' => $clone_link),
+      array('data' => $can_edit ? l(t('Delete'), "islandora_workflow_rest/delete_report/$lid/$report_name") : ''),
     );
   }
   $markup = theme('table', array(
@@ -83,10 +102,34 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
   // Define fieldsets.
   $form['workflow_reports_fs'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Create Workflow Reports'),
+    '#title' => filter_xss($heading),
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
   );
+  // Define workflow_reports_fs form elements.
+  $form['workflow_reports_fs']['report_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Report Name'),
+    '#required' => TRUE,
+    '#default_value' => isset($chosen['name']) ? $chosen['name'] : '',
+    '#weight' => -2,
+  );
+  $form['workflow_reports_fs']['report_project'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Report Project'),
+    '#default_value' => isset($chosen['project']) ? $chosen['project'] : '',
+    '#required' => TRUE,
+    '#weight' => -1,
+  );
+  $form['workflow_reports_fs']['report_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Report Type'),
+    '#weight' => 0,
+    '#options' => array(
+      0 => t('Solr'),
+    ),
+  );
+
   $form['workflow_reports_fs']['workflow_permissions_fs'] = array(
     '#type' => 'fieldset',
     '#title' => t('Permissions'),
@@ -216,26 +259,6 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
     '#suffix' => '</div>',
   );
 
-  // Define workflow_reports_fs form elements.
-  $form['workflow_reports_fs']['report_name'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Report Name'),
-    '#default_value' => isset($chosen['name']) ? $chosen['name'] : '',
-  );
-  $form['workflow_reports_fs']['report_project'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Report Project'),
-    '#default_value' => isset($chosen['project']) ? $chosen['project'] : '',
-    '#required' => FALSE,
-  );
-  $form['workflow_reports_fs']['report_type'] = array(
-    '#type' => 'select',
-    '#title' => t('Report Type'),
-    '#options' => array(
-      0 => t('Solr'),
-    ),
-  );
-
   $roles = user_roles();
   $role_names = array_values($roles);
   $current_edit_roles = isset($chosen) ? unserialize($chosen['editroles']) : array();
@@ -292,13 +315,12 @@ function islandora_workflow_rest_reports_form_validate($form, &$form_state) {
   if ($name == '') {
     form_set_error('report_name', t('Name cannot be blank.'));
   }
-  if (!isset($form_state['values']['lid'])) {
-    $record = islandora_workflow_rest_get_record('name', $name);
-    if ($record) {
-      form_set_error('report_name', t('This name is already in use.  Please select another.'));
-    }
+  $record = islandora_workflow_rest_get_record('name', $name);
+  $edit = isset($_GET['action']) && $_GET['action'] == 'edit';
+  if ($record && !$edit) {
+    // This is a new report, with the name of an existing one.
+    form_set_error('report_name', t('This name is already in use.  Please select another.'));
   }
-
   if ($form_state['values']['report_project'] == '') {
     form_set_error('report_project', t('Project name cannot be blank.'));
   }
@@ -331,7 +353,16 @@ function islandora_workflow_rest_reports_form_submit($form, &$form_state) {
   $record['viewroles'] = serialize(array_filter($form_state['values']['view_roles']));
   $record['query'] = islandora_workflow_rest_build_query($form_state['values']['terms']);
   $record['terms'] = serialize($form_state['values']['terms']);
-  if (isset($form_state['values']['lid'])) {
+
+  // This may seam silly, but is necessary as the
+  // SOLR AJAX request (adding additional solr fields)
+  // strips the 'lid' field from
+  // the form_state, prior to true form submission.
+  if (isset($_GET['lid'])) {
+    $form_state['values']['lid'] = $_GET['lid'];
+    $form_state['rebuild'] = TRUE;
+  };
+  if (isset($form_state['values']['action']) && $form_state['values']['action'] == 'edit') {
     islandora_workflow_rest_update_record($record, $form_state['values']['lid']);
   }
   else {
