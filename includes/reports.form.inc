@@ -360,6 +360,7 @@ function islandora_workflow_rest_reports_form_submit($form, &$form_state) {
   // the form_state, prior to true form submission.
   if (isset($_GET['lid'])) {
     $form_state['values']['lid'] = $_GET['lid'];
+    $form_state['action']['lid'] = $_GET['action'];
     $form_state['rebuild'] = TRUE;
   };
   if (isset($form_state['values']['action']) && $form_state['values']['action'] == 'edit') {
@@ -445,7 +446,7 @@ function cwrc_workflow_delete_reports_form(array $form, array &$form_state, $lid
 }
 
 /**
- * Marks checked log entrieds as skipped.
+ * Marks checked log entries as skipped.
  *
  * @param array $form
  *   The Drupal form.
