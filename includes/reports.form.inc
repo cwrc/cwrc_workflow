@@ -318,7 +318,7 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => 'Displayed Report Fields',
     '#collapsed' => TRUE,
-    '#collapsible' => FALSE,
+    '#collapsible' => TRUE,
   );
   // If there are values in the form_state use them for persistence in case of
   // AJAX callbacks, otherwise grab fresh values from the database.
