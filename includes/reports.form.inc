@@ -20,11 +20,40 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
   global $user;
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/report_utilities');
+  module_load_include('inc', 'islandora_solr', 'includes/admin');
+  drupal_add_css(drupal_get_path('module', 'islandora_solr') . '/css/islandora_solr.admin.css');
+  drupal_add_library('system', 'ui.dialog');
+  drupal_add_js(drupal_get_path('module', 'islandora_solr') . '/js/islandora_solr.admin.js');
   // Add the custom CSS to align the roles checkboxes.
   drupal_add_css(
       drupal_get_path('module', 'islandora_workflow_rest') .
       '/css/islandora_workflow_rest_report_css.css'
   );
+  $field_to_add = FALSE;
+
+  if (isset($form_state['triggering_element'])) {
+    if ($form_state['triggering_element']['#name'] == 'cwrc-reports-add-field') {
+      $field_to_add = array(
+        'remove_field' => 0,
+        'display_label' => '',
+        'hyperlink' => 0,
+        'weight' => count($form_state['values']['table']['table']['rows']) + 1,
+        'solr_field' => $form_state['values']['available_solr_fields'],
+      );
+    }
+    if ($form_state['triggering_element']['#name'] == 'cwrc-reports-remove-selected') {
+      $rows_to_remove = array();
+      foreach ($form_state['values']['table']['table']['rows'] as $key => $row) {
+        if ($row['remove_field'] == TRUE) {
+          $rows_to_remove[] = $key;
+        }
+      }
+      foreach ($rows_to_remove as $row_number) {
+        unset($form_state['values']['table']['table']['rows'][$row_number]);
+      }
+    }
+  }
+
   $title = "<h1></h1>";
   $heading = t('Create Workflow Report');
   $records = islandora_workflow_rest_get_all_records();
@@ -80,7 +109,7 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
     $edit_link = $can_edit ? l(t('Edit'), 'islandora_workflow_rest/reports', array('query' => array('lid' => $lid, 'action' => 'edit'))) : '';
     $clone_link = $can_edit ? l(t('Clone'), 'islandora_workflow_rest/reports', array('query' => array('lid' => $lid, 'action' => 'clone'))) : '';
     $report_name = $record->name;
-    $view_link = $can_view ? l($report_name, "islandora/search/" . $record->query, array('query' => array('workflow_report' => $lid))) : $report_name;
+    $view_link = $can_view ? l($report_name, "islandora/search/" . $record->query, array('query' => array('workflow_report' => $lid, 'display' => 'cwrc_report'))) : $report_name;
     $rows[] = array(
       array('data' => $view_link),
       array('data' => $record->project),
@@ -286,6 +315,66 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
       ),
     ),
   );
+  $form['islandora_solr_metadata_fields'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Display fields',
+    '#collapsed' => TRUE,
+    '#collapsible' => FALSE,
+  );
+  // If there are values in the form_state use them for persistence in case of
+  // AJAX callbacks, otherwise grab fresh values from the database.
+  if (isset($form_state['values'])) {
+    if (isset($form_state['values']['table'])) {
+      $data = $form_state['values']['table']['table']['rows'];
+    }
+  }
+  else {
+    $data = isset($chosen) ? unserialize($chosen['solr_terms']) : cwrc_forkflow_prep_fields();
+  }
+
+  if ($field_to_add !== FALSE) {
+    $data[] = $field_to_add;
+  }
+
+  $form['islandora_solr_metadata_fields']['search_term_table_wrapper'] = array(
+    '#prefix' => '<div id="cwrc-workflow-fields-wrapper">',
+    '#suffix' => '</div>',
+  );
+  $form['islandora_solr_metadata_fields']['search_term_table_wrapper']['table'] = cwrc_workflow_table_build($data);
+  if (count($form['islandora_solr_metadata_fields']['search_term_table_wrapper']['table']['table']['rows'])) {
+    $form['islandora_solr_metadata_fields']['search_term_table_wrapper']['remove_selected'] = array(
+      '#type' => 'button',
+      '#value' => t('Remove selected'),
+      '#name' => 'cwrc-reports-remove-selected',
+      '#ajax' => array(
+        'callback' => 'cwrc_workflow_fields_ajax',
+        'wrapper' => 'cwrc-workflow-fields-wrapper',
+      ),
+    );
+  }
+  $form['islandora_solr_metadata_fields']['search_term_table_wrapper']['add_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Add field'),
+    '#collapsed' => TRUE,
+    '#collapsible' => FALSE,
+  );
+  $form['islandora_solr_metadata_fields']['search_term_table_wrapper']['add_fieldset']['available_solr_fields'] = array(
+    '#type' => 'textfield',
+    '#description' => t('A field from within Solr'),
+    '#size' => 105,
+    '#autocomplete_path' => 'islandora_solr/autocomplete_luke',
+    '#default_value' => '',
+  );
+  $form['islandora_solr_metadata_fields']['search_term_table_wrapper']['add_fieldset']['add_field'] = array(
+    '#type' => 'button',
+    '#value' => t('Add'),
+    "#executes_submit_callback" => FALSE,
+    '#name' => 'cwrc-reports-add-field',
+    '#ajax' => array(
+      'callback' => 'cwrc_workflow_fields_ajax',
+      'wrapper' => 'cwrc-workflow-fields-wrapper',
+    ),
+  );
   $form['submit'][] = array(
     '#type' => 'submit',
     '#value' => t('Save Report'),
@@ -308,7 +397,7 @@ function islandora_workflow_rest_reports_form_validate($form, &$form_state) {
       drupal_get_path('module', 'islandora_workflow_rest') .
       '/css/islandora_workflow_rest_report_css.css'
   );
-  if ($form_state['triggering_element']['#value'] == '+' || $form_state['triggering_element']['#value'] == '-') {
+  if ($form_state['triggering_element']['#value'] != 'Save Report') {
     return;
   }
   $name = $form_state['values']['report_name'];
@@ -353,6 +442,7 @@ function islandora_workflow_rest_reports_form_submit($form, &$form_state) {
   $record['viewroles'] = serialize(array_filter($form_state['values']['view_roles']));
   $record['query'] = islandora_workflow_rest_build_query($form_state['values']['terms']);
   $record['terms'] = serialize($form_state['values']['terms']);
+  $record['solr_terms'] = serialize($form_state['values']['table']['table']['rows']);
 
   // This may seam silly, but is necessary as the
   // SOLR AJAX request (adding additional solr fields)
@@ -460,4 +550,107 @@ function cwrc_workflow_delete_reports_form_submit(array $form, array &$form_stat
       ->execute();
   drupal_set_message(t("Report deleted"));
   drupal_goto('islandora_workflow_rest/reports');
+}
+
+/**
+ * Helper function to construct the fields tableselect.
+ *
+ * @param array $data
+ *   An array of data representing rows to be rendered in the tableselect.
+ *
+ * @return array
+ *   An array representing the tableselect to be rendered.
+ */
+function cwrc_workflow_table_build($data) {
+  $form = array();
+  $rows = array();
+  if ($data) {
+    uasort($data, 'drupal_sort_weight');
+    $delta = count($data);
+    $weight = 1;
+    $map = function($field) use($delta, &$weight) {
+      $value = $weight;
+      $weight++;
+      if (!$field) {
+        return;
+      }
+      return array(
+        'remove_field' => array(
+          '#type' => 'checkbox',
+          '#default_value' => isset($field['remove']) ? $field['remove'] : FALSE,
+        ),
+        'solr_field_markup' => array('#markup' => filter_xss($field['solr_field'])),
+        'display_label' => array(
+          '#type' => 'textfield',
+          '#default_value' => isset($field['display_label']) ? filter_xss($field['display_label']) : '',
+        ),
+        'hyperlink' => array(
+          '#type' => 'checkbox',
+          '#default_value' => isset($field['hyperlink']) ? $field['hyperlink'] : FALSE,
+        ),
+        'weight' => array(
+          '#type' => 'weight',
+          '#title' => t('Weight'),
+          '#default_value' => $value,
+          '#delta' => $delta,
+        ),
+        'solr_field' => array(
+          '#type' => 'value',
+          '#value' => filter_xss($field['solr_field']),
+        ),
+      );
+    };
+    $rows = array_filter(array_map($map, $data));
+  }
+  // Add the table to the form.
+  $form['#tree'] = TRUE;
+  $form['table'] = array(
+    '#type' => 'markup',
+    '#header' => array(
+      t('Remove'),
+      t('Solr Field'),
+      t('Display Label'),
+      t('Hyperlink'),
+      '',
+    ),
+    'rows' => $rows,
+    '#theme' => 'islandora_solr_metadata_management_table',
+    '#empty' => t('No fields associated'),
+  );
+  return $form;
+}
+
+/**
+ * AJAX callback.
+ *
+ * @param array $form
+ *   An array representing a Drupal form.
+ * @param array $form_state
+ *   An array representing the Drupal form state.
+ *
+ * @return array
+ *   An array representing the portion of the form we are rendering.
+ */
+function cwrc_workflow_fields_ajax(&$form, &$form_state) {
+  return $form['islandora_solr_metadata_fields']['search_term_table_wrapper'];
+}
+
+/**
+ * Gets default solr fields and converts them to table rows.
+ *
+ * @return array
+ *   Associative array of row values for table
+ */
+function cwrc_forkflow_prep_fields() {
+  $default_fields = islandora_solr_get_fields('result_fields', FALSE, FALSE);
+  foreach ($default_fields as $field) {
+    $solr_fields[] = array(
+      'remove_field' => 0,
+      'display_label' => $field['solr_field_settings']['label'],
+      'hyperlink' => $field['solr_field_settings']['link_to_object'],
+      'weight' => $field['weight'],
+      'solr_field' => $field['solr_field'],
+    );
+  }
+  return $solr_fields;
 }

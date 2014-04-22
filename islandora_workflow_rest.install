@@ -176,6 +176,12 @@ function islandora_workflow_rest_schema() {
         'not null' => FALSE,
         'description' => 'The serialized terms array used to build the solr query.',
       ),
+      'solr_terms' => array(
+        'type' => 'varchar',
+        'length' => 4095,
+        'not null' => FALSE,
+        'description' => 'The serialized solr terms array used to build the display.',
+      ),
     ),
     'primary key' => array('lid'),
   );

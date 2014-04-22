@@ -152,6 +152,10 @@ function islandora_workflow_rest_theme($existing, $type, $theme, $path) {
       'template' => 'theme/islandora-basic-image-print',
       'variables' => array('islandora_content' => NULL),
     ),
+    'cwrc_workflow_management_table' => array(
+      'render element' => 'table',
+      'file' => 'theme/theme.inc',
+    ),
   );
 }
 
@@ -475,4 +479,20 @@ function islandora_workflow_rest_solr_access() {
     }
   }
   return user_access('search islandora solr');
+}
+
+/**
+ * Implements hook_islandora_solr_primary_display().
+ */
+function islandora_workflow_rest_islandora_solr_primary_display() {
+  return array(
+    'cwrc_report' => array(
+      'name' => t('CWRC Report'),
+      'module' => 'islandora_workflow_rest',
+      'file' => 'includes/solr_results.inc',
+      'class' => 'IslandoraSolrResultsWorkflowRest',
+      'function' => 'displayResults',
+      'description' => t('Search results for CWRC reporting.'),
+    ),
+  );
 }
