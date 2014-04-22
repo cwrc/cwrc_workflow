@@ -16,14 +16,11 @@ function islandora_workflow_rest_user_autocomplete($string) {
 
   $pieces = explode(",", $string);
   $matches = array();
-  $result = db_select('users')
-      ->fields('users', array('name'))
-      ->condition('name', db_like($pieces[count($pieces) - 1]) . '%', 'LIKE')
-      ->range(0, 10)
-      ->execute();
-
+  $use_realname = module_exists('realname');
+  $result = islandora_workflow_rest_find_user_autocomplete($pieces[count($pieces) - 1], $use_realname);
   foreach ($result as $user) {
-    $matches[$user->name] = check_plain($user->name);
+    $match_name = isset($user->realname) ? $user->realname : $user->name;
+    $matches[$match_name] = check_plain($match_name);
   }
   // This may seem crazy, but adds support for csv autocomplete.
   if (count($pieces) > 1) {
@@ -347,6 +344,7 @@ function islandora_workflow_rest_build_add_workflow($form, $last_workflow) {
  * Implements hook_form_validate().
  */
 function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
+  $use_realname = module_exists('realname');
   // Both notifications require "all or nothing" input.
   if (!empty($form_state['values']['act_user'])) {
     if (empty($form_state['values']['wf_act_subject'])) {
@@ -356,7 +354,7 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
       form_set_error('wf_act_message', t('Message field is required when a User is given.'));
     }
     // Load and validate Activity user.
-    $activity_users = islandora_workflow_rest_load_users_from_csv($form_state['values']['act_user']);
+    $activity_users = islandora_workflow_rest_load_users_from_csv($form_state['values']['act_user'], $use_realname);
     if (in_array(FALSE, $activity_users)) {
       form_set_error('act_user', t('The supplied user in Activity notify does not exist.'));
     }
@@ -372,7 +370,7 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
       form_set_error('assign_category', t('Assign Category is required when a Notification User is given.'));
     }
     // Load and validate Assign user.
-    $assign_users = islandora_workflow_rest_load_users_from_csv($form_state['values']['user']);
+    $assign_users = islandora_workflow_rest_load_users_from_csv($form_state['values']['user'], $use_realname);
     if (in_array(FALSE, $assign_users)) {
       form_set_error('user', t('The supplied user in Assign notify does not exist.'));
     }
@@ -386,6 +384,7 @@ function islandora_workflow_rest_entry_form_validate($form, &$form_state) {
  * Implements hook_form_submit().
  */
 function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
+  $use_realname = module_exists('realname');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
 
   $islandora_object = islandora_object_load($form_state['values']['islandora_object']);
@@ -398,7 +397,8 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
   $activity_params['status'] = $form_state['values']['wf_act_status'];
   $activity_params['note'] = $form_state['values']['wf_act_note'];
   // Activity Notification.
-  $activity_params['recipient'] = $form_state['values']['act_user'];
+  $activity_recipients = islandora_workflow_rest_transform_user_csv($form_state['values']['act_user']);
+  $activity_params['recipient'] = $activity_recipients;
   $activity_params['subject'] = $form_state['values']['wf_act_subject'];
   $activity_params['body'] = $form_state['values']['wf_act_message'];
 
@@ -409,7 +409,8 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
     $assigned_params['category'] = $form_state['values']['assign_category'];
     $assigned_params['note'] = $form_state['values']['assign_note'];
     // Assign Notification.
-    $assigned_params['recipient'] = $form_state['values']['user'];
+    $assigned_recipients = islandora_workflow_rest_transform_user_csv($form_state['values']['user']);
+    $assigned_params['recipient'] = $assigned_recipients;
     $assigned_params['subject'] = $form_state['values']['assign_subject'];
     $assigned_params['body'] = $form_state['values']['assign_message'];
     $assigned = new WorkflowItem(WorkflowConst::ASSIGNED, $assigned_params);
@@ -454,7 +455,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
         $this_wf_string . "\n\n" . $last_wf_string;
     $params['link'] = url("islandora/object/$islandora_object->id/workflow");
     $params['subject'] = $form_state['values']['wf_act_subject'];
-    $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['act_user']);
+    $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['act_user'], $use_realname);
     $params['force_email'] = $form_state['values']['force_act_email'];
     islandora_workflow_rest_notify($params);
   }
@@ -464,7 +465,7 @@ function islandora_workflow_rest_entry_form_submit($form, &$form_state) {
         $this_wf_string . "\n\n" . $last_wf_string;
     $params['link'] = url("islandora/object/$islandora_object->id/workflow");
     $params['subject'] = $form_state['values']['assign_subject'];
-    $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['user']);
+    $params['accounts'] = islandora_workflow_rest_load_users_from_csv($form_state['values']['user'], $use_realname);
     $params['force_email'] = $form_state['values']['force_ass_email'];
     islandora_workflow_rest_notify($params);
   }
