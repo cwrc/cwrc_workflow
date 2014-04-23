@@ -32,6 +32,35 @@ REQUIREMENTS
 
   * [Islandora](http://github.com/islandora/islandora)
 
+COMPLIMENTARY MODULES (RECOMMENDED)
+-----------------------------------
+
+  * [Real Name](https://drupal.org/project/realname)
+  * [Privatemsg](https://drupal.org/project/privatemsg)
+
+CONFIGURE COMPLIMTARY MODULES (OPTIONAL)
+-----------------------------
+
+### Privatemsg
+By Default, the previous/last workflow entry is not included in email
+notifications. After configuring the Real Name module as you like, you
+can add these entry's to the notification email by navigating to
+{your_site}/admin/config/messaging/privatemsg navigate to the email notify
+tab, and add the following (including brackets) to the "Body of notification messages"
+field:
+
+[privatemsg_message:body]
+
+### Real Name
+Configure the Real Name module by preforming the following steps
+
+* Navigate to {your_site}/admin/config/people/accounts/fields
+* Add a new field (ex: field_full_name) as Field Type 'Text', click 'Save'
+* Navigate to {your_site}/admin/config/people/realname, click browse available tokens
+* Select the new field you created, and click 'Save configuration'
+
+
+
 INSTALLATION
 ------------
 
@@ -422,7 +451,7 @@ Accept: application/json
 #### Get Variables
 | Name           | Description                                                  | Optional    |
 | -------------- | ------------------------------------------------------------ | ----------- |
-| collection_pid | Limit workflow query to a collection by collection PID.      | Optional
+| PID | Limit workflow query to a collection by collection PID.      | Optional
 | required       | Limit workflow query VIA required attribute fields           | Optional
 | query          | SOLR query string EX: 'PID:*'.                               | Optional
 

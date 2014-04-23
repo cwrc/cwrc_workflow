@@ -352,12 +352,12 @@ function islandora_workflow_rest_pretty_print_ds($content) {
  * @return array
  *   An array of user accounts.
  */
-function islandora_workflow_rest_load_users_from_csv($string) {
+function islandora_workflow_rest_load_users_from_csv($string, $use_realname = FALSE) {
   $accounts = array();
   $pieces = explode(",", $string);
   try {
     foreach ($pieces as $key => $value) {
-      $accounts[] = user_load_by_name($value);
+      $accounts[] = $use_realname ? islandora_workflow_rest_load_by_real_name($value) : user_load_by_name($value);
     }
   }
   catch (Exception $e) {
@@ -366,6 +366,94 @@ function islandora_workflow_rest_load_users_from_csv($string) {
   return $accounts;
 }
 
+/**
+ * Autocomplete callback for user's names.
+ *
+ * @param string $value
+ *   Full or part of a users name.
+ * @param bool $use_realname
+ *   Look up names from the realnames table, if it exists.
+ * 
+ * @throws Exception
+ * @return array
+ *   An array of possible matches.
+ */
+function islandora_workflow_rest_find_user_autocomplete($value, $use_realname = FALSE) {
+  $return = array();
+  try {
+    if ($use_realname) {
+      // Preform join on users and the realname table.
+      $query = db_select('users', 'u');
+      $query->join('realname', 'rn', 'u.uid = rn.uid');
+      $query->fields('u');
+      $query->fields('rn');
+      $query->condition('rn.realname', db_like($value) . '%', 'LIKE');
+      $query->groupBy('u.uid');
+      $query->range(0, 100);
+      $result = $query->execute();
+      foreach ($result as $user) {
+        $return[] = $user;
+      }
+      return $return;
+    }
+    // If realname module is not enabled, default to the users table.
+    $result = db_select('users')
+      ->fields('users', array('name'))
+      ->condition('name', db_like($value) . '%', 'LIKE')
+      ->range(0, 10)
+      ->execute();
+    return $result;
+  }
+  catch (Exception $e) {
+    throw new Exception($e);
+  }
+  return FALSE;
+}
+
+/**
+ * Loads a user account by real name value.
+ *
+ * @param string $value
+ *   The real name value.
+ *
+ * @return array|boolean
+ *   FALSE if an account is found, or array of accounts.
+ */
+function islandora_workflow_rest_load_by_real_name($value) {
+  $result = db_select('realname')
+    ->fields('realname', array('uid', 'realname'))
+    ->condition('realname', $value, '=')
+    ->execute();
+  foreach ($result as $user) {
+    $drup_user = user_load($user->uid, TRUE);
+    return $drup_user;
+  }
+  return FALSE;
+}
+
+/**
+ * Convert a Real Name CSV string to a drupal user CSV string.
+ *
+ * @param string $string
+ *   The Real Name CSV string to transform
+ *
+ * @return string
+ *   The drupal user name CSV string.
+ */
+function islandora_workflow_rest_transform_user_csv($string) {
+  $return = $string;
+  if (module_exists('realname')) {
+    // We need the drupal user name, not the real name entry.
+    $pieces = explode(",", $string);
+    $accounts;
+    $return = "";
+    foreach ($pieces as $key => $value) {
+      $user = islandora_workflow_rest_load_by_real_name($value);
+      $return .= $user->name . ",";
+    }
+  }
+  return rtrim($return, ",");
+}
 /**
  * Transform a workflow entry into email text.
  *
