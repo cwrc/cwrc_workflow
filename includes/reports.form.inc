@@ -328,7 +328,7 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
     }
   }
   else {
-    $data = isset($chosen) ? unserialize($chosen['solr_terms']) : cwrc_forkflow_prep_fields();
+    $data = isset($chosen) ? unserialize($chosen['solr_terms']) : islandora_workflow_rest_cwrc_forkflow_prep_fields();
   }
 
   if ($field_to_add !== FALSE) {
@@ -339,14 +339,14 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
     '#prefix' => '<div id="cwrc-workflow-fields-wrapper">',
     '#suffix' => '</div>',
   );
-  $form['islandora_solr_metadata_fields']['search_term_table_wrapper']['table'] = cwrc_workflow_table_build($data);
+  $form['islandora_solr_metadata_fields']['search_term_table_wrapper']['table'] = islandora_workflow_rest_cwrc_workflow_table_build($data);
   if (count($form['islandora_solr_metadata_fields']['search_term_table_wrapper']['table']['table']['rows'])) {
     $form['islandora_solr_metadata_fields']['search_term_table_wrapper']['remove_selected'] = array(
       '#type' => 'button',
       '#value' => t('Remove selected field from report'),
       '#name' => 'cwrc-reports-remove-selected',
       '#ajax' => array(
-        'callback' => 'cwrc_workflow_fields_ajax',
+        'callback' => 'islandora_workflow_rest_cwrc_workflow_fields_ajax',
         'wrapper' => 'cwrc-workflow-fields-wrapper',
       ),
     );
@@ -370,7 +370,7 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
     "#executes_submit_callback" => FALSE,
     '#name' => 'cwrc-reports-add-field',
     '#ajax' => array(
-      'callback' => 'cwrc_workflow_fields_ajax',
+      'callback' => 'islandora_workflow_rest_cwrc_workflow_fields_ajax',
       'wrapper' => 'cwrc-workflow-fields-wrapper',
     ),
   );
@@ -519,7 +519,7 @@ function islandora_workflow_rest_build_query($terms) {
  * @return array
  *   The drupal form definition.
  */
-function cwrc_workflow_delete_reports_form(array $form, array &$form_state, $lid, $report_name = 'unnamed') {
+function islandora_workflow_rest_cwrc_workflow_delete_reports_form(array $form, array &$form_state, $lid, $report_name = 'unnamed') {
   $form_state['lid'] = $lid;
   return confirm_form($form, t('Are you sure you want to delete @report', array('@report' => $report_name)), "islandora_workflow_rest/reports", t('This action cannot be undone.'), t('Delete report'), t('Cancel')
   );
@@ -533,7 +533,7 @@ function cwrc_workflow_delete_reports_form(array $form, array &$form_state, $lid
  * @param array $form_state
  *   The Drupal form state.
  */
-function cwrc_workflow_delete_reports_form_submit(array $form, array &$form_state) {
+function islandora_workflow_rest_cwrc_workflow_delete_reports_form_submit(array $form, array &$form_state) {
   $lid = intval($form_state['lid']);
   db_delete('islandora_workflow_rest_reports')
       ->condition('lid', $lid)
@@ -551,7 +551,7 @@ function cwrc_workflow_delete_reports_form_submit(array $form, array &$form_stat
  * @return array
  *   An array representing the tableselect to be rendered.
  */
-function cwrc_workflow_table_build($data) {
+function islandora_workflow_rest_cwrc_workflow_table_build($data) {
   $form = array();
   $rows = array();
   if ($data) {
@@ -621,7 +621,7 @@ function cwrc_workflow_table_build($data) {
  * @return array
  *   An array representing the portion of the form we are rendering.
  */
-function cwrc_workflow_fields_ajax(&$form, &$form_state) {
+function islandora_workflow_rest_cwrc_workflow_fields_ajax(&$form, &$form_state) {
   return $form['islandora_solr_metadata_fields']['search_term_table_wrapper'];
 }
 
@@ -631,8 +631,9 @@ function cwrc_workflow_fields_ajax(&$form, &$form_state) {
  * @return array
  *   Associative array of row values for table
  */
-function cwrc_forkflow_prep_fields() {
+function islandora_workflow_rest_cwrc_forkflow_prep_fields() {
   $default_fields = islandora_solr_get_fields('result_fields', FALSE, FALSE);
+  $solr_fields = array();
   foreach ($default_fields as $field) {
     $solr_fields[] = array(
       'remove_field' => 0,
