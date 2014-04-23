@@ -130,7 +130,7 @@ function islandora_workflow_rest_menu() {
     'islandora_workflow_rest/delete_report/%' => array(
       'title' => 'Delete report',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('cwrc_workflow_delete_reports_form', 2),
+      'page arguments' => array('islandora_workflow_rest_cwrc_workflow_delete_reports_form', 2),
       'access callback' => 'islandora_workflow_rest_can_delete_report',
       'access arguments' => array(2),
       'file' => 'includes/reports.form.inc',
@@ -510,4 +510,19 @@ function islandora_workflow_rest_solr_access() {
     }
   }
   return user_access('search islandora solr');
+}
+/**
+ * Implements hook_islandora_solr_primary_display().
+ */
+function islandora_workflow_rest_islandora_solr_primary_display() {
+  return array(
+    'cwrc_report' => array(
+      'name' => t('CWRC Report'),
+      'module' => 'islandora_workflow_rest',
+      'file' => 'includes/solr_results.inc',
+      'class' => 'IslandoraSolrResultsWorkflowRest',
+      'function' => 'displayResults',
+      'description' => t('Search results for CWRC reporting.'),
+    ),
+  );
 }
