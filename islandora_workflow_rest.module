@@ -8,6 +8,7 @@
 define('ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD', 'workflow_userID_ms');
 define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS', 'access all saved reports');
 define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS', 'view saved reports');
+define('ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS', 'modify workflow datastreams');
 
 /**
  * Implements hook_permission().
@@ -21,6 +22,10 @@ function islandora_workflow_rest_permission() {
     ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS => array(
       'title' => t('View Workflow Reports'),
       'description' => t('View, edit or delete reports configured in workflow reports.'),
+    ),
+    ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS => array(
+      'title' => t('Workflow REST Datastream access'),
+      'description' => t('View, edit, add or update workflow datastreams via REST interface.'),
     ),
   );
 }
@@ -72,36 +77,36 @@ function islandora_workflow_rest_menu() {
     'islandora_workflow_rest/v1/add_workflow' => array(
       'page callback' => 'islandora_workflow_rest_add_workflow_step',
       'page arguments' => array(3),
-      'access callback' => TRUE,
+      'access callback' => 'islandora_workflow_rest_modify_workflow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Get last workflow item.
     'islandora_workflow_rest/v1/get_last_workflow' => array(
       'page callback' => 'islandora_workflow_rest_get_last_workflow_step',
-      'access callback' => TRUE,
+      'access callback' => 'islandora_workflow_rest_modify_workflow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Get full workflow datastream.
     'islandora_workflow_rest/v1/get_full_workflow' => array(
       'page callback' => 'islandora_workflow_rest_get_full_workflow',
-      'access callback' => TRUE,
+      'access callback' => 'islandora_workflow_rest_modify_workflow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Test for stamp/category on object WORKFLOW datastream.
     'islandora_workflow_rest/v1/has_entry' => array(
       'page callback' => 'islandora_workflow_rest_test_workflow_step',
-      'access callback' => TRUE,
+      'access callback' => 'islandora_workflow_rest_modify_workflow_ds',
       'type' => MENU_CALLBACK,
     ),
     // Find all pids with given stamp/category, within an optional collection.
     'islandora_workflow_rest/v1/workflow_query' => array(
       'page callback' => 'islandora_workflow_rest_find_workflows',
-      'access callback' => TRUE,
+      'access callback' => 'islandora_workflow_rest_modify_workflow_ds',
       'type' => MENU_CALLBACK,
     ),
     'islandora_workflow_rest/user/autocomplete' => array(
       'page callback' => 'islandora_workflow_rest_user_autocomplete',
-      'access callback' => TRUE,
+      'access arguments' => array('search islandora solr'),
       'file' => 'includes/workflow.form.inc',
       'type' => MENU_CALLBACK,
     ),
@@ -126,7 +131,8 @@ function islandora_workflow_rest_menu() {
       'title' => 'Delete report',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('islandora_workflow_rest_cwrc_workflow_delete_reports_form', 2),
-      'access arguments' => array('administer islandora solr'),
+      'access callback' => 'islandora_workflow_rest_can_delete_report',
+      'access arguments' => array(2),
       'file' => 'includes/reports.form.inc',
       'type' => MENU_CALLBACK,
     ),
@@ -134,42 +140,60 @@ function islandora_workflow_rest_menu() {
 }
 
 /**
- * Impliments hook_theme().
+ * CRUD access callback for workflow datastreams.
+ *
+ * @return bool
+ *   TRUE if access is allowed, FALSE otherwise.
  */
-function islandora_workflow_rest_theme($existing, $type, $theme, $path) {
-  return array(
-    'islandora_workflow_rest_reports' => array(
-      'template' => 'theme/islandora-basic-image',
-      // We can add PIDs to the end of this pattern in our preprocess function
-      // and templates will be able to have have a pid appended to the
-      // template name to overide a template on a per object basis.
-      // An example template might be named:
-      // "islandora-basic-image--islandora-27.tpl.php".
-      'pattern' => 'islandora_basic_image__',
-      'variables' => array('islandora_object' => NULL),
-    ),
-    'islandora_basic_image_print' => array(
-      'template' => 'theme/islandora-basic-image-print',
-      'variables' => array('islandora_content' => NULL),
-    ),
-    'cwrc_workflow_management_table' => array(
-      'render element' => 'table',
-      'file' => 'theme/theme.inc',
-    ),
-  );
+function islandora_workflow_rest_modify_workflow_ds() {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
+
+  $params = islandora_workflow_rest_get_request_parameters();
+  $object = islandora_object_load($params['PID']);
+  $info = islandora_object_access_callback(
+    ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS,
+    $object);
+
+  if (!$info) {
+    echo drupal_json_output(array("Error" => "Access Denied."));
+    exit();
+  }
+
+  return $info;
 }
 
+/**
+ * Delete reports access callback.
+ *
+ * @param string $lid
+ *   The list id for the given report.
+ *
+ * @return bool
+ *   TRUE if access is granted, FALSE otherwise.
+ */
+function islandora_workflow_rest_can_delete_report($lid) {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/report_utilities');
+  global $user;
+  $record = islandora_workflow_rest_get_record('lid', $lid);
+  if (!$record) {
+    return FALSE;
+  }
+  $edit_roles = unserialize($record['editroles']);
+  $can_edit = count(array_intersect($edit_roles, $user->roles)) ||
+    user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS);
+  return $can_edit;
+}
 /**
  * Implements hook_mail().
  */
 function islandora_workflow_rest_mail($key, &$message, $params) {
   global $base_url;
 
-  $formated_name = format_username($params['mail_account']);
+  $formatted_name = format_username($params['mail_account']);
   $data['user'] = $params['mail_account'];
   $options['language'] = $message['language'];
   $variables = array(
-    "@username" => $formated_name,
+    "@username" => $formatted_name,
     "@site" => $base_url,
     "@message" => $params['body'],
     "@link" => $base_url . $params['link'],
@@ -198,7 +222,7 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
       }
     }
     else {
-      $pm_message .= " and email notification set to $formated_name";
+      $pm_message .= " and email notification set to $formatted_name";
     }
   }
   $message['send'] = $params['force_email'];
@@ -212,7 +236,7 @@ function islandora_workflow_rest_mail($key, &$message, $params) {
   if ($message['send'] && (!$success['success'])) {
     drupal_set_message(
         t("@email", array(
-      '@email' => "Email force sent to $formated_name",
+      '@email' => "Email force sent to $formatted_name",
             )
         ), 'status'
     );
@@ -323,6 +347,7 @@ function islandora_workflow_rest_get_full_workflow() {
  */
 function islandora_workflow_rest_add_workflow_step() {
   try {
+    $use_realname = module_exists('realname');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/basic_enum');
     module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
@@ -341,19 +366,25 @@ function islandora_workflow_rest_add_workflow_step() {
     $activity_accounts = array();
     if (isset($activity_params['recipient'])) {
       $activity_accounts = islandora_workflow_rest_load_users_from_csv($activity_params['recipient']);
+      $activity_recipients = "";
       foreach ($activity_accounts as $account) {
         if (!$account) {
           return drupal_json_output(array("Error" => "Supplied user is not in this system"));
         }
+        $activity_recipients .= $account->name . ",";
       }
+      $activity_params['recipient'] = rtrim($activity_recipients, ",");
     }
     if (isset($assigned_params['recipient'])) {
       $assigned_accounts = islandora_workflow_rest_load_users_from_csv($assigned_params['recipient']);
+      $assigned_recipients = "";
       foreach ($assigned_accounts as $account) {
         if (!$account) {
           return drupal_json_output(array("Error" => "Supplied user is not in this system"));
         }
+        $assigned_recipients .= $account->name . ",";
       }
+      $assigned_params['recipient'] = rtrim($assigned_recipients, ",");
     }
     $islandora_object = islandora_object_load($params['PID']);
     if (!$islandora_object['WORKFLOW']) {
@@ -388,7 +419,7 @@ function islandora_workflow_rest_add_workflow_step() {
           $this_wf_string . "\n\n" . $last_wf_string;
       $params['link'] = url("islandora/object/$islandora_object->id/workflow");
       $params['subject'] = $activity->typeAttributes[WorkflowConst::SUBJECT];
-      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($activity->typeAttributes[WorkflowConst::RECIPIENT]);
+      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($activity->typeAttributes[WorkflowConst::RECIPIENT], $use_realname);
       $params['force_email'] = 1;
       islandora_workflow_rest_notify($params);
     }
@@ -400,7 +431,7 @@ function islandora_workflow_rest_add_workflow_step() {
           $this_wf_string . "\n\n" . $last_wf_string;
       $params['link'] = url("islandora/object/$islandora_object->id/workflow");
       $params['subject'] = $assigned->typeAttributes[WorkflowConst::SUBJECT];
-      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($assigned->typeAttributes[WorkflowConst::RECIPIENT]);
+      $params['accounts'] = islandora_workflow_rest_load_users_from_csv($assigned->typeAttributes[WorkflowConst::RECIPIENT], $use_realname);
       $params['force_email'] = 1;
       islandora_workflow_rest_notify($params);
     }
@@ -422,7 +453,7 @@ function islandora_workflow_rest_find_workflows() {
     module_load_include('inc', 'islandora_workflow_rest', 'includes/workflow_item');
 
     $params = islandora_workflow_rest_get_request_parameters();
-    $collection_pid = (isset($params['collection_pid']) ? $params['collection_pid'] : NULL);
+    $collection_pid = (isset($params['PID']) ? $params['collection_pid'] : NULL);
     $required = (isset($params['required']) ? json_decode($params['required'], TRUE) : array());
     $custom_query = (isset($params['query']) ? $params['query'] : NULL);
 
@@ -479,20 +510,4 @@ function islandora_workflow_rest_solr_access() {
     }
   }
   return user_access('search islandora solr');
-}
-
-/**
- * Implements hook_islandora_solr_primary_display().
- */
-function islandora_workflow_rest_islandora_solr_primary_display() {
-  return array(
-    'cwrc_report' => array(
-      'name' => t('CWRC Report'),
-      'module' => 'islandora_workflow_rest',
-      'file' => 'includes/solr_results.inc',
-      'class' => 'IslandoraSolrResultsWorkflowRest',
-      'function' => 'displayResults',
-      'description' => t('Search results for CWRC reporting.'),
-    ),
-  );
 }

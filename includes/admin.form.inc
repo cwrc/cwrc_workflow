@@ -177,7 +177,7 @@ function islandora_workflow_rest_admin_submit($form, &$form_state) {
       $notify = FALSE;
       foreach ($form_state['values']['content_model_table'] as $list_identifier => $is_checked) {
         $entry_is_checked = ($is_checked ? 1 : 0);
-        // Remove all entries, update to match the form exactally.
+        // Remove all entries, update to match the form exactly.
         islandora_workflow_rest_delete_ds_logs_admin($list_identifier);
         // Update db table to match.
         if ($entry_is_checked) {
