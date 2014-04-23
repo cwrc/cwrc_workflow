@@ -148,7 +148,7 @@ function islandora_workflow_rest_cwrc_workflow_management_form_submit($form, &$f
  * @return array
  *   The drupal form definition.
  */
-function cwrc_workflow_skip_entries_form(array $form, array &$form_state, $lids) {
+function islandora_workflow_rest_cwrc_workflow_skip_entries_form(array $form, array &$form_state, $lids) {
   $lids = unserialize($lids);
   $form_state['lids'] = $lids;
   return confirm_form($form, t('Are you sure you want to skip %count log entries?', array('%count' => count($lids))), "cwrc_workflow", t('This action cannot be undone.'), t('Skip checked entries'), t('Cancel')
@@ -163,7 +163,7 @@ function cwrc_workflow_skip_entries_form(array $form, array &$form_state, $lids)
  * @param array $form_state
  *   The Drupal form state.
  */
-function cwrc_workflow_skip_entries_form_submit(array $form, array &$form_state) {
+function islandora_workflow_rest_cwrc_workflow_skip_entries_form_submit(array $form, array &$form_state) {
   foreach ($form_state['lids'] as $lid) {
     db_update('islandora_workflow_rest_ds_logs')
         ->fields(array('state' => 'skipped'))

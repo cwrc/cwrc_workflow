@@ -122,7 +122,7 @@ function islandora_workflow_rest_menu() {
     'islandora_workflow_rest/skip_entries/%' => array(
       'title' => 'Skip checked entries',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('cwrc_workflow_skip_entries_form', 2),
+      'page arguments' => array('islandora_workflow_rest_cwrc_workflow_skip_entries_form', 2),
       'access arguments' => array('administer islandora solr'),
       'file' => 'includes/cwrc_workflow_status.inc',
       'type' => MENU_CALLBACK,
