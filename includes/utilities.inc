@@ -341,7 +341,6 @@ function islandora_workflow_rest_pretty_print_ds($content) {
   @$doc->loadXML($content);
   $return = @dom_document_pretty_print($doc, TRUE);
   return str_replace('&amp;#xD;', "", $return);
-
 }
 
 /**
@@ -505,7 +504,7 @@ function islandora_workflow_rest_admin_cm_table_form() {
  * @param string $delay
  *   Event will not be logged if change has been logged within delay time
  */
-function islandora_workflow_log_event($pid, $action, $dsid, $delay, $timestamp) {
+function islandora_workflow_log_event($pid, $label, $action, $dsid, $delay, $timestamp, $last_stamp = NULL) {
   global $user;
   $threshold = strtotime($timestamp) - intval($delay);
   $user_id = $user->uid;
@@ -528,12 +527,14 @@ function islandora_workflow_log_event($pid, $action, $dsid, $delay, $timestamp) 
     db_insert('islandora_workflow_rest_ds_logs')
         ->fields(array(
           'pid' => $pid,
+          'object_label' => $label,
           'type' => $action,
           'usr' => $user->uid,
           'dsid' => $dsid,
           'delay' => $delay,
           'timestamp' => strtotime($timestamp),
           'state' => 'new',
+          'last_stamp' => $last_stamp,
         ))
         ->execute();
   }
@@ -550,6 +551,7 @@ function islandora_workflow_log_event($pid, $action, $dsid, $delay, $timestamp) 
  *   CRUD action
  */
 function islandora_workflow_add_or_modify(AbstractObject $object, AbstractDatastream $datastream, $action) {
+  module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
   module_load_include('inc', 'islandora_workflow_rest', 'includes/utilities');
   $tracked = FALSE;
   $delay = 0;
@@ -570,6 +572,13 @@ function islandora_workflow_add_or_modify(AbstractObject $object, AbstractDatast
     }
   }
   if ($tracked) {
-    islandora_workflow_log_event($object->id, $action, $datastream->id, $delay, $fedora_timestamp);
+    $last_workflow_step = NULL;
+    if ($object['WORKFLOW']) {
+      $workflow = CWRCWorkflowAPI::fromDatastream($object['WORKFLOW']);
+      $last_workflow_step = $workflow->entryToArray();
+    }
+    $stamp_exists = isset($last_workflow_step['response']['workflow']['activity']['attributes']['stamp']);
+    $last_stamp = $stamp_exists ? $last_workflow_step['response']['workflow']['activity']['attributes']['stamp'] : t('None');
+    islandora_workflow_log_event($object->id, $object->label, $action, $datastream->id, $delay, $fedora_timestamp, $last_stamp);
   }
 }

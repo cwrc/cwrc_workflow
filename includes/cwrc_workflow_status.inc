@@ -14,60 +14,88 @@
  *   Drupal Form
  */
 function cwrc_workflow_management_form($form, &$form_state) {
-  module_load_include('inc', 'islandora_workflow_rest', 'includes/cwrc_workflow');
   module_load_include('inc', 'islandora', 'includes/datastream.version');
   global $user;
   $user_id = $user->uid;
-  $query = "select * from {islandora_workflow_rest_ds_logs}
-             where usr = '$user_id'
-             and state = 'new'
-      order by pid, dsid desc";
-  $results = db_query($query);
+  $sort = 'ASC';
+  $order = 'timestamp';
+  if (isset($_GET['sort']) && isset($_GET['order'])) {
+    $sort = strtoupper($_GET['sort']);
+    switch ($_GET['order']) {
+      case 'Tag Workflow':
+        $order = 'object_label';
+        break;
+
+      case 'DSID':
+        $order = 'dsid';
+        break;
+
+      case 'Modified':
+        $order = 'timestamp';
+        break;
+
+      case 'Last Stamp':
+        $order = 'timestamp';
+        break;
+
+      default:
+        $order = 'timestamp';
+    }
+  }
+
+  $query = db_select('islandora_workflow_rest_ds_logs', 'i')
+      ->fields('i')
+      ->condition('usr', $user_id)
+      ->condition('state', 'new')
+      ->orderBy($order, $sort);
+  $results = $query->execute();
   $lines = array();
 
-  while ($result = $results->fetchAssoc()) {
-    $object = islandora_object_load($result['pid']);
+  while ($result = $results->fetch()) {
+    $object = islandora_object_load($result->pid);
     if (!$object) {
       db_update('islandora_workflow_rest_ds_logs')
           ->fields(array('state' => 'object_deleted'))
-          ->condition('lid', $result['lid'])
+          ->condition('lid', $result->lid)
           ->execute();
       continue;
     }
-    $date_to_find = intval($result['timestamp']);
+    $date_to_find = intval($result->timestamp);
     $version_number = NULL;
     $revision_link = "";
-    $datastream = $object[$result['dsid']];
+    $datastream = $object[$result->dsid];
     if ($datastream) {
       foreach ($datastream as $version_number => $version) {
         $date_from_trail = strtotime((string) $version->createdDate);
         if ($date_to_find == $date_from_trail) {
           $revision_text = $version->createdDate;
-          $revision_link = l($revision_text, 'islandora/object/' . $result['pid'] . '/datastream/' . $result['dsid'] . "/version/$version_number/view");
+          $revision_link = l($revision_text, 'islandora/object/' . $result->pid . '/datastream/' . $result->dsid . "/version/$version_number/view");
         }
       }
     }
-    $last_workflow_step = NULL;
-    if ($object['WORKFLOW']) {
-      $workflow = CWRCWorkflowAPI::fromDatastream($object['WORKFLOW']);
-      $last_workflow_step = $workflow->entryToArray();
-    }
-    $stamp_exists = isset($last_workflow_step['response']['workflow']['activity']['attributes']['stamp']);
-    $last_stamp = $stamp_exists ? $last_workflow_step['response']['workflow']['activity']['attributes']['stamp'] : t('None');
-    $key = $result['lid'];
-    $link = l($object->label, 'islandora/object/' . $object->id . '/workflow', $options = array('query' => array('lid' => $key)));
+    $last_stamp = $result->last_stamp;
+    $key = $result->lid;
+    $link = l($result->object_label, 'islandora/object/' . $object->id . '/workflow', $options = array('query' => array('lid' => $key)));
     $lines[$key]['object'] = $link;
-    $lines[$key]['dsid'] = $result['dsid'];
-    $lines[$key]['timestamp'] = gmdate("F j, Y, g:i a", $result['timestamp']);
+    $lines[$key]['dsid'] = $result->dsid;
+    $lines[$key]['timestamp'] = gmdate("F j, Y, g:i a", $result->timestamp);
     $lines[$key]['last_stamp'] = $last_stamp;
     $lines[$key]['revision'] = $revision_link;
   }
 
   $header = array(
-    'object' => t('Tag Workflow'),
-    'dsid' => t('DSID'),
-    'timestamp' => t('Modified'),
-    'last_stamp' => t('Last Stamp'),
+    'object' => array('data' => t('Tag Workflow'), 'field' => 'pid'),
+    'dsid' => array('data' => t('DSID'), 'field' => 'dsid', 'sort' => 'desc'),
+    'timestamp' => array(
+      'data' => t('Modified'),
+      'field' => 'timestamp',
+      'sort' => 'desc',
+    ),
+    'last_stamp' => array(
+      'data' => t('Last Stamp'),
+      'field' => 'timestamp',
+      'sort' => 'desc',
+    ),
     'revision' => t('Go to Revision'),
   );
 
