@@ -84,7 +84,7 @@ function islandora_workflow_rest_entry_form($form, &$form_state, AbstractObject 
   $form['workflow_wfds_fs']['datastream_link'] = array(
     '#type' => 'link',
     '#title' => t('View Formatted Datastream'),
-    '#href' => "islandora/object/$object->id/datastream/WORKFLOW/view",
+    '#href' => "islandora_workflow_rest/formatted_workflow/$object->id",
   );
   $form['workflow_wfds_fs']['workflow_ds_content'] = array(
     '#type' => 'item',
