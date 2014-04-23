@@ -73,6 +73,12 @@ function islandora_workflow_rest_schema() {
         'not null' => FALSE,
         'description' => 'The object pid that has been modified.',
       ),
+      'object_label' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'The label of the modified object.',
+      ),
       'timestamp' => array(
         'type' => 'int',
         'not null' => TRUE,
@@ -82,7 +88,13 @@ function islandora_workflow_rest_schema() {
         'type' => 'varchar',
         'length' => 255,
         'not null' => FALSE,
-        'description' => 'State of log entry.  Should be new, skipped, or tagged',
+        'description' => 'State of log entry.  Should be new, skipped, or tagged.',
+      ),
+      'last_stamp' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'Last stamp at time of datastream update.',
       ),
     ),
     'primary key' => array('lid'),
