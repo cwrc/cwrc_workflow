@@ -13,7 +13,7 @@
  * @return array
  *   Drupal Form
  */
-function cwrc_workflow_management_form($form, &$form_state) {
+function islandora_workflow_rest_cwrc_workflow_management_form($form, &$form_state) {
   module_load_include('inc', 'islandora', 'includes/datastream.version');
   global $user;
   $user_id = $user->uid;
@@ -129,7 +129,7 @@ function cwrc_workflow_management_form($form, &$form_state) {
  * @param array $form_state
  *   Drupal form state
  */
-function cwrc_workflow_management_form_submit($form, &$form_state) {
+function islandora_workflow_rest_cwrc_workflow_management_form_submit($form, &$form_state) {
   $logged_events = array_filter($form_state['values']['logged_events']);
   $serialized = serialize($logged_events);
   drupal_goto("islandora_workflow_rest/skip_entries/$serialized");

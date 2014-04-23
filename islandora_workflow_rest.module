@@ -40,7 +40,7 @@ function islandora_workflow_rest_menu() {
       'description' => 'Manage logged workflow events',
       'type' => MENU_NORMAL_ITEM,
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('cwrc_workflow_management_form'),
+      'page arguments' => array('islandora_workflow_rest_cwrc_workflow_management_form'),
       'file' => 'includes/cwrc_workflow_status.inc',
       'access arguments' => array('access content'),
     ),
