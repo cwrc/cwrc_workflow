@@ -22,19 +22,19 @@ function cwrc_workflow_management_form($form, &$form_state) {
   if (isset($_GET['sort']) && isset($_GET['order'])) {
     $sort = strtoupper($_GET['sort']);
     switch ($_GET['order']) {
-      case 'Tag Workflow':
+      case t('Tag Workflow'):
         $order = 'object_label';
         break;
 
-      case 'DSID':
+      case t('DSID'):
         $order = 'dsid';
         break;
 
-      case 'Modified':
+      case t('Modified'):
         $order = 'timestamp';
         break;
 
-      case 'Last Stamp':
+      case t('Last Stamp'):
         $order = 'timestamp';
         break;
 
@@ -84,8 +84,14 @@ function cwrc_workflow_management_form($form, &$form_state) {
   }
 
   $header = array(
-    'object' => array('data' => t('Tag Workflow'), 'field' => 'pid'),
-    'dsid' => array('data' => t('DSID'), 'field' => 'dsid', 'sort' => 'desc'),
+    'object' => array(
+      'data' => t('Tag Workflow'),
+      'field' => 'pid',
+    ),
+    'dsid' => array(
+      'data' => t('DSID'),
+      'field' => 'dsid',
+    ),
     'timestamp' => array(
       'data' => t('Modified'),
       'field' => 'timestamp',
@@ -94,7 +100,6 @@ function cwrc_workflow_management_form($form, &$form_state) {
     'last_stamp' => array(
       'data' => t('Last Stamp'),
       'field' => 'timestamp',
-      'sort' => 'desc',
     ),
     'revision' => t('Go to Revision'),
   );
