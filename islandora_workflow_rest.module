@@ -125,7 +125,7 @@ function islandora_workflow_rest_menu() {
     'islandora_workflow_rest/delete_report/%' => array(
       'title' => 'Delete report',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('cwrc_workflow_delete_reports_form', 2),
+      'page arguments' => array('islandora_workflow_rest_cwrc_workflow_delete_reports_form', 2),
       'access arguments' => array('administer islandora solr'),
       'file' => 'includes/reports.form.inc',
       'type' => MENU_CALLBACK,

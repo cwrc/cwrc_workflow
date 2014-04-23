@@ -519,7 +519,7 @@ function islandora_workflow_rest_build_query($terms) {
  * @return array
  *   The drupal form definition.
  */
-function cwrc_workflow_delete_reports_form(array $form, array &$form_state, $lid, $report_name = 'unnamed') {
+function islandora_workflow_rest_cwrc_workflow_delete_reports_form(array $form, array &$form_state, $lid, $report_name = 'unnamed') {
   $form_state['lid'] = $lid;
   return confirm_form($form, t('Are you sure you want to delete @report', array('@report' => $report_name)), "islandora_workflow_rest/reports", t('This action cannot be undone.'), t('Delete report'), t('Cancel')
   );
@@ -533,7 +533,7 @@ function cwrc_workflow_delete_reports_form(array $form, array &$form_state, $lid
  * @param array $form_state
  *   The Drupal form state.
  */
-function cwrc_workflow_delete_reports_form_submit(array $form, array &$form_state) {
+function islandora_workflow_rest_cwrc_workflow_delete_reports_form_submit(array $form, array &$form_state) {
   $lid = intval($form_state['lid']);
   db_delete('islandora_workflow_rest_reports')
       ->condition('lid', $lid)
