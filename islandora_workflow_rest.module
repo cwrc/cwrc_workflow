@@ -131,10 +131,17 @@ function islandora_workflow_rest_menu() {
       'title' => 'Delete report',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('islandora_workflow_rest_cwrc_workflow_delete_reports_form', 2),
-
       'access callback' => 'islandora_workflow_rest_can_delete_report',
       'access arguments' => array(2),
       'file' => 'includes/reports.form.inc',
+      'type' => MENU_CALLBACK,
+    ),
+    'islandora_workflow_rest/formatted_workflow/%' => array(
+      'title' => 'Workflow',
+      'page callback' => 'islandora_workflow_rest_show_formatted_workflow',
+      'page arguments' => array(2),
+      'access arguments' => array('access content'),
+      'file' => 'includes/formatted_workflow.inc',
       'type' => MENU_CALLBACK,
     ),
   );
@@ -152,8 +159,7 @@ function islandora_workflow_rest_modify_workflow_ds() {
   $params = islandora_workflow_rest_get_request_parameters();
   $object = islandora_object_load($params['PID']);
   $info = islandora_object_access_callback(
-    ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS,
-    $object);
+      ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS, $object);
 
   if (!$info) {
     echo drupal_json_output(array("Error" => "Access Denied."));
@@ -181,9 +187,10 @@ function islandora_workflow_rest_can_delete_report($lid) {
   }
   $edit_roles = unserialize($record['editroles']);
   $can_edit = count(array_intersect($edit_roles, $user->roles)) ||
-    user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS);
+      user_access(ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS);
   return $can_edit;
 }
+
 /**
  * Implements hook_mail().
  */
@@ -512,6 +519,7 @@ function islandora_workflow_rest_solr_access() {
   }
   return user_access('search islandora solr');
 }
+
 /**
  * Implements hook_islandora_solr_primary_display().
  */

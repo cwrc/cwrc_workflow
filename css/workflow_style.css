@@ -1,0 +1,158 @@
+.cwrc_workflow  *{
+    background-color:#FFEBD6;
+    font-family:sans-serif}
+
+:empty{
+    display:none
+}
+
+cwrc:before{
+    display:block;
+    padding-left:5%;
+    padding-right:5%;
+    padding-top:2%;
+    padding-bottom:2%;
+    content:"File Editing History";
+    font-size:large;
+    font-weight:bold;
+    text-align:center
+}
+
+workflow{
+    display:block;
+    padding-bottom:2%;
+    margin-left:5%;
+    text-align:left;
+    font-size:medium
+}
+
+cwrc{
+    counter-reset:section;
+}
+
+workflow:before{
+    counter-increment:section;
+    content:counter(section) ". Date: "attr(date)". Time: " attr(time)". Action performed by: " attr(userID)".";
+    font-weight:bold;
+    padding:2%;
+    font-weight:bold
+}
+
+activity,
+assigned{
+    display:list-item;
+    list-style:diamond;
+    margin-left:5%;
+    padding-top:1%
+}
+
+
+
+/*activity:before{content:"Activity performed: "}*/
+
+activity:before{
+    content:"Category of work: "attr(category)" (Status: " attr(status) ". Stamp: " attr(stamp) ".)";font-weight:bold}
+
+/*activity[category = "created"]:before{
+    content:"Created the file. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}
+
+activity[category = "deposited"]:before{
+    content:"Deposited the file. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}
+
+activity[category = "metadata_contribution"]:before{
+    content:"Contributed metadata to the file. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}
+
+activity[category = "content_contribution"]:before{
+    content:"Contributed content to the file. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}
+
+activity[category = "checked"]:before{
+    content:"Checked the file. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}
+
+activity[category = "machine-processed"]:before{
+    content:"Processed the file. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}
+
+activity[category = "user-tagged"]:before{
+    content:"Tagged the file. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}
+
+activity[category = "rights_assigned"]:before{
+    content:"Assigned rights to the file. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}
+
+activity[category = "published"]:before{
+    content:"Published the file. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}
+
+activity[category = "peer-reviewed/evaluated"]:before{
+    content:"Peer-reviewed/evaluated the manuscript. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}
+
+activity[category = "withdrawn"]:before{
+    content:"Withdrew the file. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}
+
+activity[category = "deleted"]:before{
+    content:"Deleted the file. (Status: " attr(status) ". Stamp: " attr(stamp) ".)"
+}*/
+
+note,
+message{
+    display:block}
+
+note:before{
+    content:url(note.png) " Note: ";
+    font-weight:bold
+}
+
+message:before{
+    content:url(e_mail.png) " Message: ";
+    font-weight:bold
+}
+
+recipient,
+subject,
+body{
+    display:block;
+    margin-left:7%
+}
+
+recipient:before{
+    content:"To: " attr(userID);
+
+}
+
+subject:before{
+    content:"Subject: ";
+
+}
+
+body:before{
+    content:"Content: "
+}
+
+/*assigned:before{
+    content:"Sent to next editor."
+}*/
+
+assigned:before{
+    content:"Sent to next editor. Category of work recommended: "attr(category); font-weight:bold
+}
+
+cwrc:after{
+    content:"Status: c - in progress; ipr - in progress; p - pending; i - incomplete";
+    display:block;
+    text-align:center
+}
+cwrc{
+    content:"Status: c - in progress; ipr - in progress; p - pending; i - incomplete";
+    display:block;
+    text-align:center;
+    padding-bottom:3%
+}
+
