@@ -31,6 +31,10 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
   );
   $field_to_add = FALSE;
 
+  if (isset($_GET['action']) && $_GET['action'] == 'clone') {
+    drupal_set_message(t('The workflow report has been copied. Click "Save Report" to save the new report.'));
+  }
+
   if (isset($form_state['triggering_element'])) {
     if ($form_state['triggering_element']['#name'] == 'cwrc-reports-add-field') {
       $new_term = $form_state['values']['available_solr_fields'];
