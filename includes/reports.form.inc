@@ -34,11 +34,12 @@ function islandora_workflow_rest_reports_form($form, &$form_state) {
   if (isset($form_state['triggering_element'])) {
     if ($form_state['triggering_element']['#name'] == 'cwrc-reports-add-field') {
       $new_term = $form_state['values']['available_solr_fields'];
+      $weight = isset($form_state['values']['table']['table']['rows']) ? count($form_state['values']['table']['table']['rows']) + 1 : 1;
       $field_to_add = array(
         'remove_field' => 0,
         'display_label' => $new_term,
         'hyperlink' => 0,
-        'weight' => count($form_state['values']['table']['table']['rows']) + 1,
+        'weight' => $weight,
         'solr_field' => $new_term,
       );
     }
@@ -417,6 +418,11 @@ function islandora_workflow_rest_reports_form_validate($form, &$form_state) {
   }
   if (count(array_filter($form_state['values']['view_roles'])) == 0) {
     form_set_error('view_roles', t('Please choose at least one view role.'));
+  }
+  $has_reports = isset($form_state['values']['table']['table']['rows']);
+  $has_report = $has_reports && count($form_state['values']['table']['table']['rows']);
+  if (!$has_reports || !$has_report) {
+    form_set_error('add_field', t('Please choose at least one field to display.'));
   }
 }
 
