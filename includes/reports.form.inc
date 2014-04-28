@@ -459,6 +459,7 @@ function islandora_workflow_rest_reports_form_submit($form, &$form_state) {
   else {
     islandora_workflow_rest_add_record($record);
   }
+  $form_state['redirect'] = 'islandora_workflow_rest/reports';
 }
 
 /**
