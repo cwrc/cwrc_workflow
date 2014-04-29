@@ -50,7 +50,6 @@ function islandora_workflow_rest_cwrc_workflow_management_form($form, &$form_sta
       ->orderBy($order, $sort);
   $results = $query->execute();
   $lines = array();
-
   while ($result = $results->fetch()) {
     $object = islandora_object_load($result->pid);
     if (!$object) {
@@ -78,7 +77,7 @@ function islandora_workflow_rest_cwrc_workflow_management_form($form, &$form_sta
     $link = l($result->object_label, 'islandora/object/' . $object->id . '/workflow', $options = array('query' => array('lid' => $key)));
     $lines[$key]['object'] = $link;
     $lines[$key]['dsid'] = $result->dsid;
-    $lines[$key]['timestamp'] = gmdate("F j, Y, g:i a", $result->timestamp);
+    $lines[$key]['timestamp'] = islandora_workflow_rest_convert_timestamp_to_user_local($result->timestamp);
     $lines[$key]['last_stamp'] = $last_stamp;
     $lines[$key]['revision'] = $revision_link;
   }
@@ -119,6 +118,26 @@ function islandora_workflow_rest_cwrc_workflow_management_form($form, &$form_sta
     );
   }
   return $form;
+}
+
+/**
+ * Convert stored timestamp to the users timezone.
+ *
+ * @param int $timestamp
+ *   The timestamp to convert.
+ * @param string $format
+ *   The format to use when converting.
+ *
+ * @return string
+ *   The newly formatted date time string.
+ */
+function islandora_workflow_rest_convert_timestamp_to_user_local($timestamp, $format = "F j, Y, g:i a") {
+  // Use the Unix Timestamp format to construct a new DateTime object.
+  // Using '@$var' constructs DateTime with no timezone.
+  $date = new DateTime("@$timestamp");
+  // Set the timezone based on user selected, or site default by default.
+  date_timezone_set($date, timezone_open(drupal_get_user_timezone()));
+  return date_format($date, $format);
 }
 
 /**
