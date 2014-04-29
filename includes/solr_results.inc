@@ -42,8 +42,7 @@ class IslandoraSolrResultsWorkflowRest extends IslandoraSolrResults {
         $value = $field['hyperlink'] ? "islandora/object/$label" : $label;
         $solr_fields[$field['solr_field']] = array(
           'label' => $label,
-          'class' => str_replace('_', '-', $field['solr_field']),
-          'value' => $field['solr_field'],
+          'linked' => $field['hyperlink'],
         );
       }
     }
@@ -52,9 +51,14 @@ class IslandoraSolrResultsWorkflowRest extends IslandoraSolrResults {
     $object_results = islandora_solr_prepare_solr_doc($objects);
     foreach ($object_results as &$result) {
       $solr_doc = $result['solr_doc'];
+      $pid = $result['PID'];
       foreach ($solr_doc as $term => $valueset) {
         if (array_key_exists($term, $solr_fields)) {
-          $new_doc[$term] = $valueset;
+          $new_doc[$term] = array(
+            'class' => str_replace('_', '-', $term),
+            'value' => $valueset['value'],
+            'label' => $solr_fields[$term]['linked'] ? l($solr_fields[$term]['label'], "islandora/object/$pid") : $solr_fields[$term]['label'],
+          );
         }
       }
       $result['solr_doc'] = $new_doc;
@@ -62,9 +66,8 @@ class IslandoraSolrResultsWorkflowRest extends IslandoraSolrResults {
     $elements = array();
     $elements['solr_total'] = $solr_results['response']['numFound'];
     $elements['solr_start'] = $solr_results['response']['start'];
-
     // Return themed search results.
-    return theme('islandora_solr', array('results' => $object_results, 'elements' => $elements));
+    return l(t("Return to reports"), "islandora_workflow_rest/reports") . theme('islandora_solr', array('results' => $object_results, 'elements' => $elements));
   }
 
 }
