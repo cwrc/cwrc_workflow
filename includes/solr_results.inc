@@ -55,7 +55,7 @@ class IslandoraSolrResultsWorkflowRest extends IslandoraSolrResults {
     try {
       $local_results = $solr->search($query, 0, 1000, array());
       $json = json_decode($local_results->getRawResponse(), TRUE);
-      foreach($json['response']['docs'] as $candidate) {
+      foreach ($json['response']['docs'] as $candidate) {
         $full_results[$candidate['PID']] = $candidate;
       }
     }
@@ -72,7 +72,7 @@ class IslandoraSolrResultsWorkflowRest extends IslandoraSolrResults {
 
       foreach ($fields as $field) {
         $term = $field['solr_field'];
-        //Mutli-valued fields are returned as arrays.
+        // Mutli-valued fields are returned as arrays.
         if (array_key_exists($term, $full_result)) {
           $values = $full_result[$term];
           if (is_array($values)) {
