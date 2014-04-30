@@ -373,7 +373,7 @@ function islandora_workflow_rest_load_users_from_csv($string, $use_realname = FA
  *   Full or part of a users name.
  * @param bool $use_realname
  *   Look up names from the realnames table, if it exists.
- * 
+ *
  * @throws Exception
  * @return array
  *   An array of possible matches.
@@ -596,7 +596,7 @@ function islandora_workflow_log_event($pid, $label, $action, $dsid, $delay, $tim
   global $user;
   $threshold = strtotime($timestamp) - intval($delay);
   $user_id = $user->uid;
-  $query = "select * from {islandora_workflow_rest_ds_logs}
+  $query = "SELECT * from {islandora_workflow_rest_ds_logs}
              where pid = '$pid'
              and type = '$action'
              and usr = '$user_id'
