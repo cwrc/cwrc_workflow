@@ -69,7 +69,7 @@ class IslandoraSolrResultsWorkflowRest extends IslandoraSolrResults {
     foreach ($object_results as &$result) {
       $pid = $result['PID'];
       $full_result = $full_results[$pid];
-
+      $new_solr_doc = array();
       foreach ($fields as $field) {
         $term = $field['solr_field'];
         // Mutli-valued fields are returned as arrays.
