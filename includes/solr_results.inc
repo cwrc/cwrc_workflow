@@ -46,22 +46,49 @@ class IslandoraSolrResultsWorkflowRest extends IslandoraSolrResults {
         );
       }
     }
+    drupal_set_title($chosen['name']);
+    // Pull unfiltered results.
+    $query = str_replace('islandora/search/', '', $_GET['q']);
+    $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
+    $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
+    $solr->setCreateDocuments(FALSE);
+    try {
+      $local_results = $solr->search($query, 0, 1000, array());
+      $json = json_decode($local_results->getRawResponse(), TRUE);
+      foreach($json['response']['docs'] as $candidate) {
+        $full_results[$candidate['PID']] = $candidate;
+      }
+    }
+    catch (Exception $e) {
+      watchdog_exception('Islandora Rest Workflow', $e, 'Got an exception while searching.', array(), WATCHDOG_ERROR);
+    }
+
     $solr_results = islandora_solr_prepare_solr_results($results);
     $objects = $solr_results['response']['objects'];
     $object_results = islandora_solr_prepare_solr_doc($objects);
     foreach ($object_results as &$result) {
-      $solr_doc = $result['solr_doc'];
       $pid = $result['PID'];
-      foreach ($solr_doc as $term => $valueset) {
-        if (array_key_exists($term, $solr_fields)) {
-          $new_doc[$term] = array(
+      $full_result = $full_results[$pid];
+
+      foreach ($fields as $field) {
+        $term = $field['solr_field'];
+        //Mutli-valued fields are returned as arrays.
+        if (array_key_exists($term, $full_result)) {
+          $values = $full_result[$term];
+          if (is_array($values)) {
+            $value = $values[0];
+          }
+          else {
+            $value = $values;
+          }
+          $new_solr_doc[$term] = array(
             'class' => str_replace('_', '-', $term),
-            'value' => $valueset['value'],
-            'label' => $solr_fields[$term]['linked'] ? l($solr_fields[$term]['label'], "islandora/object/$pid") : $solr_fields[$term]['label'],
+            'value' => $solr_fields[$term]['linked'] ? l($value, "islandora/object/$pid") : $value,
+            'label' => $solr_fields[$term]['label'],
           );
         }
       }
-      $result['solr_doc'] = $new_doc;
+      $result['solr_doc'] = $new_solr_doc;
     }
     $elements = array();
     $elements['solr_total'] = $solr_results['response']['numFound'];
