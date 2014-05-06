@@ -136,11 +136,12 @@ function islandora_workflow_rest_menu() {
       'file' => 'includes/reports.form.inc',
       'type' => MENU_CALLBACK,
     ),
-    'islandora_workflow_rest/formatted_workflow/%' => array(
+    'islandora_workflow_rest/formatted_workflow/%islandora_object' => array(
       'title' => 'Workflow',
       'page callback' => 'islandora_workflow_rest_show_formatted_workflow',
       'page arguments' => array(2),
-      'access arguments' => array('access content'),
+      'access callback' => 'islandora_workflow_rest_can_access_formatted',
+      'access arguments' => array(2),
       'file' => 'includes/formatted_workflow.inc',
       'type' => MENU_CALLBACK,
     ),
@@ -534,4 +535,17 @@ function islandora_workflow_rest_islandora_solr_primary_display() {
       'description' => t('Search results for CWRC reporting.'),
     ),
   );
+}
+
+/**
+ * Access callback for viewing a formatted WORKFLOW datastream.
+ *
+ * @param AbstractObject $object
+ *   An AbstractObject representing a Fedora object.
+ *
+ * @return bool
+ *   TRUE if the user has access, FALSE otherwise.
+ */
+function islandora_workflow_rest_can_access_formatted(AbstractObject $object) {
+  return islandora_datastream_access('access content', $object['WORKFLOW']);
 }
