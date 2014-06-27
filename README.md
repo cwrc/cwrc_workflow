@@ -1,3 +1,4 @@
+#CWRC Workflow
 
 BUILD STATUS
 ------------
@@ -26,6 +27,32 @@ SUMMARY
 -------
 This module provides a number of REST end points for fetching/manipulating
 workflow items.
+
+
+## Maintainers/Sponsors
+-----------------------
+Current maintainers:
+
+* [CWRC](https://github.com/cwrc)
+
+Past maintainers:
+
+* [discoverygarden](https://github.com/discoverygarden)
+
+This project has been sponsored by:
+
+* [The Canadian Writing Research Collaboratory](http://www.cwrc.ca/en/)
+The Canadian Writing Research Collaboratory is an online project designed to
+enable unprecedented avenues for studying the words that most move people in and
+about Canada.
+
+
+## License
+----------
+
+[GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)
+
+
 
 REQUIREMENTS
 ------------
