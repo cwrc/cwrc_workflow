@@ -39,7 +39,7 @@ class CWRCWorkflowAPI {
   public static function fromTemplate() {
     $xml = <<<XML
 <?xml version="1.0" encoding="UTF-8" ?>
-<?xml-model href="http://cwrc.ca/schema/workflow.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://cwrc.ca/schemas/workflow.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
 <cwrc></cwrc>
 XML;
     $set_doc = new DOMDocument();
