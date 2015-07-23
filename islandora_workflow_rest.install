@@ -190,7 +190,7 @@ function islandora_workflow_rest_schema() {
       ),
       'solr_terms' => array(
         'type' => 'text',
-        'size' => medium,
+        'size' => 'medium',
         'not null' => FALSE,
         'description' => 'The serialized solr terms array used to build the display.',
       ),
