@@ -218,13 +218,6 @@ function islandora_workflow_rest_install() {
   module_load_include('inc', 'islandora_basic_collection', 'includes/utilities');
   // Add default stamp records.
   $stamps = array(
-    "niso:AO" => "Author's Original",
-    "niso:SMUR" => "Manuscript Under Review",
-    "niso:AM" => "Accepted Manuscript",
-    "niso:P" => "Proof",
-    "niso:VoR" => "Version of Record",
-    "niso:CVoR" => "Corrected Version",
-    "niso:EVoR" => "Enhanced Version",
     "orl:SUB" => "Submitted",
     "orl:RWT" => "Researched / Written / Tagged",
     "orl:REV" => "Revised",
@@ -247,6 +240,13 @@ function islandora_workflow_rest_install() {
     "cwrc:rev" => "Peer-reviewed",
     "cwrc:wdr" => "Removed from published state",
     "cwrc:del" => "Deleted from the repository",
+    "niso:AO" => "Author's Original",
+    "niso:SMUR" => "Manuscript Under Review",
+    "niso:AM" => "Accepted Manuscript",
+    "niso:P" => "Proof",
+    "niso:VoR" => "Version of Record",
+    "niso:CVoR" => "Corrected Version",
+    "niso:EVoR" => "Enhanced Version",
   );
 
   // This hook fires on install.
