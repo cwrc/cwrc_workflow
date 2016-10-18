@@ -9,6 +9,7 @@ define('ISLANDORA_WORKFLOW_REST_SOLR_DEFAULT_FIELD', 'workflow_userID_ms');
 define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_ACCESS_ALL_REPORTS', 'access all saved reports');
 define('ISLANDORA_WORKFLOW_REST_ISLANDORA_ENTITIES_VIEW_REPORTS', 'view saved reports');
 define('ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS', 'modify workflow datastreams');
+define('ISLANDORA_WORKFLOW_REST_ISLANDORA_SKIP_WORKFLOW_ENTRIES', 'skip workflow entries');
 
 /**
  * Implements hook_permission().
@@ -26,6 +27,10 @@ function islandora_workflow_rest_permission() {
     ISLANDORA_WORKFLOW_REST_ISLANDORA_MODIFY_WORKFLOW_DATASTREAMS => array(
       'title' => t('Workflow REST Datastream access'),
       'description' => t('View, edit, add or update workflow datastreams via REST interface.'),
+    ),
+    ISLANDORA_WORKFLOW_REST_ISLANDORA_SKIP_WORKFLOW_ENTRIES => array(
+      'title' => t('Workflow REST Skip Workflow Entries'),
+      'description' => t('Skip Workflow Entries.'),
     ),
   );
 }
@@ -123,7 +128,7 @@ function islandora_workflow_rest_menu() {
       'title' => 'Skip checked entries',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('islandora_workflow_rest_cwrc_workflow_skip_entries_form', 2),
-      'access arguments' => array('administer islandora solr'),
+      'access arguments' => array('skip workflow entries'),
       'file' => 'includes/cwrc_workflow_status.inc',
       'type' => MENU_CALLBACK,
     ),
