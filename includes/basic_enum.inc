@@ -107,6 +107,7 @@ abstract class WorkflowConst extends BasicEnum {
   const STAMP = "stamp";
   const TOOLID = "toolID";
   const TIME = "time";
+  const TIMESTAMP = "timestamp";
   const DATE = "date";
   const USERID = "userID";
   const WORKFLOWID = "workflowID";

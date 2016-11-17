@@ -290,14 +290,20 @@ XML;
    *   WorkflowItem object representing the workflow node.
    */
   protected function createDefaultParamsForWorkflow(WorkflowItem $workflow) {
-    $date = new DateTime();
+    // model after Fedora Commons datastream version timestamp returned
+    // by the tuque library
+    $timestampFormat = 'Y-m-d\TH:i:s.uP'; 
+    $date = DateTime::createFromFormat('U.u', sprintf('%.f', microtime(true)));
     $result = $date->format('Y-m-d');
-    $time = date('H:i:s');
+    $time = $date->format('H:i:s');
+    $timestamp = $date->setTimezone(new DateTimeZone('UTC'));
     $user = user_uid_optional_load();
     $server_identifier = variable_get('islandora_workflow_rest_server_identifier', '');
     $workflow->typeAttributes[WorkflowConst::DATE] = $result;
     $workflow->typeAttributes[WorkflowConst::USERID] = $user->name . $server_identifier;
     $workflow->typeAttributes[WorkflowConst::TIME] = $time;
+    //$workflow->typeAttributes[WorkflowConst::TIMESTAMP] = $timestamp->format('c'); // ISO 8601 with microseconds
+    $workflow->typeAttributes[WorkflowConst::TIMESTAMP] = $timestamp->format($timestampFormat); // ISO 8601 with microseconds
     $workflow->typeAttributes[WorkflowConst::WORKFLOWID] = $this->getNewWorkflowId();
   }
 
