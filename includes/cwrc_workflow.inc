@@ -294,12 +294,18 @@ XML;
     // by the tuque library
     $timestampFormat = 'Y-m-d\TH:i:s.uP'; 
     $date = DateTime::createFromFormat('U.u', sprintf('%.f', microtime(true)));
+    // set timezone to the default timezone to support legacy 
+    // date and time attributes
+    $date = $date->setTimezone(new DateTimeZone(date_default_timezone_get()));
     $result = $date->format('Y-m-d');
-    $timestamp = $date->setTimezone(new DateTimeZone(date_default_timezone_get()));
     $time = $date->format('H:i:s');
+
+    // set the new timestamp to UTC time 
     $timestamp = $date->setTimezone(new DateTimeZone('UTC'));
     $user = user_uid_optional_load();
     $server_identifier = variable_get('islandora_workflow_rest_server_identifier', '');
+
+    // update XML
     $workflow->typeAttributes[WorkflowConst::DATE] = $result;
     $workflow->typeAttributes[WorkflowConst::USERID] = $user->name . $server_identifier;
     $workflow->typeAttributes[WorkflowConst::TIME] = $time;
