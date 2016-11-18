@@ -295,6 +295,7 @@ XML;
     $timestampFormat = 'Y-m-d\TH:i:s.uP'; 
     $date = DateTime::createFromFormat('U.u', sprintf('%.f', microtime(true)));
     $result = $date->format('Y-m-d');
+    $timestamp = $date->setTimezone(new DateTimeZone(date_default_timezone_get()));
     $time = $date->format('H:i:s');
     $timestamp = $date->setTimezone(new DateTimeZone('UTC'));
     $user = user_uid_optional_load();
