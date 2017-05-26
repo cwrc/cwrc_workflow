@@ -62,8 +62,8 @@ function islandora_workflow_rest_admin($form, &$form_state) {
   $form['manage_workflow']['workflow_ns_fs']['manage_namespace'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable Stamp Namespace Restrictions.'),
-    '#description' => t('When enabled, only stamps whos namespace matches that of the give
-      object will be available in workflow entries.'),
+    '#description' => t('When enabled, only stamps whose namespace matches that of the
+      given object will be available in workflow entries.'),
     '#default_value' => variable_get('islandora_workflow_rest_enable_namespace', 0),
   );
   $form['manage_workflow']['workflow_ns_fs']['submit'] = array(
@@ -91,7 +91,7 @@ function islandora_workflow_rest_admin($form, &$form_state) {
   $form['manage_workflow']['workflow_stamp_fs']['workflow_stamp_desc'] = array(
     '#type' => 'textfield',
     '#title' => t('Add workflow stamp description.'),
-    '#description' => t('Add add a more detail description for a new workflow stamp'),
+    '#description' => t('Add a more detailed description for a new workflow stamp'),
     '#default_value' => "",
   );
   $options = array();
