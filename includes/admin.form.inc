@@ -91,7 +91,7 @@ function islandora_workflow_rest_admin($form, &$form_state) {
   $form['manage_workflow']['workflow_stamp_fs']['workflow_stamp_desc'] = array(
     '#type' => 'textfield',
     '#title' => t('Add workflow stamp description.'),
-    '#description' => t('Add a more detailed description for a new workflow stamp'),
+    '#description' => t('Add a more detailed description for a new workflow stamp.'),
     '#default_value' => "",
   );
   $options = array();
